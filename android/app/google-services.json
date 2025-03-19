@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "325913484637",
+    "project_id": "mavipiksel-39f12",
+    "storage_bucket": "mavipiksel-39f12.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:325913484637:android:3c5143abd3c94452911cb4",
+        "android_client_info": {
+          "package_name": "com.example.login_page"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqL8bfbHK9VANojExNwT_o6BxdG09qwRQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
