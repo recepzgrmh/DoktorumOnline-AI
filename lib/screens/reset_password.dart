@@ -20,29 +20,52 @@ class _ResetPasswordState extends State<ResetPassword> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Şifremi Unuttum"),
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
         ),
         toolbarHeight: 100,
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(25.0),
-          child: Column(
-            children: [
-              const SizedBox(height: 100),
-              TextInputs(
-                labelText: 'E-mail adresinizi giriniz',
-                controller: email,
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: resetPassword,
-                child: const Text("Şifremi Sıfırla"),
-              ),
-            ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+          child: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Şifreni mi Unuttun?",
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade900,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  "Hesabınızla ilişkili e-posta adresini girin, size şifrenizi sıfırlamanız için bir bağlantı gönderelim.",
+                  style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+                ),
+
+                const SizedBox(height: 40),
+                TextInputs(labelText: 'E-mail', controller: email),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: resetPassword,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    minimumSize: const Size.fromHeight(48),
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  child: Text("Sıfırlama Linki Gönder"),
+                ),
+              ],
+            ),
           ),
         ),
       ),

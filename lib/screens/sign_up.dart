@@ -59,24 +59,24 @@ class _SignUpState extends State<SignUp> {
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         toolbarHeight: 80,
-        title: const Text("Sign Up", style: TextStyle(color: Colors.black)),
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back, color: Colors.black),
         ),
-        centerTitle: true,
+
         backgroundColor: Colors.white,
         elevation: 1,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+          // içeriğin yatay ve dikey olarak baskılanması
           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
               Text(
-                "Create Account",
+                "Hesap Oluştur",
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -85,25 +85,25 @@ class _SignUpState extends State<SignUp> {
               ),
               const SizedBox(height: 10),
               Text(
-                "Sign up to get started!",
+                "Başlamak İçin Kayıt Olun!",
                 style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
               ),
               const SizedBox(height: 40),
               // Ad-Soyad Alanları
-              TextInputs(labelText: 'First Name', controller: fullName),
+              TextInputs(labelText: 'İsim', controller: fullName),
               const SizedBox(height: 20),
-              TextInputs(labelText: 'Last Name', controller: lastName),
+              TextInputs(labelText: 'Soyisim', controller: lastName),
               const SizedBox(height: 20),
               TextInputs(labelText: 'E-mail', controller: email, isEmail: true),
               const SizedBox(height: 20),
               TextInputs(
-                labelText: 'Password',
+                labelText: 'Şifre',
                 controller: password,
                 isPassword: true,
               ),
               const SizedBox(height: 20),
               Text(
-                "By continuing, you agree to the Terms of Use.\nRead our Privacy Policy.",
+                "Devam ederek Kullanım Şartları'nı kabul etmiş olursunuz.\nGizlilik Politikamızı okuyun.",
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
               ),
               const SizedBox(height: 30),
@@ -120,7 +120,7 @@ class _SignUpState extends State<SignUp> {
                   ),
                 ),
                 child: const Text(
-                  "Sign Up",
+                  "Kayıt Ol",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

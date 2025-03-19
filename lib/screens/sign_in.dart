@@ -14,7 +14,6 @@ class SignIn extends StatefulWidget {
 }
 
 class _SignInState extends State<SignIn> {
-  // Kontroller
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
 
@@ -55,8 +54,7 @@ class _SignInState extends State<SignIn> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        centerTitle: true,
-        title: const Text("Login", style: TextStyle(color: Colors.black)),
+
         backgroundColor: Colors.white,
         elevation: 1,
       ),
@@ -69,7 +67,7 @@ class _SignInState extends State<SignIn> {
               // Başlık
               const SizedBox(height: 10),
               Text(
-                "Welcome back!",
+                "Tekrar Hoşgeldin!",
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -78,7 +76,7 @@ class _SignInState extends State<SignIn> {
               ),
               const SizedBox(height: 6),
               Text(
-                "Please sign in to continue",
+                "Devam etmek için gerekli yerleri doldurun.",
                 style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
               ),
 
@@ -87,7 +85,7 @@ class _SignInState extends State<SignIn> {
               TextInputs(labelText: 'E-mail', controller: email, isEmail: true),
               const SizedBox(height: 20),
               TextInputs(
-                labelText: 'Password',
+                labelText: 'Şifre',
                 controller: password,
                 isPassword: true,
               ),
@@ -95,7 +93,7 @@ class _SignInState extends State<SignIn> {
               // Bilgilendirme metni
               const SizedBox(height: 20),
               Text(
-                "By continuing, you agree to the Terms of Use.\nRead our Privacy Policy.",
+                "Devam ederek Kullanım Şartları'nı kabul etmiş olursunuz.\nGizlilik Politikamızı okuyun.",
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
               ),
 
