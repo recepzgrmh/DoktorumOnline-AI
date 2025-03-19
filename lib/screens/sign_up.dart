@@ -72,8 +72,10 @@ class _SignUpState extends State<SignUp> {
           // içeriğin yatay ve dikey olarak baskılanması
           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
           child: Column(
+            // yazıların sola sabitlenmesi
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // appBar ve title arası boşluk
               const SizedBox(height: 20),
               Text(
                 "Hesap Oluştur",
@@ -83,6 +85,8 @@ class _SignUpState extends State<SignUp> {
                   color: Colors.grey.shade900,
                 ),
               ),
+
+              // title ve subtitle arası boşluk
               const SizedBox(height: 10),
               Text(
                 "Başlamak İçin Kayıt Olun!",
