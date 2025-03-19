@@ -5,7 +5,12 @@ import 'package:get/get.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  try {
+    await Firebase.initializeApp();
+    print("🔥 Firebase Başlatıldı!"); // Konsola başarı mesajı
+  } catch (e) {
+    print("🚨 Firebase Başlatma Hatası: $e"); // Hata mesajını yazdır
+  }
   runApp(const MyApp());
 }
 

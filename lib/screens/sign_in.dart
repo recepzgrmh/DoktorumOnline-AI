@@ -4,6 +4,7 @@ import 'package:login_page/screens/reset_password.dart';
 import 'package:login_page/screens/sign_up.dart';
 import 'package:login_page/widgets/text_inputs.dart';
 import 'package:get/get.dart';
+import 'package:login_page/wrapper.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
@@ -20,13 +21,23 @@ class _SignInState extends State<SignIn> {
   // Giriş yapma fonksiyonu
   Future<void> signInUser() async {
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email.text.trim(),
-        password: password.text.trim(),
-      );
-      // Başarılı giriş sonrası yönlendirme veya mesaj gösterme gibi işlemler yapılabilir.
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+            email: email.text.trim(),
+            password: password.text.trim(),
+          );
+
+      User? user = userCredential.user;
+
+      if (user != null) {
+        print("🔥 Kullanıcı giriş yaptı: ${user.email}");
+        print("📌 Kullanıcı UID: ${user.uid}");
+
+        // **Ana ekrana yönlendir**
+        Get.offAll(() => const Wrapper());
+      }
     } catch (e) {
-      // Hata yakalama
+      print("🚨 Firebase Giriş Hatası: $e");
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Giriş yapılamadı: $e")));

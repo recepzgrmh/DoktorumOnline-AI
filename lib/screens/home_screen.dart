@@ -19,15 +19,19 @@ class _HomescreenState extends State<Homescreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("HomePage")),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Center(child: Text("Hoşgeldin ${user!.email}")),
-          ElevatedButton(
-            onPressed: signOut,
-            child: const Icon(Icons.login_rounded),
-          ),
-        ],
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Welcome, ${user!.displayName ?? "User"}",
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 20),
+            ElevatedButton(onPressed: signOut, child: const Text("Logout")),
+          ],
+        ),
       ),
     );
   }
