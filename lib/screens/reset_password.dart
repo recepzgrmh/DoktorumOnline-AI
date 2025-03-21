@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/widgets/text_inputs.dart';
+import 'package:login_page/widgets/custom_button.dart';
 
 class ResetPassword extends StatefulWidget {
   const ResetPassword({super.key});
@@ -12,8 +13,17 @@ class ResetPassword extends StatefulWidget {
 class _ResetPasswordState extends State<ResetPassword> {
   TextEditingController email = TextEditingController();
 
-  resetPassword() async {
-    await FirebaseAuth.instance.sendPasswordResetEmail(email: email.text);
+  Future<void> resetPassword() async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email.text);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Reset link sent!")));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    }
   }
 
   @override
@@ -46,23 +56,19 @@ class _ResetPasswordState extends State<ResetPassword> {
                   "Hesabınızla ilişkili e-posta adresini girin, size şifrenizi sıfırlamanız için bir bağlantı gönderelim.",
                   style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
                 ),
-
                 const SizedBox(height: 40),
                 TextInputs(labelText: 'E-mail', controller: email),
                 const SizedBox(height: 20),
-                ElevatedButton(
+                CustomButton(
+                  label: "Sıfırlama Linki Gönder",
                   onPressed: resetPassword,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    minimumSize: const Size.fromHeight(48),
-                    elevation: 3,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ),
-                  child: Text("Sıfırlama Linki Gönder"),
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  verticalPadding: 16,
+                  minHeight: 48,
+                  elevation: 3,
+                  borderRadius: const BorderRadius.all(Radius.circular(6)),
+                  textStyle: const TextStyle(fontSize: 16),
                 ),
               ],
             ),

@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore için eklendi
-import 'package:get/get.dart';
+import 'package:login_page/screens/verify_account.dart';
 import 'package:login_page/widgets/text_inputs.dart';
-import 'package:login_page/wrapper.dart';
+import 'package:get/get.dart';
+import 'package:login_page/widgets/custom_button.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -30,23 +30,18 @@ class _SignUpState extends State<SignUp> {
       User? user = userCredential.user;
 
       if (user != null) {
-        // **1️⃣ Firebase Authentication'a Kullanıcı Adını Güncelle**
+        // Kullanıcı adını güncelle
         await user.updateDisplayName("${fullName.text} ${lastName.text}");
-        await user.reload(); // Kullanıcı bilgilerini yenile
+        await user.reload();
 
-        // **2️⃣ Firestore'a Kullanıcı Bilgilerini Kaydet**
-        await FirebaseFirestore.instance.collection("users").doc(user.uid).set({
-          "fullName": fullName.text,
-          "lastName": lastName.text,
-          "email": email.text,
-          "createdAt": DateTime.now(),
-        });
+        // Doğrulama e-postasını gönder
+        await user.sendEmailVerification();
 
-        // **3️⃣ Kayıt tamamlandı, ana sayfaya yönlendir**
-        Get.offAll(() => const Wrapper());
+        // Doğrulama ekranına yönlendir
+        Get.offAll(() => const VerifyAccount());
       }
     } catch (e) {
-      print("🔥 Firebase Hatası: $e"); // Konsola hata mesajını yazdır
+      print("🔥 Firebase Hatası: $e");
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Hesap oluşturulamadı: $e")));
@@ -63,19 +58,15 @@ class _SignUpState extends State<SignUp> {
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back, color: Colors.black),
         ),
-
         backgroundColor: Colors.white,
         elevation: 1,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          // içeriğin yatay ve dikey olarak baskılanması
           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
           child: Column(
-            // yazıların sola sabitlenmesi
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // appBar ve title arası boşluk
               const SizedBox(height: 20),
               Text(
                 "Hesap Oluştur",
@@ -85,15 +76,14 @@ class _SignUpState extends State<SignUp> {
                   color: Colors.grey.shade900,
                 ),
               ),
-
-              // title ve subtitle arası boşluk
               const SizedBox(height: 10),
               Text(
                 "Başlamak İçin Kayıt Olun!",
                 style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
               ),
               const SizedBox(height: 40),
-              // Ad-Soyad Alanları
+
+              // TextInputs widget'ları
               TextInputs(labelText: 'İsim', controller: fullName),
               const SizedBox(height: 20),
               TextInputs(labelText: 'Soyisim', controller: lastName),
@@ -111,25 +101,21 @@ class _SignUpState extends State<SignUp> {
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
               ),
               const SizedBox(height: 30),
-              ElevatedButton(
+
+              // "Kayıt Ol" butonu
+              CustomButton(
+                label: "Kayıt Ol",
                 onPressed: signUpUser,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  minimumSize: const Size.fromHeight(48),
-                  elevation: 3,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-                child: const Text(
-                  "Kayıt Ol",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                  ),
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                verticalPadding: 16,
+                minHeight: 48,
+                elevation: 3,
+                borderRadius: const BorderRadius.all(Radius.circular(6)),
+                textStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
                 ),
               ),
             ],

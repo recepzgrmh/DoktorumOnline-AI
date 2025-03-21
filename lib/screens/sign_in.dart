@@ -5,6 +5,7 @@ import 'package:login_page/screens/sign_up.dart';
 import 'package:login_page/widgets/text_inputs.dart';
 import 'package:get/get.dart';
 import 'package:login_page/wrapper.dart';
+import 'package:login_page/widgets/custom_button.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
@@ -32,7 +33,7 @@ class _SignInState extends State<SignIn> {
         print("🔥 Kullanıcı giriş yaptı: ${user.email}");
         print("📌 Kullanıcı UID: ${user.uid}");
 
-        // **Ana ekrana yönlendir**
+        // Ana ekrana yönlendir
         Get.offAll(() => const Wrapper());
       }
     } catch (e) {
@@ -54,7 +55,6 @@ class _SignInState extends State<SignIn> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-
         backgroundColor: Colors.white,
         elevation: 1,
       ),
@@ -64,7 +64,6 @@ class _SignInState extends State<SignIn> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Başlık
               const SizedBox(height: 10),
               Text(
                 "Tekrar Hoşgeldin!",
@@ -79,8 +78,6 @@ class _SignInState extends State<SignIn> {
                 "Devam etmek için gerekli yerleri doldurun.",
                 style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
               ),
-
-              // E-mail ve Şifre alanları
               const SizedBox(height: 40),
               TextInputs(labelText: 'E-mail', controller: email, isEmail: true),
               const SizedBox(height: 20),
@@ -89,71 +86,57 @@ class _SignInState extends State<SignIn> {
                 controller: password,
                 isPassword: true,
               ),
-
-              // Bilgilendirme metni
               const SizedBox(height: 20),
               Text(
                 "Devam ederek Kullanım Şartları'nı kabul etmiş olursunuz.\nGizlilik Politikamızı okuyun.",
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
               ),
-
-              // Butonlar
               const SizedBox(height: 30),
-              ElevatedButton(
+
+              // "Giriş Yap" butonu
+              CustomButton(
+                label: "Giriş Yap",
                 onPressed: signInUser,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  minimumSize: const Size.fromHeight(48),
-                  elevation: 3,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-                child: const Text(
-                  "Giriş Yap",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                  ),
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                verticalPadding: 16,
+                minHeight: 48,
+                elevation: 3,
+                borderRadius: const BorderRadius.all(Radius.circular(6)),
+                textStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
                 ),
               ),
-
               const SizedBox(height: 20),
-              ElevatedButton(
+
+              // "Şifremi Unuttum" butonu
+              CustomButton(
+                label: "Şifremi Unuttum",
                 onPressed: () => Get.to(const ResetPassword()),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE8EEF2),
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  minimumSize: const Size.fromHeight(48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-                child: const Text(
-                  "Şifremi Unuttum",
-                  style: TextStyle(fontWeight: FontWeight.w700),
-                ),
+                backgroundColor: Color(0xFFE8EEF2),
+                foregroundColor: Colors.black,
+                verticalPadding: 16,
+                minHeight: 48,
+                elevation:
+                    0, // Orijinal kodda yoktu, isterseniz 3 de yapabilirsiniz
+                borderRadius: const BorderRadius.all(Radius.circular(6)),
+                textStyle: const TextStyle(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 10),
-              ElevatedButton(
+
+              // "Şimdi Hesap Oluştur" butonu
+              CustomButton(
+                label: "Şimdi Hesap Oluştur",
                 onPressed: () => Get.to(const SignUp()),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE8EEF2),
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  minimumSize: const Size.fromHeight(48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-                child: const Text(
-                  "Şimdi Hesap Oluştur",
-                  style: TextStyle(fontWeight: FontWeight.w700),
-                ),
+                backgroundColor: Color(0xFFE8EEF2),
+                foregroundColor: Colors.black,
+                verticalPadding: 16,
+                minHeight: 48,
+                elevation: 0,
+                borderRadius: const BorderRadius.all(Radius.circular(6)),
+                textStyle: const TextStyle(fontWeight: FontWeight.w700),
               ),
             ],
           ),

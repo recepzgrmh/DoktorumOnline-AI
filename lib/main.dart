@@ -1,25 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:login_page/wrapper.dart';
 import 'package:get/get.dart';
-import 'firebase_options.dart'; // Firebase yapılandırmasını içe aktar
+import 'firebase_options.dart';
+import 'package:login_page/wrapper.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // .env dosyasını yükle
-  await dotenv.load(fileName: ".env");
+  try {
+    await dotenv.load(fileName: "assets/.env");
+    print("📌 `.env` dosyası başarıyla yüklendi!");
+    print("📌 FIREBASE_API_KEY: ${dotenv.env['FIREBASE_API_KEY'] ?? 'YOK!'}");
+  } catch (e) {
+    print("🚨 `.env` dosyası yüklenemedi! Hata: $e");
+  }
 
   try {
-    await Firebase.initializeApp(
-      options:
-          DefaultFirebaseOptions
-              .currentPlatform, // Güvenli Firebase yapılandırması
-    );
-    print("🔥 Firebase Başlatıldı!"); // Konsola başarı mesajı
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      print("🔥 Firebase Başlatıldı!");
+    } else {
+      print("Firebase zaten başlatılmış.");
+    }
   } catch (e) {
-    print("🚨 Firebase Başlatma Hatası: $e"); // Hata mesajını yazdır
+    print("🚨 Firebase Başlatma Hatası: $e");
   }
 
   runApp(const MyApp());

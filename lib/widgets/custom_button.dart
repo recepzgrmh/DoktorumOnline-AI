@@ -2,14 +2,28 @@ import 'package:flutter/material.dart';
 
 class CustomButton extends StatelessWidget {
   final String label;
-  final Color backgroundColor;
   final VoidCallback onPressed;
+
+  // Stil parametreleri (Orijinal ElevatedButton.styleFrom(...) değerleri)
+  final Color backgroundColor;
+  final Color foregroundColor;
+  final double verticalPadding;
+  final double minHeight;
+  final double elevation;
+  final BorderRadiusGeometry borderRadius;
+  final TextStyle? textStyle;
 
   const CustomButton({
     super.key,
     required this.label,
-    required this.backgroundColor,
     required this.onPressed,
+    required this.backgroundColor,
+    required this.foregroundColor,
+    this.verticalPadding = 16.0,
+    this.minHeight = 48.0,
+    this.elevation = 3.0,
+    this.borderRadius = const BorderRadius.all(Radius.circular(6)),
+    this.textStyle,
   });
 
   @override
@@ -18,13 +32,13 @@ class CustomButton extends StatelessWidget {
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.all(16),
-        textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        elevation: 5,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        foregroundColor: foregroundColor,
+        padding: EdgeInsets.symmetric(vertical: verticalPadding),
+        minimumSize: Size.fromHeight(minHeight),
+        elevation: elevation,
+        shape: RoundedRectangleBorder(borderRadius: borderRadius),
       ),
-      child: Text(label),
+      child: Text(label, style: textStyle),
     );
   }
 }
