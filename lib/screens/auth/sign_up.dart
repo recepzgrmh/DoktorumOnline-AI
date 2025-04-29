@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:login_page/screens/verify_account.dart';
+import 'package:login_page/screens/auth/verify_account.dart';
 import 'package:login_page/widgets/text_inputs.dart';
 import 'package:get/get.dart';
 import 'package:login_page/widgets/custom_button.dart';
@@ -53,7 +53,7 @@ class _SignUpState extends State<SignUp> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        toolbarHeight: 80,
+        toolbarHeight: 50,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back, color: Colors.black),

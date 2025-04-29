@@ -55,7 +55,7 @@ class _VerifyAccountState extends State<VerifyAccount> {
               });
         }
         // Doğrulama başarılı, anasayfaya yönlendir
-        Get.offAll(() => const Homescreen());
+        Get.offAll(() => const HomeScreen());
       } else {
         Get.snackbar(
           "Hesap Doğrulanmadı",

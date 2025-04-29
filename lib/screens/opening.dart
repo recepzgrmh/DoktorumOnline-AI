@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:login_page/screens/sign_in.dart';
-import 'package:login_page/screens/sign_up.dart';
+import 'package:login_page/screens/auth/sign_in.dart';
+import 'package:login_page/screens/auth/sign_up.dart';
 import 'package:login_page/widgets/custom_button.dart';
 
 class Opening extends StatelessWidget {

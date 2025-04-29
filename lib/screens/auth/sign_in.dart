@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:login_page/screens/reset_password.dart';
-import 'package:login_page/screens/sign_up.dart';
+import 'package:login_page/screens/auth/reset_password.dart';
+import 'package:login_page/screens/auth/sign_up.dart';
 import 'package:login_page/widgets/text_inputs.dart';
 import 'package:get/get.dart';
 import 'package:login_page/wrapper.dart';
@@ -50,7 +50,7 @@ class _SignInState extends State<SignIn> {
       // Klavye açıldığında taşma olmaması için
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        toolbarHeight: 80,
+        toolbarHeight: 50,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),

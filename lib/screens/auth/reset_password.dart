@@ -34,7 +34,7 @@ class _ResetPasswordState extends State<ResetPassword> {
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back),
         ),
-        toolbarHeight: 100,
+        toolbarHeight: 50,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
