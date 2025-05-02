@@ -22,11 +22,9 @@ class Opening extends StatelessWidget {
                       MaterialPageRoute(builder: (context) => const SignIn()),
                     );
                   },
-                  backgroundColor: Colors.blue,
+                  backgroundColor: Theme.of(context).primaryColor,
                   foregroundColor: Colors.white,
                   verticalPadding: 16,
-                  minHeight: 48,
-                  elevation: 5,
                   borderRadius: BorderRadius.zero,
                   textStyle: const TextStyle(
                     fontSize: 18,
@@ -43,11 +41,9 @@ class Opening extends StatelessWidget {
                       MaterialPageRoute(builder: (context) => const SignUp()),
                     );
                   },
-                  backgroundColor: Colors.green,
+                  backgroundColor: Theme.of(context).primaryColor,
                   foregroundColor: Colors.white,
                   verticalPadding: 16,
-                  minHeight: 48,
-                  elevation: 5,
                   borderRadius: BorderRadius.zero,
                   textStyle: const TextStyle(
                     fontSize: 18,
