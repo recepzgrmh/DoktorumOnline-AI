@@ -1,72 +1,292 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:login_page/widgets/custom_text_widget.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
+import 'package:dash_chat_2/dash_chat_2.dart';
 
-class OverviewScreen extends StatelessWidget {
+class OverviewScreen extends StatefulWidget {
   final String response;
 
-  const OverviewScreen({super.key, required this.response});
+  const OverviewScreen({Key? key, required this.response}) : super(key: key);
+
+  @override
+  State<OverviewScreen> createState() => _OverviewScreenState();
+}
+
+class _OverviewScreenState extends State<OverviewScreen> {
+  late final OpenAI _openAI;
+  late final String _apiKey;
+  bool _emojiShowing = false;
+
+  final ChatUser _currentUser = ChatUser(
+    id: '1',
+    firstName: 'Recep',
+    lastName: 'Özgür',
+  );
+
+  final ChatUser _gptChatUser = ChatUser(
+    id: '2',
+    firstName: 'Chat',
+    lastName: 'GPT',
+  );
+
+  String _gptState = 'Çevrimiçi';
+  final List<ChatMessage> _messages = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    // .env dosyasından API anahtarını al ve kontrol et
+    _apiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
+    if (_apiKey.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'API anahtarı bulunamadı! .env dosyasını kontrol edin.',
+            ),
+          ),
+        );
+      });
+
+      _emojiShowing = false;
+    }
+
+    // OpenAI istemcisini başlat
+    _openAI = OpenAI.instance.build(
+      token: _apiKey,
+      baseOption: HttpSetup(receiveTimeout: const Duration(seconds: 10)),
+      enableLog: true,
+    );
+
+    // İlk GPT mesajını ekle (widget.response boş olabilir)
+    _messages.insert(
+      0,
+      ChatMessage(
+        user: _gptChatUser,
+        createdAt: DateTime.now(),
+        text: widget.response.isNotEmpty ? widget.response : '[Yanıt boş]',
+      ),
+    );
+
+    _messages.insert(
+      0,
+      ChatMessage(
+        user: _gptChatUser,
+        createdAt: DateTime.now(),
+        text: 'Bu konu hakkında merak ettiğin soru varsa yanıtlayabilirim :)',
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    // Eğer ileride controller/stream eklediyseniz burada kapatın.
+    super.dispose();
+  }
+
+  Future<void> _onSendMessage(ChatMessage userMsg) async {
+    setState(() {
+      _messages.insert(0, userMsg);
+      _gptState = '...yazıyor';
+    });
+
+    // Mesaj geçmişini kronolojik sırayla hazırla
+    final history =
+        _messages.reversed.map((msg) {
+          return {
+            'role': msg.user.id == _currentUser.id ? 'user' : 'assistant',
+            'content': msg.text,
+          };
+        }).toList();
+
+    final request = ChatCompleteText(
+      model: Gpt4oMiniChatModel(),
+      messages: history,
+      maxToken: 100,
+    );
+
+    try {
+      final resp = await _openAI.onChatCompletion(request: request);
+
+      if (resp == null || resp.choices.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('⚠️ OpenAI’dan yanıt dönmedi')),
+        );
+        setState(() => _gptState = 'Çevrimiçi');
+        return;
+      }
+
+      final aiContent = resp.choices.first.message?.content?.trim();
+      if (aiContent == null || aiContent.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('⚠️ OpenAI mesajı boş döndü')),
+        );
+        setState(() => _gptState = 'Çevrimiçi');
+        return;
+      }
+
+      setState(() {
+        _messages.insert(
+          0,
+          ChatMessage(
+            user: _gptChatUser,
+            createdAt: DateTime.now(),
+            text: aiContent,
+          ),
+        );
+        _gptState = 'Çevrimiçi';
+      });
+    } catch (e, st) {
+      debugPrint('❌ OpenAI hata: $e\n$st');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('OpenAI ile iletişim kurulamadı')),
+      );
+      setState(() => _gptState = 'Çevrimiçi');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Gelen response değerini konsola yazdır
-    print('OverviewScreen response: $response');
-
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('Chat', style: TextStyle(color: Colors.white)),
+        iconTheme: const IconThemeData(
+          color: Colors.white, // örneğin sarı geri oku
+        ),
+        toolbarHeight: 70,
+        elevation: 4,
         backgroundColor: Colors.teal,
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+        title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Üst kısım kaydırılabilir
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+            Row(
+              children: [
+                const CircleAvatar(
+                  radius: 24,
+                  backgroundImage: AssetImage('assets/images/avatar.png'),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Card(
-                      color: Colors.teal.shade50,
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                    const Text(
+                      'ChatGPT',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Durum Özeti',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(response),
-                          ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: Colors.lightGreenAccent.shade200,
+                            shape: BoxShape.circle,
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 6),
+                        Text(
+                          _gptState,
+                          style: TextStyle(
+                            color: Colors.lightGreenAccent.shade200,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
-
-            // Alt sabit buton
-            const SizedBox(height: 20),
-            CustomTextWidget(
-              icon: Icons.send,
-              title: 'Sohbete devam etmek için tıklayın',
-              controller: TextEditingController(),
+            IconButton(
+              icon: const Icon(Icons.more_vert, color: Colors.white),
+              onPressed: () {},
             ),
           ],
+        ),
+      ),
+
+      body: Container(
+        color: Colors.teal.shade50,
+        child: DashChat(
+          inputOptions: InputOptions(
+            sendOnEnter: true,
+            sendButtonBuilder:
+                (send) =>
+                    IconButton(onPressed: send, icon: const Icon(Icons.send)),
+            inputDecoration: InputDecoration(
+              fillColor: Colors.white,
+              hintText: 'Mesajınızı yazın...',
+              border: const OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+            ),
+            cursorStyle: const CursorStyle(color: Colors.teal),
+            inputToolbarStyle: const BoxDecoration(
+              color: Color.fromARGB(0, 0, 150, 135),
+            ),
+            inputToolbarPadding: const EdgeInsets.only(
+              top: 16,
+              bottom: 20,
+              left: 8,
+              right: 8,
+            ),
+            inputToolbarMargin: const EdgeInsets.symmetric(horizontal: 4),
+            leading: [
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    _emojiShowing = !_emojiShowing;
+                  });
+                },
+                icon: const Icon(
+                  Icons.emoji_emotions_outlined,
+                  color: Colors.teal,
+                  size: 30,
+                ),
+              ),
+            ],
+            trailing: [
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(
+                  Icons.attach_file,
+                  color: Colors.teal,
+                  size: 30,
+                ),
+              ),
+            ],
+          ),
+          currentUser: _currentUser,
+          onSend: _onSendMessage,
+          messages: _messages,
+          messageOptions: MessageOptions(
+            currentUserTextColor: Colors.white,
+            textColor: Colors.black,
+            messageDecorationBuilder: (
+              ChatMessage message,
+              ChatMessage? previous,
+              ChatMessage? next,
+            ) {
+              final isMe = message.user.id == _currentUser.id;
+              return BoxDecoration(
+                color: isMe ? Colors.teal : Colors.grey.shade300,
+                boxShadow: const [
+                  BoxShadow(offset: Offset(1, 1), blurRadius: 2),
+                ],
+                border: Border.all(
+                  width: 2,
+                  color: isMe ? Colors.teal : Colors.white,
+                ),
+                borderRadius: BorderRadius.circular(18),
+              );
+            },
+          ),
         ),
       ),
     );

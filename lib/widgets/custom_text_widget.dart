@@ -9,6 +9,12 @@ class CustomTextWidget extends StatelessWidget {
   final int maxLines;
   final TextEditingController controller;
 
+  // hatalar için bunlar
+  final String? Function(String?)? validator;
+  final TextStyle? errorStyle;
+  final OutlineInputBorder? errorBorder;
+  final OutlineInputBorder? focusedErrorBorder;
+
   const CustomTextWidget({
     super.key,
     required this.title,
@@ -16,6 +22,10 @@ class CustomTextWidget extends StatelessWidget {
     required this.controller,
     this.keyboardType = TextInputType.text,
     this.maxLines = 1,
+    this.validator,
+    this.errorStyle,
+    this.errorBorder,
+    this.focusedErrorBorder,
   });
 
   @override
@@ -27,10 +37,36 @@ class CustomTextWidget extends StatelessWidget {
         keyboardType: keyboardType,
         maxLines: maxLines,
         controller: controller,
+        validator: validator,
         decoration: InputDecoration(
           labelText: title,
           prefixIcon: Icon(icon, color: Colors.teal),
           labelStyle: TextStyle(color: Colors.black),
+
+          errorStyle:
+              errorStyle ??
+              const TextStyle(
+                color: Colors.redAccent,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+          // Normal hata kenarlığı
+          errorBorder:
+              errorBorder ??
+              OutlineInputBorder(
+                borderSide: const BorderSide(
+                  color: Color.fromARGB(141, 255, 82, 82),
+                  width: 1.5,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+          // Fokuslanmış (textarea seçiliyken) hata kenarlığı
+          focusedErrorBorder:
+              focusedErrorBorder ??
+              OutlineInputBorder(
+                borderSide: const BorderSide(color: Colors.redAccent, width: 2),
+                borderRadius: BorderRadius.circular(8),
+              ),
         ),
       ),
     );
