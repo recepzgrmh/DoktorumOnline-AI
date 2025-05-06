@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -28,10 +29,12 @@ class _OverviewScreenState extends State<OverviewScreen> {
     id: '2',
     firstName: 'Chat',
     lastName: 'GPT',
+    profileImage: "assets/images/avatar.png",
   );
 
   String _gptState = 'Çevrimiçi';
   final List<ChatMessage> _messages = [];
+  final chatHistory = FirebaseFirestore.instance.collection('messages');
 
   @override
   void initState() {
@@ -92,6 +95,11 @@ class _OverviewScreenState extends State<OverviewScreen> {
       _gptState = '...yazıyor';
     });
 
+    await chatHistory.add({
+      ...userMsg.toJson(),
+      'createdAt': FieldValue.serverTimestamp(), // Firestore zaman damgası
+    });
+
     // Mesaj geçmişini kronolojik sırayla hazırla
     final history =
         _messages.reversed.map((msg) {
@@ -101,10 +109,11 @@ class _OverviewScreenState extends State<OverviewScreen> {
           };
         }).toList();
 
+    // gpt'den gelen sonraki cevaplar
     final request = ChatCompleteText(
       model: Gpt4oMiniChatModel(),
       messages: history,
-      maxToken: 100,
+      maxToken: 1000,
     );
 
     try {
@@ -127,6 +136,16 @@ class _OverviewScreenState extends State<OverviewScreen> {
         return;
       }
 
+      final aiMsg = ChatMessage(
+        user: _gptChatUser,
+        createdAt: DateTime.now(),
+        text: aiContent.isNotEmpty ? aiContent : '[Boş yanıt]',
+      );
+
+      await chatHistory.add({
+        ...aiMsg.toJson(),
+        'createdAt': FieldValue.serverTimestamp(),
+      });
       setState(() {
         _messages.insert(
           0,
@@ -262,6 +281,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
               ),
             ],
           ),
+
           currentUser: _currentUser,
           onSend: _onSendMessage,
           messages: _messages,

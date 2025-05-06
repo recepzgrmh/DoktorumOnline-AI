@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:login_page/screens/home_screen.dart';
+
+import 'package:login_page/screens/old_chat_screen.dart';
 import 'package:login_page/screens/opening.dart';
-import 'package:login_page/screens/overview_screen.dart';
+
 import 'package:login_page/screens/settings_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -65,7 +66,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 padding: const EdgeInsets.only(left: 25.0),
                 child: ListTile(
                   title: Text(
-                    'CHAT',
+                    'OLD  CHATS',
                     style: TextStyle(
                       letterSpacing: 7,
                       color: const Color.fromARGB(193, 105, 105, 105),
@@ -79,7 +80,7 @@ class _MyDrawerState extends State<MyDrawer> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => HomeScreen()),
+                      MaterialPageRoute(builder: (context) => OldChatScreen()),
                     );
                   },
                 ),

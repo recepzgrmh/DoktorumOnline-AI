@@ -16,9 +16,27 @@ class OpenAIService {
           ..writeln("- Şikayet: ${inputs['Şikayet']}")
           ..writeln("- Şikayet Süresi: ${inputs['Şikayetin Süresi']}")
           ..writeln("- Mevcut İlaçlar: ${inputs['Mevcut İlaçlar']}")
+          ..writeln("")
           ..writeln(
-            "\nLütfen yukarıdaki bilgilere dayanarak hasta bilgilerini analiz et ve kapsamlı bir tıbbi değerlendirme sun,Eksik bilgi varsa belirt, tıbbi açıklama yap, olası teşhis ve riskleri değerlendir.",
-          );
+            "Lütfen kullanıcının sağladığı tüm hasta bilgilerini dikkatle incele ve aşağıdaki adımları takip ederek kapsamlı bir tıbbi değerlendirme yap:",
+          )
+          ..writeln(
+            "1. Bilgi Tamamlama: Sunulan verilerde eksik veya belirsiz kalan noktaları belirt ve netleştirmek için kullanıcıya spesifik sorular sor.",
+          )
+          ..writeln(
+            "2. Tıbbi Açıklama: Mevcut semptomlar, bulgular ve öykü ışığında tıbbi terimleri anlaşılır bir şekilde açıkla.",
+          )
+          ..writeln(
+            "3. Olası Teşhis ve Risk Analizi: En muhtemel tanıları, alternatif tanıları ve bunların olası risklerini değerlendir; fizyopatolojiyi, yaygınlığını ve aciliyet gerektiren durumları vurgula.",
+          )
+          ..writeln(
+            "4. Öneriler ve Yönlendirme: Kullanıcının hangi branştaki bir uzmana (ör. dahiliye, kardiyoloji, nöroloji vb.) görünmesi gerektiğini belirt; birinci basamak mı yoksa acil servise mi başvurması gerektiğini açıkla; evde uygulanabilecek temel destekleyici önlemlerden bahset.",
+          )
+          ..writeln(
+            "5. İzleme ve Takip: Kullanıcının verdiği yanıtlara göre sonraki adımları yeniden değerlendir ve gerektiğinde ilave tetkik veya konsültasyon öner.",
+          )
+          ..writeln("")
+          ..writeln("Her aşamada net, anlaşılır ve empatik bir dil kullan.");
 
     final response = await http.post(
       _endpoint,
@@ -32,7 +50,7 @@ class OpenAIService {
           {'role': 'system', 'content': 'Sen bir tıbbi asistansın.'},
           {'role': 'user', 'content': prompt.toString()},
         ],
-        'max_tokens': 300,
+        'max_tokens': 1000,
         'temperature': 0.7,
       }),
     );
