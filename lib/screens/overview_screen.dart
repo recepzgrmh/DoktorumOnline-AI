@@ -1,6 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
@@ -8,9 +6,15 @@ import 'package:dash_chat_2/dash_chat_2.dart';
 
 class OverviewScreen extends StatefulWidget {
   final String response;
-  final String? uid;
+  final String uid;
+  final String complaintId;
 
-  const OverviewScreen({super.key, required this.response, required this.uid});
+  const OverviewScreen({
+    super.key,
+    required this.response,
+    required this.uid,
+    required this.complaintId,
+  });
 
   @override
   State<OverviewScreen> createState() => _OverviewScreenState();
@@ -89,6 +93,8 @@ class _OverviewScreenState extends State<OverviewScreen> {
         _db
             .collection('users')
             .doc(widget.uid)
+            .collection('complaints')
+            .doc(widget.complaintId)
             .collection('messages')
             .orderBy('sentAt', descending: true)
             .snapshots();
@@ -103,7 +109,9 @@ class _OverviewScreenState extends State<OverviewScreen> {
     final messagesRef = _db
         .collection('users')
         .doc(widget.uid)
-        .collection('messages');
+        .collection('complaints')
+        .doc(widget.complaintId)
+        .collection("messages");
 
     setState(() {
       _messages.insert(0, userMsg);

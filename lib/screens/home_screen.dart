@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:login_page/screens/opening.dart';
 import 'package:login_page/screens/overview_screen.dart';
 import 'package:login_page/services/openai_service.dart';
@@ -143,6 +142,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         label: 'Belirtmek İstemiyorum',
                       ),
                     ],
+                    onSelected: (value) {
+                      setState(() {
+                        _cinsiyet = value;
+                      });
+                    },
                   ),
                 ),
                 CustomTextWidget(
@@ -204,7 +208,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             ? null
                             : () async {
                               if (!_formKey.currentState!.validate()) return;
-
+                              final complaintDoc =
+                                  userDoc.collection('complaints').doc();
+                              final complaintId = complaintDoc.id;
                               setState(() {
                                 _loading = true;
                               });
@@ -213,20 +219,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
                               try {
                                 // Kullanıcı profil bilgilerini güncelle
-                                await userDoc.set({
-                                  'boy': boyController.text.trim(),
-                                  'yas': yasController.text.trim(),
-                                  'kilo': kiloController.text.trim(),
-                                  'sure': sureController.text.trim(),
-                                  'ilac': ilacController.text.trim(),
-                                  'cinsiyet': _cinsiyet ?? '',
-                                  'lastAnalyzed': FieldValue.serverTimestamp(),
-                                }, SetOptions(merge: true));
+                                await userDoc
+                                    .collection('complaints')
+                                    .doc(complaintId)
+                                    .set({
+                                      'boy': boyController.text.trim(),
+                                      'yas': yasController.text.trim(),
+                                      'kilo': kiloController.text.trim(),
+                                      'sure': sureController.text.trim(),
+                                      'ilac': ilacController.text.trim(),
+                                      'cinsiyet': _cinsiyet ?? '',
+                                      'lastAnalyzed':
+                                          FieldValue.serverTimestamp(),
+                                    }, SetOptions(merge: true));
 
                                 // Şikayeti messages alt koleksiyonuna ekle
-                                await userDoc.collection('messages').add({
-                                  'text': sikayetController.text.trim(),
-                                  'analizSonucu': analysisResult,
+                                await complaintDoc.collection('messages').add({
+                                  'text': analysisResult,
+                                  'senderId': '2',
                                   'sentAt': FieldValue.serverTimestamp(),
                                 });
 
@@ -246,6 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       (_) => OverviewScreen(
                                         uid: _uid,
                                         response: analysisResult,
+                                        complaintId: complaintId,
                                       ),
                                 ),
                               );
