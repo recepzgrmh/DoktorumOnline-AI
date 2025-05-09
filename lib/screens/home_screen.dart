@@ -16,8 +16,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _service = OpenAIService();
-
-  // Form key for validation
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController boyController = TextEditingController();
@@ -29,9 +27,16 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _cinsiyet;
 
   bool _loading = false;
+  final String _uid = FirebaseAuth.instance.currentUser!.uid;
 
-  // Kullanıcının girmiş olduğu verileri saklamak için problem adlı collection oluşturduk
-  final collection = FirebaseFirestore.instance.collection("problem");
+  // Kullanıcının profil bilgilerini tutacağımız doküman referansı
+  late final DocumentReference<Map<String, dynamic>> userDoc;
+
+  @override
+  void initState() {
+    super.initState();
+    userDoc = FirebaseFirestore.instance.collection('users').doc(_uid);
+  }
 
   @override
   void dispose() {
@@ -111,7 +116,6 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 20),
-
                 CustomTextWidget(
                   title: 'Boy',
                   icon: Icons.straighten,
@@ -124,7 +128,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     return null;
                   },
                 ),
-
                 Card(
                   margin: const EdgeInsets.symmetric(vertical: 8),
 
@@ -192,11 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   controller: ilacController,
                   maxLines: 3,
                 ),
-
-                const SizedBox(height: 16),
-
                 const SizedBox(height: 24),
-
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -206,23 +205,38 @@ class _HomeScreenState extends State<HomeScreen> {
                             : () async {
                               if (!_formKey.currentState!.validate()) return;
 
+                              setState(() {
+                                _loading = true;
+                              });
+
                               final analysisResult = await _analyzeInputs();
 
                               try {
-                                await collection.add({
-                                  "boy": boyController.text.trim(),
-                                  "yas": yasController.text.trim(),
-                                  "kilo": kiloController.text.trim(),
-                                  "sikayet": sikayetController.text.trim(),
-                                  "sure": sureController.text.trim(),
-                                  "ilac": ilacController.text.trim(),
-                                  "cinsiyet": _cinsiyet ?? '',
-                                  "analizSonucu": analysisResult,
-                                  "tarih": FieldValue.serverTimestamp(),
+                                // Kullanıcı profil bilgilerini güncelle
+                                await userDoc.set({
+                                  'boy': boyController.text.trim(),
+                                  'yas': yasController.text.trim(),
+                                  'kilo': kiloController.text.trim(),
+                                  'sure': sureController.text.trim(),
+                                  'ilac': ilacController.text.trim(),
+                                  'cinsiyet': _cinsiyet ?? '',
+                                  'lastAnalyzed': FieldValue.serverTimestamp(),
+                                }, SetOptions(merge: true));
+
+                                // Şikayeti messages alt koleksiyonuna ekle
+                                await userDoc.collection('messages').add({
+                                  'text': sikayetController.text.trim(),
+                                  'analizSonucu': analysisResult,
+                                  'sentAt': FieldValue.serverTimestamp(),
                                 });
-                                print("Veri başarıyla eklendi.");
+
+                                debugPrint("Veri başarıyla eklendi.");
                               } catch (e) {
-                                print("Hata oluştu: $e");
+                                debugPrint("Hata oluştu: $e");
+                              } finally {
+                                setState(() {
+                                  _loading = false;
+                                });
                               }
 
                               Navigator.push(
@@ -230,6 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 MaterialPageRoute(
                                   builder:
                                       (_) => OverviewScreen(
+                                        uid: _uid,
                                         response: analysisResult,
                                       ),
                                 ),

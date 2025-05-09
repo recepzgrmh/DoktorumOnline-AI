@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
@@ -7,8 +8,9 @@ import 'package:dash_chat_2/dash_chat_2.dart';
 
 class OverviewScreen extends StatefulWidget {
   final String response;
+  final String? uid;
 
-  const OverviewScreen({Key? key, required this.response}) : super(key: key);
+  const OverviewScreen({super.key, required this.response, required this.uid});
 
   @override
   State<OverviewScreen> createState() => _OverviewScreenState();
@@ -34,7 +36,9 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
   String _gptState = 'Çevrimiçi';
   final List<ChatMessage> _messages = [];
-  final chatHistory = FirebaseFirestore.instance.collection('messages');
+
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  late final Stream<QuerySnapshot<Map<String, dynamic>>> chatHistory;
 
   @override
   void initState() {
@@ -52,7 +56,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
           ),
         );
       });
-
       _emojiShowing = false;
     }
 
@@ -63,7 +66,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       enableLog: true,
     );
 
-    // İlk GPT mesajını ekle (widget.response boş olabilir)
+    // İlk GPT mesajlarını ekle
     _messages.insert(
       0,
       ChatMessage(
@@ -72,7 +75,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
         text: widget.response.isNotEmpty ? widget.response : '[Yanıt boş]',
       ),
     );
-
     _messages.insert(
       0,
       ChatMessage(
@@ -81,26 +83,41 @@ class _OverviewScreenState extends State<OverviewScreen> {
         text: 'Bu konu hakkında merak ettiğin soru varsa yanıtlayabilirim :)',
       ),
     );
+
+    // messages alt-koleksiyonundan canlı stream
+    chatHistory =
+        _db
+            .collection('users')
+            .doc(widget.uid)
+            .collection('messages')
+            .orderBy('sentAt', descending: true)
+            .snapshots();
   }
 
   @override
   void dispose() {
-    // Eğer ileride controller/stream eklediyseniz burada kapatın.
     super.dispose();
   }
 
   Future<void> _onSendMessage(ChatMessage userMsg) async {
+    final messagesRef = _db
+        .collection('users')
+        .doc(widget.uid)
+        .collection('messages');
+
     setState(() {
       _messages.insert(0, userMsg);
       _gptState = '...yazıyor';
     });
 
-    await chatHistory.add({
-      ...userMsg.toJson(),
-      'createdAt': FieldValue.serverTimestamp(), // Firestore zaman damgası
+    // Kullanıcının mesajını Firestore'a ekle
+    await messagesRef.add({
+      'text': userMsg.text,
+      'senderId': userMsg.user.id,
+      'sentAt': FieldValue.serverTimestamp(),
     });
 
-    // Mesaj geçmişini kronolojik sırayla hazırla
+    // Geçmişi GPT için hazırla
     final history =
         _messages.reversed.map((msg) {
           return {
@@ -109,7 +126,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
           };
         }).toList();
 
-    // gpt'den gelen sonraki cevaplar
+    // GPT isteği
     final request = ChatCompleteText(
       model: Gpt4oMiniChatModel(),
       messages: history,
@@ -136,16 +153,13 @@ class _OverviewScreenState extends State<OverviewScreen> {
         return;
       }
 
-      final aiMsg = ChatMessage(
-        user: _gptChatUser,
-        createdAt: DateTime.now(),
-        text: aiContent.isNotEmpty ? aiContent : '[Boş yanıt]',
-      );
-
-      await chatHistory.add({
-        ...aiMsg.toJson(),
-        'createdAt': FieldValue.serverTimestamp(),
+      // GPT cevabını Firestore'a ekle
+      await messagesRef.add({
+        'text': aiContent,
+        'senderId': _gptChatUser.id,
+        'sentAt': FieldValue.serverTimestamp(),
       });
+
       setState(() {
         _messages.insert(
           0,
@@ -170,9 +184,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(
-          color: Colors.white, // örneğin sarı geri oku
-        ),
+        iconTheme: const IconThemeData(color: Colors.white),
         toolbarHeight: 70,
         elevation: 4,
         backgroundColor: Colors.teal,
@@ -229,12 +241,11 @@ class _OverviewScreenState extends State<OverviewScreen> {
           ],
         ),
       ),
-
       body: Container(
         color: Colors.teal.shade50,
         child: DashChat(
           inputOptions: InputOptions(
-            sendOnEnter: true,
+            sendOnEnter: false,
             sendButtonBuilder:
                 (send) =>
                     IconButton(onPressed: send, icon: const Icon(Icons.send)),
@@ -281,7 +292,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
               ),
             ],
           ),
-
           currentUser: _currentUser,
           onSend: _onSendMessage,
           messages: _messages,
