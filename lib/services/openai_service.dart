@@ -10,6 +10,7 @@ class OpenAIService {
 
   /// 1. Adım: Kullanıcı verilerindeki eksik/ belirsiz noktaları
   /// madde madde sorulara dönüştürür.
+  /// burası sorularla alakalı
   Future<List<String>> getFollowUpQuestions(Map<String, String> inputs) async {
     final prompt =
         StringBuffer()
@@ -20,13 +21,16 @@ class OpenAIService {
           ..writeln("- Şikayet: ${inputs['Şikayet']}")
           ..writeln("- Şikayet Süresi: ${inputs['Şikayet Süresi']}")
           ..writeln("- Mevcut İlaçlar: ${inputs['Mevcut İlaçlar']}")
+          ..writeln("- Cinsiyet: ${inputs['Cinsiyet']}")
+          ..writeln("- Kan Grubu: ${inputs['Kan Grubu']}")
+          ..writeln("- Kronik Rahatsızlık: ${inputs['Kronik Rahatsızlık']}")
           ..writeln("")
           ..writeln(
             "Lütfen kullanıcının sağladığı tüm hasta bilgilerini dikkatle incele ve aşağıdaki adımları takip et:",
           )
           ..writeln("")
           ..writeln(
-            "Sunulan verilerde eksik veya belirsiz kalan noktaları belirt ve netleştirmek için kullanıcıya spesifik sorular sor. bu soruları madde madde sor. herbir soru birbirinden farklı olmalı",
+            "Sunulan verilerde eksik veya belirsiz kalan noktaları belirt ve netleştirmek için kullanıcıya spesifik sorular sor. bu soruları madde madde sor. herbir soru birbirinden farklı olmalı.",
           )
           ..writeln("")
           ..writeln("Her aşamada net, anlaşılır ve empatik bir dil kullan.");
@@ -43,6 +47,7 @@ class OpenAIService {
   }
 
   /// 2. Adım: Kullanıcının cevaplarıyla birlikte nihai tıbbi değerlendirmeyi üretir.
+  /// burası son mesaj
   Future<String> getFinalEvaluation(
     Map<String, String> inputs,
     List<String> answers,
@@ -56,6 +61,9 @@ class OpenAIService {
           ..writeln("- Şikayet: ${inputs['Şikayet']}")
           ..writeln("- Şikayet Süresi: ${inputs['Şikayet Süresi']}")
           ..writeln("- Mevcut İlaçlar: ${inputs['Mevcut İlaçlar']}")
+          ..writeln("- Cinsiyet: ${inputs['Cinsiyet']}")
+          ..writeln("- Kan Grubu: ${inputs['Kan Grubu']}")
+          ..writeln("- Kronik Hastalık: ${inputs['Kronik Rahatsızlık']}")
           ..writeln("")
           ..writeln("Kullanıcının takip sorulara verdiği cevaplar:")
           ..writeAll(
@@ -64,7 +72,7 @@ class OpenAIService {
           )
           ..writeln("")
           ..writeln(
-            "Yukarıdaki tüm bilgileri dikkate alarak kapsamlı bir tıbbi değerlendirme yap ve önerilerde bulun hastanın sikayetini çözmeye çalış.",
+            "Yukarıdaki tüm bilgileri dikkate alarak kapsamlı bir tıbbi değerlendirme yap ve önerilerde bulun hastanın sikayetini çözmeye çalış.  eğer hastanın doktora gitmesi gerekiyorsa bile onun şikayetini azaltacak şeyler öner",
           );
 
     final result = await _postToChatGPT(buffer.toString());

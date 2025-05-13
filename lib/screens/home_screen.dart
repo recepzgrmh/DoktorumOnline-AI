@@ -25,7 +25,9 @@ class _HomeScreenState extends State<HomeScreen> {
   final sikayetController = TextEditingController();
   final sureController = TextEditingController();
   final ilacController = TextEditingController();
+  final illnessController = TextEditingController();
   String? _cinsiyet;
+  String? _kanGrubu;
 
   bool _loading = false;
   final _uid = FirebaseAuth.instance.currentUser!.uid;
@@ -39,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
     sikayetController.dispose();
     sureController.dispose();
     ilacController.dispose();
+    illnessController.dispose();
     super.dispose();
   }
 
@@ -49,13 +52,16 @@ class _HomeScreenState extends State<HomeScreen> {
     final complaintDoc = userDoc.collection('complaints').doc();
     final complaintId = complaintDoc.id;
 
-    final inputs = {
+    final inputs = <String, String>{
       'Boy': boyController.text.trim(),
       'Yaş': yasController.text.trim(),
       'Kilo': kiloController.text.trim(),
       'Şikayet': sikayetController.text.trim(),
       'Şikayet Süresi': sureController.text.trim(),
       'Mevcut İlaçlar': ilacController.text.trim(),
+      'Cinsiyet': _cinsiyet ?? '',
+      'Kan Grubu': _kanGrubu ?? '',
+      'Kronik Rahatsızlık': illnessController.text.trim(),
     };
 
     try {
@@ -67,7 +73,9 @@ class _HomeScreenState extends State<HomeScreen> {
         'sikayet': inputs['Şikayet'],
         'sure': inputs['Şikayet Süresi'],
         'ilac': inputs['Mevcut İlaçlar'],
+        'Kronik Rahatsızlık': inputs['Kronik Rahatsızlık'],
         'cinsiyet': _cinsiyet ?? '',
+        'kan_grubu': _kanGrubu ?? '',
         'lastAnalyzed': FieldValue.serverTimestamp(),
       });
 
@@ -152,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ? 'Lütfen Boyunuzu Giriniz'
                               : null,
                 ),
-                const SizedBox(height: 8),
+
                 Card(
                   margin: const EdgeInsets.symmetric(vertical: 8),
                   child: DropdownMenu<String>(
@@ -194,6 +202,31 @@ class _HomeScreenState extends State<HomeScreen> {
                               ? 'Lütfen Kilonuzu Giriniz'
                               : null,
                 ),
+                Card(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  child: DropdownMenu<String>(
+                    hintText: 'Kan Grubunuzu Seçiniz',
+                    width: double.infinity,
+                    inputDecorationTheme: const InputDecorationTheme(
+                      filled: true,
+                    ),
+                    dropdownMenuEntries: const [
+                      DropdownMenuEntry(value: 'A+', label: 'A+'),
+                      DropdownMenuEntry(value: 'A-', label: 'A-'),
+                      DropdownMenuEntry(value: 'B+', label: 'B+'),
+                      DropdownMenuEntry(value: 'B-', label: 'B-'),
+                      DropdownMenuEntry(value: 'AB+', label: 'AB+'),
+                      DropdownMenuEntry(value: 'AB-', label: 'AB-'),
+                      DropdownMenuEntry(value: 'O+', label: 'O+'),
+                      DropdownMenuEntry(value: 'O-', label: 'O-'),
+                      DropdownMenuEntry(
+                        value: '-',
+                        label: 'Belirtmek İstemiyorum',
+                      ),
+                    ],
+                    onSelected: (value) => setState(() => _kanGrubu = value),
+                  ),
+                ),
                 CustomTextWidget(
                   title: 'Şikayet',
                   icon: Icons.report,
@@ -219,6 +252,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   controller: ilacController,
                   maxLines: 3,
                 ),
+
+                CustomTextWidget(
+                  title: 'Kronik Bir Rahatsızlığınız Var Mı?',
+                  icon: Icons.back_hand,
+                  keyboardType: TextInputType.text,
+                  controller: illnessController,
+                ),
+
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
