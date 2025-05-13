@@ -79,14 +79,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
         text: widget.response.isNotEmpty ? widget.response : '[Yanıt boş]',
       ),
     );
-    _messages.insert(
-      0,
-      ChatMessage(
-        user: _gptChatUser,
-        createdAt: DateTime.now(),
-        text: 'Bu konu hakkında merak ettiğin soru varsa yanıtlayabilirim :)',
-      ),
-    );
 
     // messages alt-koleksiyonundan canlı stream
     chatHistory =
