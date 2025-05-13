@@ -1,17 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:login_page/screens/chat_history_detail_screen.dart';
 import 'package:login_page/widgets/my_drawer.dart';
 
 class OldChatScreen extends StatefulWidget {
   final String userId;
-  final String complaintId;
 
-  const OldChatScreen({
-    super.key,
-    required this.userId,
-    required this.complaintId,
-  });
+  const OldChatScreen({super.key, required this.userId});
 
   @override
   State<OldChatScreen> createState() => _OldChatScreenState();
@@ -20,6 +16,11 @@ class OldChatScreen extends StatefulWidget {
 class _OldChatScreenState extends State<OldChatScreen> {
   @override
   Widget build(BuildContext context) {
+    final complaintsRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('complaints');
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -70,37 +71,61 @@ class _OldChatScreenState extends State<OldChatScreen> {
                   ),
                   title: Text(
                     complaintDoc['sikayet'],
+                    maxLines: 1,
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: StreamBuilder(
+                  subtitle: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                     stream:
                         FirebaseFirestore.instance
                             .collection('users')
                             .doc(widget.userId)
                             .collection('complaints')
-                            .doc(widget.complaintId)
+                            .doc(complaintDoc.id)
                             .collection('messages')
-                            .orderBy('sendAt', descending: false)
+                            .orderBy('sentAt', descending: true)
+                            .limit(1)
                             .snapshots(),
-                    builder: (context, chatSnapshots) {
-                      if (chatSnapshots.connectionState ==
-                          ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
+                    builder: (context, snap) {
+                      if (snap.connectionState == ConnectionState.waiting) {
+                        return const Text(
+                          'Yükleniyor…',
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                        );
                       }
-
-                      if (!chatSnapshots.hasData ||
-                          chatSnapshots.data!.docs.isEmpty) {
-                        return Text('Henüz Mesaj Yok');
+                      if (!snap.hasData || snap.data!.docs.isEmpty) {
+                        return const Text(
+                          'Henüz Mesaj Yok',
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                        );
                       }
-                      if (chatSnapshots.hasError) {
-                        return Text("hataaa");
-                      }
-
-                      return Text('data');
+                      final msg = snap.data!.docs.first.data();
+                      final text = msg['text'] ?? '';
+                      return Text(
+                        text,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                      );
                     },
                   ),
-                  trailing: Text('data'),
-                  onTap: () {},
+                  trailing: Text(DateTime.now().toString().split(' ')[0]),
+
+                  // loadMessages[index][widget.complaintId]['text'],
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => ChatHistoryDetailScreen(
+                              userId: widget.userId,
+                              complaintId: complaintDoc.id,
+                            ),
+                      ),
+                    );
+                  },
                 ),
               );
             },

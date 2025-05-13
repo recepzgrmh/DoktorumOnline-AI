@@ -8,7 +8,7 @@ import 'package:login_page/widgets/custom_text_widget.dart';
 import 'package:login_page/widgets/my_drawer.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key}) : super(key: key);
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -27,8 +27,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _loading = false;
   final String _uid = FirebaseAuth.instance.currentUser!.uid;
-
-  // Kullanıcının profil bilgilerini tutacağımız doküman referansı
   late final DocumentReference<Map<String, dynamic>> userDoc;
 
   @override
@@ -49,9 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<String> _analyzeInputs() async {
-    setState(() {
-      _loading = true;
-    });
+    setState(() => _loading = true);
 
     final inputs = {
       'Boy':
@@ -77,9 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       return 'Hata: $e';
     } finally {
-      setState(() {
-        _loading = false;
-      });
+      setState(() => _loading = false);
     }
   }
 
@@ -87,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
     await FirebaseAuth.instance.signOut();
     Navigator.of(
       context,
-    ).pushReplacement(MaterialPageRoute(builder: (ctx) => const Opening()));
+    ).pushReplacement(MaterialPageRoute(builder: (_) => const Opening()));
   }
 
   @override
@@ -120,21 +114,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icons.straighten,
                   keyboardType: TextInputType.number,
                   controller: boyController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Lütfen Boyunuzu Giriniz';
-                    }
-                    return null;
-                  },
+                  validator:
+                      (v) =>
+                          v == null || v.isEmpty
+                              ? 'Lütfen Boyunuzu Giriniz'
+                              : null,
                 ),
+                const SizedBox(height: 8),
                 Card(
                   margin: const EdgeInsets.symmetric(vertical: 8),
-
                   child: DropdownMenu<String>(
                     hintText: 'Cinsiyetinizi Seçiniz',
                     width: double.infinity,
-                    inputDecorationTheme: InputDecorationTheme(filled: true),
-                    dropdownMenuEntries: [
+                    inputDecorationTheme: const InputDecorationTheme(
+                      filled: true,
+                    ),
+                    dropdownMenuEntries: const [
                       DropdownMenuEntry(value: 'erkek', label: 'erkek'),
                       DropdownMenuEntry(value: 'kadın', label: 'kadın'),
                       DropdownMenuEntry(
@@ -142,11 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         label: 'Belirtmek İstemiyorum',
                       ),
                     ],
-                    onSelected: (value) {
-                      setState(() {
-                        _cinsiyet = value;
-                      });
-                    },
+                    onSelected: (value) => setState(() => _cinsiyet = value),
                   ),
                 ),
                 CustomTextWidget(
@@ -154,24 +145,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icons.cake,
                   keyboardType: TextInputType.number,
                   controller: yasController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Lütfen Yaşınızı Giriniz';
-                    }
-                    return null;
-                  },
+                  validator:
+                      (v) =>
+                          v == null || v.isEmpty
+                              ? 'Lütfen Yaşınızı Giriniz'
+                              : null,
                 ),
                 CustomTextWidget(
                   title: 'Kilo',
                   icon: Icons.monitor_weight,
                   keyboardType: TextInputType.number,
                   controller: kiloController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Lütfen Kilonuzu Giriniz';
-                    }
-                    return null;
-                  },
+                  validator:
+                      (v) =>
+                          v == null || v.isEmpty
+                              ? 'Lütfen Kilonuzu Giriniz'
+                              : null,
                 ),
                 CustomTextWidget(
                   title: 'Şikayet',
@@ -179,12 +168,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   keyboardType: TextInputType.text,
                   controller: sikayetController,
                   maxLines: 3,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Lütfen Şikayetinizi Giriniz';
-                    }
-                    return null;
-                  },
+                  validator:
+                      (v) =>
+                          v == null || v.isEmpty
+                              ? 'Lütfen Şikayetinizi Giriniz'
+                              : null,
                 ),
                 CustomTextWidget(
                   title: 'Şikayetin Süresi',
@@ -208,17 +196,25 @@ class _HomeScreenState extends State<HomeScreen> {
                             ? null
                             : () async {
                               if (!_formKey.currentState!.validate()) return;
+
+                              // Yeni şikayet dokümanı oluştur
                               final complaintDoc =
                                   userDoc.collection('complaints').doc();
                               final complaintId = complaintDoc.id;
-                              setState(() {
-                                _loading = true;
-                              });
 
-                              final analysisResult = await _analyzeInputs();
+                              // API'den düz metin yanıt al
+                              final rawResult = await _analyzeInputs();
+
+                              // Metni "1. …", "2. …" maddelerinde böl
+                              final parts =
+                                  rawResult
+                                      .split(RegExp(r'\n(?=\d+\.)'))
+                                      .map((p) => p.trim())
+                                      .where((p) => p.isNotEmpty)
+                                      .toList();
 
                               try {
-                                // Kullanıcı profil bilgilerini güncelle
+                                // Profil bilgilerini kaydet
                                 await userDoc
                                     .collection('complaints')
                                     .doc(complaintId)
@@ -234,33 +230,33 @@ class _HomeScreenState extends State<HomeScreen> {
                                           FieldValue.serverTimestamp(),
                                     }, SetOptions(merge: true));
 
-                                // Şikayeti messages alt koleksiyonuna ekle
-                                await complaintDoc.collection('messages').add({
-                                  'text': analysisResult,
-                                  'senderId': '2',
-                                  'sentAt': FieldValue.serverTimestamp(),
-                                });
-
-                                debugPrint("Veri başarıyla eklendi.");
+                                // Her maddeyi ayrı mesaj olarak ekle
+                                final col = complaintDoc.collection('messages');
+                                for (var i = 0; i < parts.length; i++) {
+                                  await col.add({
+                                    'text': parts[i],
+                                    'senderId': '2',
+                                    'order': i,
+                                    'sentAt': FieldValue.serverTimestamp(),
+                                  });
+                                }
                               } catch (e) {
-                                debugPrint("Hata oluştu: $e");
-                              } finally {
-                                setState(() {
-                                  _loading = false;
-                                });
+                                debugPrint('Hata oluştu: $e');
                               }
 
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (_) => OverviewScreen(
-                                        uid: _uid,
-                                        response: analysisResult,
-                                        complaintId: complaintId,
-                                      ),
-                                ),
-                              );
+                              // OverviewScreen'e yönlendir
+                              if (mounted) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (_) => OverviewScreen(
+                                          uid: _uid,
+                                          complaintId: complaintId,
+                                        ),
+                                  ),
+                                );
+                              }
                             },
                     child:
                         _loading

@@ -5,16 +5,11 @@ import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 
 class OverviewScreen extends StatefulWidget {
-  final String response;
   final String uid;
   final String complaintId;
 
-  const OverviewScreen({
-    super.key,
-    required this.response,
-    required this.uid,
-    required this.complaintId,
-  });
+  const OverviewScreen({Key? key, required this.uid, required this.complaintId})
+    : super(key: key);
 
   @override
   State<OverviewScreen> createState() => _OverviewScreenState();
@@ -39,16 +34,14 @@ class _OverviewScreenState extends State<OverviewScreen> {
   );
 
   String _gptState = 'Çevrimiçi';
-  final List<ChatMessage> _messages = [];
 
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
-  late final Stream<QuerySnapshot<Map<String, dynamic>>> chatHistory;
+  late final CollectionReference<Map<String, dynamic>> _messagesRef;
 
   @override
   void initState() {
     super.initState();
 
-    // .env dosyasından API anahtarını al ve kontrol et
+    // 1. .env’den API anahtarını al
     _apiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
     if (_apiKey.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -60,122 +53,70 @@ class _OverviewScreenState extends State<OverviewScreen> {
           ),
         );
       });
-      _emojiShowing = false;
     }
 
-    // OpenAI istemcisini başlat
+    // 2. OpenAI SDK’yı başlat
     _openAI = OpenAI.instance.build(
       token: _apiKey,
       baseOption: HttpSetup(receiveTimeout: const Duration(seconds: 10)),
       enableLog: true,
     );
 
-    // İlk GPT mesajlarını ekle
-    _messages.insert(
-      0,
-      ChatMessage(
-        user: _gptChatUser,
-        createdAt: DateTime.now(),
-        text: widget.response.isNotEmpty ? widget.response : '[Yanıt boş]',
-      ),
-    );
-
-    // messages alt-koleksiyonundan canlı stream
-    chatHistory =
-        _db
-            .collection('users')
-            .doc(widget.uid)
-            .collection('complaints')
-            .doc(widget.complaintId)
-            .collection('messages')
-            .orderBy('sentAt', descending: true)
-            .snapshots();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  Future<void> _onSendMessage(ChatMessage userMsg) async {
-    final messagesRef = _db
+    // 3. Firestore’daki mesajlar koleksiyonuna referans
+    _messagesRef = FirebaseFirestore.instance
         .collection('users')
         .doc(widget.uid)
         .collection('complaints')
         .doc(widget.complaintId)
-        .collection("messages");
+        .collection('messages');
+  }
 
-    setState(() {
-      _messages.insert(0, userMsg);
-      _gptState = '...yazıyor';
-    });
+  Future<void> _onSendMessage(ChatMessage userMsg) async {
+    setState(() => _gptState = '...yazıyor');
 
-    // Kullanıcının mesajını Firestore'a ekle
-    await messagesRef.add({
+    // A. Kullanıcı mesajını kaydet
+    await _messagesRef.add({
       'text': userMsg.text,
       'senderId': userMsg.user.id,
       'sentAt': FieldValue.serverTimestamp(),
     });
 
-    // Geçmişi GPT için hazırla
-    final history =
-        _messages.reversed.map((msg) {
+    // B. Tüm mesaj geçmişini Firestore’dan çek ve OpenAI formatına çevir
+    final historySnapshot = await _messagesRef.orderBy('sentAt').get();
+    final openAIHistory =
+        historySnapshot.docs.map((doc) {
+          final data = doc.data();
           return {
-            'role': msg.user.id == _currentUser.id ? 'user' : 'assistant',
-            'content': msg.text,
+            'role': data['senderId'] == _currentUser.id ? 'user' : 'assistant',
+            'content': data['text'] ?? '',
           };
         }).toList();
 
-    // GPT isteği
+    // C. OpenAI’dan yeni cevap iste
     final request = ChatCompleteText(
       model: Gpt4oMiniChatModel(),
-      messages: history,
+      messages: openAIHistory,
       maxToken: 1000,
     );
 
     try {
       final resp = await _openAI.onChatCompletion(request: request);
+      final aiContent = resp?.choices.first.message?.content?.trim() ?? '';
 
-      if (resp == null || resp.choices.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('⚠️ OpenAI’dan yanıt dönmedi')),
-        );
-        setState(() => _gptState = 'Çevrimiçi');
-        return;
+      if (aiContent.isNotEmpty) {
+        // D. ChatGPT cevabını da kaydet
+        await _messagesRef.add({
+          'text': aiContent,
+          'senderId': _gptChatUser.id,
+          'sentAt': FieldValue.serverTimestamp(),
+        });
       }
-
-      final aiContent = resp.choices.first.message?.content?.trim();
-      if (aiContent == null || aiContent.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('⚠️ OpenAI mesajı boş döndü')),
-        );
-        setState(() => _gptState = 'Çevrimiçi');
-        return;
-      }
-
-      // GPT cevabını Firestore'a ekle
-      await messagesRef.add({
-        'text': aiContent,
-        'senderId': _gptChatUser.id,
-        'sentAt': FieldValue.serverTimestamp(),
-      });
-
-      setState(() {
-        _messages.insert(
-          0,
-          ChatMessage(
-            user: _gptChatUser,
-            createdAt: DateTime.now(),
-            text: aiContent,
-          ),
-        );
-        _gptState = 'Çevrimiçi';
-      });
-    } catch (e, st) {
-      debugPrint('❌ OpenAI hata: $e\n$st');
+    } catch (e) {
+      debugPrint('❌ OpenAI error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('OpenAI ile iletişim kurulamadı')),
       );
+    } finally {
       setState(() => _gptState = 'Çevrimiçi');
     }
   }
@@ -184,10 +125,10 @@ class _OverviewScreenState extends State<OverviewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.teal,
         iconTheme: const IconThemeData(color: Colors.white),
         toolbarHeight: 70,
         elevation: 4,
-        backgroundColor: Colors.teal,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -243,80 +184,88 @@ class _OverviewScreenState extends State<OverviewScreen> {
       ),
       body: Container(
         color: Colors.teal.shade50,
-        child: DashChat(
-          inputOptions: InputOptions(
-            sendOnEnter: false,
-            sendButtonBuilder:
-                (send) =>
-                    IconButton(onPressed: send, icon: const Icon(Icons.send)),
-            inputDecoration: InputDecoration(
-              fillColor: Colors.white,
-              hintText: 'Mesajınızı yazın...',
-              border: const OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10)),
-              ),
-            ),
-            cursorStyle: const CursorStyle(color: Colors.teal),
-            inputToolbarStyle: const BoxDecoration(
-              color: Color.fromARGB(0, 0, 150, 135),
-            ),
-            inputToolbarPadding: const EdgeInsets.only(
-              top: 16,
-              bottom: 20,
-              left: 8,
-              right: 8,
-            ),
-            inputToolbarMargin: const EdgeInsets.symmetric(horizontal: 4),
-            leading: [
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    _emojiShowing = !_emojiShowing;
-                  });
-                },
-                icon: const Icon(
-                  Icons.emoji_emotions_outlined,
-                  color: Colors.teal,
-                  size: 30,
+        child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: _messagesRef.orderBy('sentAt', descending: true).snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final docs = snapshot.data?.docs ?? [];
+            final messages =
+                docs.map((doc) {
+                  final data = doc.data();
+                  return ChatMessage(
+                    user:
+                        data['senderId'] == _currentUser.id
+                            ? _currentUser
+                            : _gptChatUser,
+                    createdAt: (data['sentAt'] as Timestamp).toDate(),
+                    text: data['text'] ?? '',
+                  );
+                }).toList();
+
+            return DashChat(
+              messages: messages,
+              currentUser: _currentUser,
+              onSend: _onSendMessage,
+              inputOptions: InputOptions(
+                sendOnEnter: false,
+                sendButtonBuilder:
+                    (send) => IconButton(
+                      onPressed: send,
+                      icon: const Icon(Icons.send),
+                    ),
+                inputDecoration: InputDecoration(
+                  fillColor: Colors.white,
+                  hintText: 'Mesajınızı yazın...',
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
                 ),
-              ),
-            ],
-            trailing: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.attach_file,
-                  color: Colors.teal,
-                  size: 30,
-                ),
-              ),
-            ],
-          ),
-          currentUser: _currentUser,
-          onSend: _onSendMessage,
-          messages: _messages,
-          messageOptions: MessageOptions(
-            currentUserTextColor: Colors.white,
-            textColor: Colors.black,
-            messageDecorationBuilder: (
-              ChatMessage message,
-              ChatMessage? previous,
-              ChatMessage? next,
-            ) {
-              final isMe = message.user.id == _currentUser.id;
-              return BoxDecoration(
-                color: isMe ? Colors.teal : Colors.grey.shade300,
-                boxShadow: const [
-                  BoxShadow(offset: Offset(1, 1), blurRadius: 2),
+                leading: [
+                  IconButton(
+                    onPressed:
+                        () => setState(() => _emojiShowing = !_emojiShowing),
+                    icon: const Icon(
+                      Icons.emoji_emotions_outlined,
+                      color: Colors.teal,
+                      size: 30,
+                    ),
+                  ),
                 ],
-                border: Border.all(
-                  width: 2,
-                  color: isMe ? Colors.teal : Colors.white,
-                ),
-                borderRadius: BorderRadius.circular(18),
-              );
-            },
-          ),
+                trailing: [
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(
+                      Icons.attach_file,
+                      color: Colors.teal,
+                      size: 30,
+                    ),
+                  ),
+                ],
+              ),
+              messageOptions: MessageOptions(
+                messageDecorationBuilder: (
+                  ChatMessage message,
+                  ChatMessage? prev,
+                  ChatMessage? next,
+                ) {
+                  final isMe = message.user.id == _currentUser.id;
+                  return BoxDecoration(
+                    color: isMe ? Colors.teal : Colors.grey.shade300,
+                    boxShadow: const [
+                      BoxShadow(offset: Offset(1, 1), blurRadius: 2),
+                    ],
+                    border: Border.all(
+                      width: 2,
+                      color: isMe ? Colors.teal : Colors.white,
+                    ),
+                    borderRadius: BorderRadius.circular(18),
+                  );
+                },
+              ),
+            );
+          },
         ),
       ),
     );

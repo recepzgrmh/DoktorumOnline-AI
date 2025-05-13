@@ -17,10 +17,6 @@ class MyDrawer extends StatefulWidget {
 
 class _MyDrawerState extends State<MyDrawer> {
   final currentUser = FirebaseAuth.instance.currentUser;
-  late final complaintsRef = FirebaseFirestore.instance
-      .collection('users')
-      .doc(currentUser?.uid)
-      .collection('complaints');
 
   Future<void> signOut() async {
     await FirebaseAuth.instance.signOut();
@@ -93,10 +89,8 @@ class _MyDrawerState extends State<MyDrawer> {
                       context,
                       MaterialPageRoute(
                         builder:
-                            (context) => OldChatScreen(
-                              complaintId: complaintsRef.id,
-                              userId: currentUser!.uid,
-                            ),
+                            (context) =>
+                                OldChatScreen(userId: currentUser!.uid),
                       ),
                     );
                   },
