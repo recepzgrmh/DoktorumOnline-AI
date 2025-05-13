@@ -14,12 +14,12 @@ class OverviewScreen extends StatefulWidget {
   final List<String> questions;
 
   const OverviewScreen({
-    Key? key,
+    super.key,
     required this.uid,
     required this.complaintId,
     required this.inputs,
     required this.questions,
-  }) : super(key: key);
+  });
 
   @override
   State<OverviewScreen> createState() => _OverviewScreenState();

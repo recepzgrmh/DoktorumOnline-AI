@@ -26,13 +26,13 @@ class OpenAIService {
           )
           ..writeln("")
           ..writeln(
-            "Sunulan verilerde eksik veya belirsiz kalan noktaları belirt ve netleştirmek için kullanıcıya spesifik sorular sor. bu soruları madde madde sor",
+            "Sunulan verilerde eksik veya belirsiz kalan noktaları belirt ve netleştirmek için kullanıcıya spesifik sorular sor. bu soruları madde madde sor. herbir soru birbirinden farklı olmalı",
           )
           ..writeln("")
           ..writeln("Her aşamada net, anlaşılır ve empatik bir dil kullan.");
 
     final raw = await _postToChatGPT(prompt.toString());
-    // “1. …\n2. …” formatını parçalara ayır
+    // “1. …  2. …” formatını parçalara ayır
     final parts =
         raw
             .split(RegExp(r'\n(?=\d+\.)'))

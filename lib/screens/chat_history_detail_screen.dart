@@ -7,10 +7,10 @@ class ChatHistoryDetailScreen extends StatelessWidget {
   final String complaintId;
 
   const ChatHistoryDetailScreen({
-    Key? key,
+    super.key,
     required this.userId,
     required this.complaintId,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
