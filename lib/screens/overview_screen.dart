@@ -8,8 +8,11 @@ class OverviewScreen extends StatefulWidget {
   final String uid;
   final String complaintId;
 
-  const OverviewScreen({Key? key, required this.uid, required this.complaintId})
-    : super(key: key);
+  const OverviewScreen({
+    super.key,
+    required this.uid,
+    required this.complaintId,
+  });
 
   @override
   State<OverviewScreen> createState() => _OverviewScreenState();
@@ -94,7 +97,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
     try {
       final resp = await _openAI.onChatCompletion(request: request);
-      final aiContent = resp?.choices.first.message?.content?.trim() ?? '';
+      final aiContent = resp?.choices.first.message?.content.trim() ?? '';
 
       if (aiContent.isNotEmpty) {
         await _messagesRef.add({

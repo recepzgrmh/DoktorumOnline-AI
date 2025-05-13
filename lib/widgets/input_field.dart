@@ -6,11 +6,11 @@ class InputField extends StatelessWidget {
   final int maxLines;
 
   const InputField({
-    Key? key,
+    super.key,
     required this.label,
     this.keyboardType = TextInputType.text,
     this.maxLines = 1,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
