@@ -34,14 +34,12 @@ class _OverviewScreenState extends State<OverviewScreen> {
   );
 
   String _gptState = 'Çevrimiçi';
-
   late final CollectionReference<Map<String, dynamic>> _messagesRef;
 
   @override
   void initState() {
     super.initState();
 
-    // 1. .env’den API anahtarını al
     _apiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
     if (_apiKey.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -55,14 +53,12 @@ class _OverviewScreenState extends State<OverviewScreen> {
       });
     }
 
-    // 2. OpenAI SDK’yı başlat
     _openAI = OpenAI.instance.build(
       token: _apiKey,
       baseOption: HttpSetup(receiveTimeout: const Duration(seconds: 10)),
       enableLog: true,
     );
 
-    // 3. Firestore’daki mesajlar koleksiyonuna referans
     _messagesRef = FirebaseFirestore.instance
         .collection('users')
         .doc(widget.uid)
@@ -74,14 +70,12 @@ class _OverviewScreenState extends State<OverviewScreen> {
   Future<void> _onSendMessage(ChatMessage userMsg) async {
     setState(() => _gptState = '...yazıyor');
 
-    // A. Kullanıcı mesajını kaydet
     await _messagesRef.add({
       'text': userMsg.text,
       'senderId': userMsg.user.id,
       'sentAt': FieldValue.serverTimestamp(),
     });
 
-    // B. Tüm mesaj geçmişini Firestore’dan çek ve OpenAI formatına çevir
     final historySnapshot = await _messagesRef.orderBy('sentAt').get();
     final openAIHistory =
         historySnapshot.docs.map((doc) {
@@ -92,7 +86,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
           };
         }).toList();
 
-    // C. OpenAI’dan yeni cevap iste
     final request = ChatCompleteText(
       model: Gpt4oMiniChatModel(),
       messages: openAIHistory,
@@ -104,7 +97,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
       final aiContent = resp?.choices.first.message?.content?.trim() ?? '';
 
       if (aiContent.isNotEmpty) {
-        // D. ChatGPT cevabını da kaydet
         await _messagesRef.add({
           'text': aiContent,
           'senderId': _gptChatUser.id,
@@ -194,12 +186,21 @@ class _OverviewScreenState extends State<OverviewScreen> {
             final messages =
                 docs.map((doc) {
                   final data = doc.data();
+                  // Güvenli Timestamp dönüşümü
+                  final raw = data['sentAt'];
+                  DateTime createdAt;
+                  if (raw is Timestamp) {
+                    createdAt = raw.toDate();
+                  } else {
+                    createdAt = DateTime.now();
+                  }
+
                   return ChatMessage(
                     user:
                         data['senderId'] == _currentUser.id
                             ? _currentUser
                             : _gptChatUser,
-                    createdAt: (data['sentAt'] as Timestamp).toDate(),
+                    createdAt: createdAt,
                     text: data['text'] ?? '',
                   );
                 }).toList();

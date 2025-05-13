@@ -14,6 +14,49 @@ class OldChatScreen extends StatefulWidget {
 }
 
 class _OldChatScreenState extends State<OldChatScreen> {
+  final List<Color> _avatarPalette = [
+    // Reds
+    Colors.red,
+    Colors.redAccent,
+    // Pinks
+    Colors.pink,
+    Colors.pinkAccent,
+    // Purples
+    Colors.purple,
+    Colors.deepPurple,
+    Colors.deepPurpleAccent,
+    // Indigos
+    Colors.indigo,
+    Colors.indigoAccent,
+    // Blues
+    Colors.blue,
+    Colors.lightBlue,
+    Colors.lightBlueAccent,
+    Colors.blueAccent,
+    // Cyans & Teals
+    Colors.cyan,
+    Colors.cyanAccent,
+    Colors.teal,
+    Colors.tealAccent,
+    // Greens
+    Colors.green,
+    Colors.lightGreen,
+    Colors.greenAccent,
+    // Yellows & Ambers
+    Colors.lime,
+    Colors.yellow,
+    Colors.amber,
+    Colors.amberAccent,
+    // Oranges
+    Colors.orange,
+    Colors.deepOrange,
+    Colors.deepOrangeAccent,
+    // Neutrals
+    Colors.brown,
+    Colors.grey,
+    Colors.blueGrey,
+  ];
+
   @override
   Widget build(BuildContext context) {
     final complaintsRef = FirebaseFirestore.instance
@@ -33,24 +76,18 @@ class _OldChatScreenState extends State<OldChatScreen> {
         ),
       ),
       drawer: MyDrawer(),
-      body: StreamBuilder(
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream:
-            FirebaseFirestore.instance
-                .collection('users')
-                .doc(widget.userId)
-                .collection('complaints')
-                .orderBy('lastAnalyzed', descending: true)
-                .snapshots(),
+            complaintsRef.orderBy('lastAnalyzed', descending: true).snapshots(),
         builder: (context, chatSnapshots) {
           if (chatSnapshots.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-
-          if (!chatSnapshots.hasData || chatSnapshots.data!.docs.isEmpty) {
-            return Center(child: Text('Henüz Mesaj Yok'));
-          }
           if (chatSnapshots.hasError) {
-            return Center(child: Text("hataaa"));
+            return Center(child: Text("Bir hata oluştu"));
+          }
+          if (!chatSnapshots.hasData || chatSnapshots.data!.docs.isEmpty) {
+            return const Center(child: Text('Henüz Mesaj Yok'));
           }
 
           final loadMessages = chatSnapshots.data!.docs;
@@ -59,27 +96,40 @@ class _OldChatScreenState extends State<OldChatScreen> {
             itemCount: loadMessages.length,
             itemBuilder: (context, index) {
               final complaintDoc = loadMessages[index];
+
+              final color =
+                  _avatarPalette[complaintDoc.id.hashCode %
+                      _avatarPalette.length];
+
               return Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: ListTile(
                   leading: CircleAvatar(
                     radius: 24,
-                    backgroundImage: AssetImage('assets/images/avatar.png'),
+                    backgroundColor: Colors.transparent,
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/images/avatar.png',
+                        color: color,
+                        colorBlendMode: BlendMode.modulate,
+                        fit: BoxFit.cover,
+                        width: 48,
+                        height: 48,
+                      ),
+                    ),
                   ),
                   title: Text(
-                    complaintDoc['sikayet'],
+                    complaintDoc['sikayet'] ?? '',
                     maxLines: 1,
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                     stream:
-                        FirebaseFirestore.instance
-                            .collection('users')
-                            .doc(widget.userId)
-                            .collection('complaints')
+                        complaintsRef
                             .doc(complaintDoc.id)
                             .collection('messages')
                             .orderBy('sentAt', descending: true)
@@ -111,15 +161,19 @@ class _OldChatScreenState extends State<OldChatScreen> {
                       );
                     },
                   ),
-                  trailing: Text(DateTime.now().toString().split(' ')[0]),
-
-                  // loadMessages[index][widget.complaintId]['text'],
+                  trailing: Text(
+                    // Tarihi biçimlendirilebilir:
+                    DateFormat('yyyy-MM-dd').format(
+                      (complaintDoc['lastAnalyzed'] as Timestamp).toDate(),
+                    ),
+                    style: const TextStyle(fontSize: 12),
+                  ),
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder:
-                            (context) => ChatHistoryDetailScreen(
+                            (_) => ChatHistoryDetailScreen(
                               userId: widget.userId,
                               complaintId: complaintDoc.id,
                             ),

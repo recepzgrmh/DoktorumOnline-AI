@@ -21,7 +21,7 @@ class OpenAIService {
             "Lütfen kullanıcının sağladığı tüm hasta bilgilerini dikkatle incele ve aşağıdaki adımları takip ederek kapsamlı bir tıbbi değerlendirme yap:",
           )
           ..writeln(
-            "1. Bilgi Tamamlama: Sunulan verilerde eksik veya belirsiz kalan noktaları belirt ve netleştirmek için kullanıcıya spesifik sorular sor. bu soruları madde madde sor",
+            "1. Bilgi Tamamlama: Sunulan verilerde eksik veya belirsiz kalan noktaları belirt ve netleştirmek için kullanıcıya spesifik sorular sor. bu soruları madde madde sor. Soru cevap şeklinde ilerlesin her mesajda sadece ama sadece 1 tane soru sor en son bütün sorularını sorduktan ve bütün sorularına cevap aldıktan sonra detaylı analizini yaz",
           )
           ..writeln("")
           ..writeln("Her aşamada net, anlaşılır ve empatik bir dil kullan.");

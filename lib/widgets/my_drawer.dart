@@ -60,6 +60,7 @@ class _MyDrawerState extends State<MyDrawer> {
                     color: Color.fromARGB(193, 105, 105, 105),
                   ),
                   onTap: () {
+                    Navigator.of(context).pop();
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => HomeScreen()),
@@ -85,6 +86,7 @@ class _MyDrawerState extends State<MyDrawer> {
                     color: Color.fromARGB(193, 105, 105, 105),
                   ),
                   onTap: () {
+                    Navigator.of(context).pop();
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -114,7 +116,7 @@ class _MyDrawerState extends State<MyDrawer> {
                     color: Color.fromARGB(193, 105, 105, 105),
                   ),
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.of(context).pop();
 
                     Navigator.push(
                       context,
