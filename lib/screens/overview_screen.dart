@@ -1,18 +1,25 @@
+// lib/screens/overview_screen.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
+import 'package:login_page/services/openai_service.dart';
 
 class OverviewScreen extends StatefulWidget {
   final String uid;
   final String complaintId;
+  final Map<String, String> inputs;
+  final List<String> questions;
 
   const OverviewScreen({
-    super.key,
+    Key? key,
     required this.uid,
     required this.complaintId,
-  });
+    required this.inputs,
+    required this.questions,
+  }) : super(key: key);
 
   @override
   State<OverviewScreen> createState() => _OverviewScreenState();
@@ -20,24 +27,25 @@ class OverviewScreen extends StatefulWidget {
 
 class _OverviewScreenState extends State<OverviewScreen> {
   late final OpenAI _openAI;
+  final OpenAIService _service = OpenAIService();
   late final String _apiKey;
+
   bool _emojiShowing = false;
+  String _gptState = 'Çevrimiçi';
 
-  final ChatUser _currentUser = ChatUser(
-    id: '1',
-    firstName: 'Recep',
-    lastName: 'Özgür',
-  );
-
+  final ChatUser _currentUser = ChatUser(id: '1', firstName: 'Sen');
   final ChatUser _gptChatUser = ChatUser(
     id: '2',
-    firstName: 'Chat',
-    lastName: 'GPT',
+    firstName: 'ChatGPT',
     profileImage: "assets/images/avatar.png",
   );
 
-  String _gptState = 'Çevrimiçi';
   late final CollectionReference<Map<String, dynamic>> _messagesRef;
+
+  // Takip soruları için
+  int _currentQIndex = 0;
+  final List<String> _answers = [];
+  bool _flowComplete = false;
 
   @override
   void initState() {
@@ -73,47 +81,80 @@ class _OverviewScreenState extends State<OverviewScreen> {
   Future<void> _onSendMessage(ChatMessage userMsg) async {
     setState(() => _gptState = '...yazıyor');
 
+    // 1. Kullanıcı cevabını kaydet
     await _messagesRef.add({
       'text': userMsg.text,
-      'senderId': userMsg.user.id,
+      'senderId': _currentUser.id,
       'sentAt': FieldValue.serverTimestamp(),
     });
 
-    final historySnapshot = await _messagesRef.orderBy('sentAt').get();
-    final openAIHistory =
-        historySnapshot.docs.map((doc) {
-          final data = doc.data();
-          return {
-            'role': data['senderId'] == _currentUser.id ? 'user' : 'assistant',
-            'content': data['text'] ?? '',
-          };
-        }).toList();
+    // 2. Eğer sorular akışı bitmediyse
+    if (!_flowComplete && _currentQIndex < widget.questions.length) {
+      // Gelen cevabı listeye ekle
+      _answers.add(userMsg.text.trim());
 
-    final request = ChatCompleteText(
-      model: Gpt4oMiniChatModel(),
-      messages: openAIHistory,
-      maxToken: 1000,
-    );
-
-    try {
-      final resp = await _openAI.onChatCompletion(request: request);
-      final aiContent = resp?.choices.first.message?.content.trim() ?? '';
-
-      if (aiContent.isNotEmpty) {
+      // a) Daha soru varsa → bir sonraki soruyu ekle
+      if (_currentQIndex + 1 < widget.questions.length) {
+        final nextQ = widget.questions[_currentQIndex + 1];
         await _messagesRef.add({
-          'text': aiContent,
+          'text': nextQ,
           'senderId': _gptChatUser.id,
           'sentAt': FieldValue.serverTimestamp(),
         });
+        setState(() => _currentQIndex++);
       }
-    } catch (e) {
-      debugPrint('❌ OpenAI error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('OpenAI ile iletişim kurulamadı')),
-      );
-    } finally {
-      setState(() => _gptState = 'Çevrimiçi');
+      // b) Son soruya da cevap verildiyse → nihai değerlendirmeyi al ve göster
+      else {
+        final report = await _service.getFinalEvaluation(
+          widget.inputs,
+          _answers,
+        );
+        await _messagesRef.add({
+          'text': report,
+          'senderId': _gptChatUser.id,
+          'sentAt': FieldValue.serverTimestamp(),
+        });
+        setState(() => _flowComplete = true);
+      }
     }
+    // 3. Eğer takip akışı tamamlandıysa, klasik ChatGPT sohbetine dön
+    else {
+      final historySnapshot = await _messagesRef.orderBy('sentAt').get();
+      final openAIHistory =
+          historySnapshot.docs.map((doc) {
+            final data = doc.data();
+            return {
+              'role':
+                  data['senderId'] == _currentUser.id ? 'user' : 'assistant',
+              'content': data['text'] ?? '',
+            };
+          }).toList();
+
+      final request = ChatCompleteText(
+        model: Gpt4oMiniChatModel(),
+        messages: openAIHistory,
+        maxToken: 1000,
+      );
+
+      try {
+        final resp = await _openAI.onChatCompletion(request: request);
+        final aiContent = resp?.choices.first.message?.content.trim() ?? '';
+        if (aiContent.isNotEmpty) {
+          await _messagesRef.add({
+            'text': aiContent,
+            'senderId': _gptChatUser.id,
+            'sentAt': FieldValue.serverTimestamp(),
+          });
+        }
+      } catch (e) {
+        debugPrint('❌ OpenAI error: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('OpenAI ile iletişim kurulamadı')),
+        );
+      }
+    }
+
+    setState(() => _gptState = 'Çevrimiçi');
   }
 
   @override
@@ -189,15 +230,9 @@ class _OverviewScreenState extends State<OverviewScreen> {
             final messages =
                 docs.map((doc) {
                   final data = doc.data();
-                  // Güvenli Timestamp dönüşümü
                   final raw = data['sentAt'];
-                  DateTime createdAt;
-                  if (raw is Timestamp) {
-                    createdAt = raw.toDate();
-                  } else {
-                    createdAt = DateTime.now();
-                  }
-
+                  final createdAt =
+                      raw is Timestamp ? raw.toDate() : DateTime.now();
                   return ChatMessage(
                     user:
                         data['senderId'] == _currentUser.id
@@ -249,11 +284,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
                 ],
               ),
               messageOptions: MessageOptions(
-                messageDecorationBuilder: (
-                  ChatMessage message,
-                  ChatMessage? prev,
-                  ChatMessage? next,
-                ) {
+                messageDecorationBuilder: (message, prev, next) {
                   final isMe = message.user.id == _currentUser.id;
                   return BoxDecoration(
                     color: isMe ? Colors.teal : Colors.grey.shade300,

@@ -1,3 +1,5 @@
+// lib/screens/home_screen.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -17,23 +19,17 @@ class _HomeScreenState extends State<HomeScreen> {
   final _service = OpenAIService();
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController boyController = TextEditingController();
-  final TextEditingController yasController = TextEditingController();
-  final TextEditingController kiloController = TextEditingController();
-  final TextEditingController sikayetController = TextEditingController();
-  final TextEditingController sureController = TextEditingController();
-  final TextEditingController ilacController = TextEditingController();
+  final boyController = TextEditingController();
+  final yasController = TextEditingController();
+  final kiloController = TextEditingController();
+  final sikayetController = TextEditingController();
+  final sureController = TextEditingController();
+  final ilacController = TextEditingController();
   String? _cinsiyet;
 
   bool _loading = false;
-  final String _uid = FirebaseAuth.instance.currentUser!.uid;
-  late final DocumentReference<Map<String, dynamic>> userDoc;
-
-  @override
-  void initState() {
-    super.initState();
-    userDoc = FirebaseFirestore.instance.collection('users').doc(_uid);
-  }
+  final _uid = FirebaseAuth.instance.currentUser!.uid;
+  late final userDoc = FirebaseFirestore.instance.collection('users').doc(_uid);
 
   @override
   void dispose() {
@@ -46,32 +42,68 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  Future<String> _analyzeInputs() async {
+  Future<void> _startFollowUp() async {
+    if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
 
+    final complaintDoc = userDoc.collection('complaints').doc();
+    final complaintId = complaintDoc.id;
+
     final inputs = {
-      'Boy':
-          boyController.text.trim().isEmpty ? '—' : boyController.text.trim(),
-      'Yaş':
-          yasController.text.trim().isEmpty ? '—' : yasController.text.trim(),
-      'Kilo':
-          kiloController.text.trim().isEmpty ? '—' : kiloController.text.trim(),
-      'Şikayet':
-          sikayetController.text.trim().isEmpty
-              ? '—'
-              : sikayetController.text.trim(),
-      'Şikayetin Süresi':
-          sureController.text.trim().isEmpty ? '—' : sureController.text.trim(),
-      'Mevcut İlaçlar':
-          ilacController.text.trim().isEmpty ? '—' : ilacController.text.trim(),
-      'Cinsiyet': _cinsiyet ?? '—',
+      'Boy': boyController.text.trim(),
+      'Yaş': yasController.text.trim(),
+      'Kilo': kiloController.text.trim(),
+      'Şikayet': sikayetController.text.trim(),
+      'Şikayet Süresi': sureController.text.trim(),
+      'Mevcut İlaçlar': ilacController.text.trim(),
     };
 
     try {
-      final result = await _service.analyzeSymptoms(inputs);
-      return result;
+      // 1) Profili kaydet
+      await complaintDoc.set({
+        'boy': inputs['Boy'],
+        'yas': inputs['Yaş'],
+        'kilo': inputs['Kilo'],
+        'sikayet': inputs['Şikayet'],
+        'sure': inputs['Şikayet Süresi'],
+        'ilac': inputs['Mevcut İlaçlar'],
+        'cinsiyet': _cinsiyet ?? '',
+        'lastAnalyzed': FieldValue.serverTimestamp(),
+      });
+
+      // 2) Takip sorularını direkt al
+      final parts = await _service.getFollowUpQuestions(inputs);
+
+      // 3) İlk soruyu Firestore'a ekle
+      if (parts.isNotEmpty) {
+        await complaintDoc.collection('messages').add({
+          'text': parts[0],
+          'senderId': '2', // ChatGPT
+          'order': 0,
+          'sentAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      // 4) OverviewScreen’e inputs + complaintId + tüm soruları gönder
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (_) => OverviewScreen(
+                  uid: _uid,
+                  complaintId: complaintId,
+                  inputs: inputs,
+                  questions: parts,
+                ),
+          ),
+        );
+      }
     } catch (e) {
-      return 'Hata: $e';
+      debugPrint('Başlatma hatası: $e');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Başlatma hatası: $e')));
     } finally {
       setState(() => _loading = false);
     }
@@ -175,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               : null,
                 ),
                 CustomTextWidget(
-                  title: 'Şikayetin Süresi',
+                  title: 'Şikayet Süresi',
                   icon: Icons.timer,
                   keyboardType: TextInputType.text,
                   controller: sureController,
@@ -191,73 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed:
-                        _loading
-                            ? null
-                            : () async {
-                              if (!_formKey.currentState!.validate()) return;
-
-                              // Yeni şikayet dokümanı oluştur
-                              final complaintDoc =
-                                  userDoc.collection('complaints').doc();
-                              final complaintId = complaintDoc.id;
-
-                              // API'den düz metin yanıt al
-                              final rawResult = await _analyzeInputs();
-
-                              // Metni "1. …", "2. …" maddelerinde böl
-                              final parts =
-                                  rawResult
-                                      .split(RegExp(r'\n(?=\d+\.)'))
-                                      .map((p) => p.trim())
-                                      .where((p) => p.isNotEmpty)
-                                      .toList();
-
-                              try {
-                                // Profil bilgilerini kaydet
-                                await userDoc
-                                    .collection('complaints')
-                                    .doc(complaintId)
-                                    .set({
-                                      'boy': boyController.text.trim(),
-                                      'yas': yasController.text.trim(),
-                                      'kilo': kiloController.text.trim(),
-                                      'sure': sureController.text.trim(),
-                                      'ilac': ilacController.text.trim(),
-                                      'sikayet': sikayetController.text.trim(),
-                                      'cinsiyet': _cinsiyet ?? '',
-                                      'lastAnalyzed':
-                                          FieldValue.serverTimestamp(),
-                                    }, SetOptions(merge: true));
-
-                                // Her maddeyi ayrı mesaj olarak ekle
-                                final col = complaintDoc.collection('messages');
-                                for (var i = 0; i < parts.length; i++) {
-                                  await col.add({
-                                    'text': parts[i],
-                                    'senderId': '2',
-                                    'order': i,
-                                    'sentAt': FieldValue.serverTimestamp(),
-                                  });
-                                }
-                              } catch (e) {
-                                debugPrint('Hata oluştu: $e');
-                              }
-
-                              // OverviewScreen'e yönlendir
-                              if (mounted) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (_) => OverviewScreen(
-                                          uid: _uid,
-                                          complaintId: complaintId,
-                                        ),
-                                  ),
-                                );
-                              }
-                            },
+                    onPressed: _loading ? null : _startFollowUp,
                     child:
                         _loading
                             ? const SizedBox(
