@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:login_page/screens/home_screen.dart';
 
 import 'package:login_page/screens/old_chat_screen.dart';
 import 'package:login_page/screens/opening.dart';
@@ -14,6 +16,12 @@ class MyDrawer extends StatefulWidget {
 }
 
 class _MyDrawerState extends State<MyDrawer> {
+  final currentUser = FirebaseAuth.instance.currentUser;
+  late final complaintsRef = FirebaseFirestore.instance
+      .collection('users')
+      .doc(currentUser?.uid)
+      .collection('complaints');
+
   Future<void> signOut() async {
     await FirebaseAuth.instance.signOut();
     Navigator.of(
@@ -56,7 +64,10 @@ class _MyDrawerState extends State<MyDrawer> {
                     color: Color.fromARGB(193, 105, 105, 105),
                   ),
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomeScreen()),
+                    );
                   },
                 ),
               ),
@@ -80,7 +91,13 @@ class _MyDrawerState extends State<MyDrawer> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => OldChatScreen()),
+                      MaterialPageRoute(
+                        builder:
+                            (context) => OldChatScreen(
+                              complaintId: complaintsRef.id,
+                              userId: currentUser!.uid,
+                            ),
+                      ),
                     );
                   },
                 ),

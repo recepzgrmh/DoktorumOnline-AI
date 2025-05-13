@@ -228,6 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       'kilo': kiloController.text.trim(),
                                       'sure': sureController.text.trim(),
                                       'ilac': ilacController.text.trim(),
+                                      'sikayet': sikayetController.text.trim(),
                                       'cinsiyet': _cinsiyet ?? '',
                                       'lastAnalyzed':
                                           FieldValue.serverTimestamp(),

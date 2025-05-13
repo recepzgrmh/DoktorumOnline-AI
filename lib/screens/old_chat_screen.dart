@@ -1,99 +1,109 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
-class ChatItem {
-  final String avatarPath = "assets/images/avatar.png";
-  final String name;
-  final String message;
-  final String time;
-
-  ChatItem({required this.name, required this.message, required this.time});
-}
+import 'package:intl/intl.dart';
+import 'package:login_page/widgets/my_drawer.dart';
 
 class OldChatScreen extends StatefulWidget {
-  const OldChatScreen({super.key});
+  final String userId;
+  final String complaintId;
+
+  const OldChatScreen({
+    super.key,
+    required this.userId,
+    required this.complaintId,
+  });
 
   @override
   State<OldChatScreen> createState() => _OldChatScreenState();
 }
 
 class _OldChatScreenState extends State<OldChatScreen> {
-  final List<ChatItem> _chats = [
-    ChatItem(
-      name: 'Sırt Ağrısı',
-      message: 'lorem ipsum sit amet',
-      time: '13:35',
-    ),
-    ChatItem(
-      name: 'Bacaktaki Morarma',
-      message: 'lorem ipsum sit amet',
-      time: '11:20',
-    ),
-    ChatItem(
-      name: 'Sırt Ağrısı',
-      message: 'lorem ipsum sit amet',
-      time: '10:35',
-    ),
-    ChatItem(
-      name: 'Sırt Ağrısı',
-      message: 'lorem ipsum sit amet',
-      time: '10:35',
-    ),
-    ChatItem(
-      name: 'Sırt Ağrısı',
-      message: 'lorem ipsum sit amet',
-      time: '10:35',
-    ),
-    ChatItem(
-      name: 'Sırt Ağrısı',
-      message: 'lorem ipsum sit amet',
-      time: '10:35',
-    ),
-    ChatItem(
-      name: 'Sırt Ağrısı',
-      message: 'lorem ipsum sit amet',
-      time: '10:35',
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        foregroundColor: Colors.white,
         backgroundColor: Colors.teal,
-        title: const Text(
-          'Chat History',
-          style: TextStyle(fontWeight: FontWeight.w500, fontSize: 24),
-        ),
+        foregroundColor: Colors.white,
         centerTitle: true,
+        title: const Text(
+          'DoktorumOnline AI',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+        ),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(8),
-        itemCount: _chats.length,
-        itemBuilder: (context, index) {
-          final chat = _chats[index];
-          return Card(
-            margin: const EdgeInsets.symmetric(vertical: 6),
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: ListTile(
-              leading: CircleAvatar(
-                radius: 24,
-                backgroundImage: AssetImage(chat.avatarPath),
-              ),
-              title: Text(
-                chat.name,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(chat.message, maxLines: 1),
-              trailing: Text(
-                chat.time,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              onTap: () {},
-            ),
+      drawer: MyDrawer(),
+      body: StreamBuilder(
+        stream:
+            FirebaseFirestore.instance
+                .collection('users')
+                .doc(widget.userId)
+                .collection('complaints')
+                .orderBy('lastAnalyzed', descending: true)
+                .snapshots(),
+        builder: (context, chatSnapshots) {
+          if (chatSnapshots.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (!chatSnapshots.hasData || chatSnapshots.data!.docs.isEmpty) {
+            return Center(child: Text('Henüz Mesaj Yok'));
+          }
+          if (chatSnapshots.hasError) {
+            return Center(child: Text("hataaa"));
+          }
+
+          final loadMessages = chatSnapshots.data!.docs;
+
+          return ListView.builder(
+            itemCount: loadMessages.length,
+            itemBuilder: (context, index) {
+              final complaintDoc = loadMessages[index];
+              return Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    radius: 24,
+                    backgroundImage: AssetImage('assets/images/avatar.png'),
+                  ),
+                  title: Text(
+                    complaintDoc['sikayet'],
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: StreamBuilder(
+                    stream:
+                        FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(widget.userId)
+                            .collection('complaints')
+                            .doc(widget.complaintId)
+                            .collection('messages')
+                            .orderBy('sendAt', descending: false)
+                            .snapshots(),
+                    builder: (context, chatSnapshots) {
+                      if (chatSnapshots.connectionState ==
+                          ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      if (!chatSnapshots.hasData ||
+                          chatSnapshots.data!.docs.isEmpty) {
+                        return Text('Henüz Mesaj Yok');
+                      }
+                      if (chatSnapshots.hasError) {
+                        return Text("hataaa");
+                      }
+
+                      return Text('data');
+                    },
+                  ),
+                  trailing: Text('data'),
+                  onTap: () {},
+                ),
+              );
+            },
           );
         },
       ),
