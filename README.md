@@ -7,7 +7,7 @@
 
 
 ## 📦 Uygulama Paketi (APK)
-[En son APK’yı indir](https://github.com/recepzgrmh/DoktorumOnline-AI/releases/latest/download/app-release.apk)
+[En son APK’yı indir](https://github.com/recepzgrmh/DoktorumOnline-AI/releases/tag/v0.0.1-beta)
 
 
 
