@@ -2,6 +2,10 @@
 
 **DoktorumOnline AI** – Flutter ile geliştirilmiş, Firestore + Firebase Auth altyapısını kullanan mobil bir sağlık asistanı uygulamasıdır.
 
+## 📦 Uygulama Paketi (APK)
+[En son APK’yı indir](https://github.com/recepzgrmh/DoktorumOnline-AI/releases/latest/download/app-release.apk)
+
+
 ---
 
 ## 📋 Uygulamanın Amacı ve Özellikleri
