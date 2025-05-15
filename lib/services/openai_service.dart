@@ -46,7 +46,7 @@ class OpenAIService {
     return parts;
   }
 
-  /// 2. Adım: Kullanıcının cevaplarıyla birlikte nihai tıbbi değerlendirmeyi üretir.
+  /// 2. Adım: kullanıcın mesajlarını değerlendirip tıbbi yanıt alma
   /// burası son mesaj
   Future<String> getFinalEvaluation(
     Map<String, String> inputs,
