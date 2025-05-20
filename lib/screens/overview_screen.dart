@@ -51,6 +51,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
   void initState() {
     super.initState();
 
+    // burayı uygulama yayınlanırken kaldırmayı unutma
     _apiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
     if (_apiKey.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {

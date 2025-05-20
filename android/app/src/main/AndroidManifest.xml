@@ -1,4 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+<!-- Android 13+ için medya erişimi -->
+<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+<uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+
+<!-- Android 12 ve altı için harici depolama okuma -->
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+<!-- (opsiyonel) Android 11+ için geniş depolama erişimi -->
+<uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <application
         android:label="DoktorumOnline AI"
         android:name="${applicationName}"

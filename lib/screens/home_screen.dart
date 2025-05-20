@@ -1,6 +1,9 @@
 // lib/screens/home_screen.dart
 
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/screens/opening.dart';
@@ -28,6 +31,28 @@ class _HomeScreenState extends State<HomeScreen> {
   final illnessController = TextEditingController();
   String? _cinsiyet;
   String? _kanGrubu;
+
+  PlatformFile? _selectedFile;
+
+  Future<void> _pickFile() async {
+    // Tek dosya seçimi
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.any,
+      allowMultiple: false,
+    );
+
+    if (result == null) return; // Kullanıcı iptal etmiş
+
+    setState(() {
+      _selectedFile = result.files.first;
+    });
+
+    // Dosyaya erişmek isterseniz:
+    final filePath = _selectedFile!.path!;
+    final file = File(filePath);
+    final bytes = await file.readAsBytes();
+    // ...bytes üzerinde işlem yapabilirsiniz
+  }
 
   bool _loading = false;
   final _uid = FirebaseAuth.instance.currentUser!.uid;
@@ -260,7 +285,38 @@ class _HomeScreenState extends State<HomeScreen> {
                   controller: illnessController,
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 10),
+                Material(
+                  elevation: 3,
+                  borderRadius: BorderRadius.circular(10),
+
+                  child: Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.teal.shade50,
+                    ),
+                    child: Row(
+                      children: [
+                        Text('Seçilen dosya: '),
+                        Expanded(
+                          child: Text(
+                            _selectedFile != null
+                                ? '${_selectedFile!.name} — ${_selectedFile!.size} bytes'
+                                : 'Henüz dosya seçilmedi',
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.attach_file),
+                          onPressed: _pickFile,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
