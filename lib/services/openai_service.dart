@@ -1,10 +1,8 @@
 // lib/services/openai_service.dart
 
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:openai_dart/openai_dart.dart';
 
 class OpenAIService {
   final String _apiKey = dotenv.env['OPENAI_API_KEY']!;
@@ -111,46 +109,5 @@ class OpenAIService {
     // 2) JSON parse
     final data = jsonDecode(utf8Body) as Map<String, dynamic>;
     return (data['choices'][0]['message']['content'] as String?)?.trim() ?? '';
-  }
-
-  //belge göndermek için gerekli olan şeyler
-  late final String openaiApiKey;
-  late final OpenAIClient client;
-
-  OpenAIService() {
-    openaiApiKey = dotenv.env['OPENAI_API_KEY']!;
-    client = OpenAIClient(apiKey: openaiApiKey);
-  }
-
-  Future<String> identifyFruit(String imageUrl) async {
-    final res = await client.createChatCompletion(
-      request: CreateChatCompletionRequest(
-        model: ChatCompletionModel.model(ChatCompletionModels.chatgpt4oLatest),
-        messages: [
-          ChatCompletionMessage.system(
-            content:
-                'Sen bir doktorsun ve amacın sana gönderilen belgeli doktor edasıyla inceleyip kullanıcıya neler olabileceği konusunda bilgiler vermek',
-          ),
-          ChatCompletionMessage.user(
-            content: ChatCompletionUserMessageContent.parts([
-              ChatCompletionMessageContentPart.text(
-                text:
-                    'Sen bir doktorsun ve amacın sana gönderilen belgeli doktor edasıyla inceleyip kullanıcıya bi sıkıntı varsa söyle yoksa eğer \' bu rötgen sağlıklı görünüyor şeklinde geri bildirim ver',
-              ),
-              ChatCompletionMessageContentPart.image(
-                imageUrl: ChatCompletionMessageImageUrl(url: imageUrl),
-              ),
-            ]),
-          ),
-        ],
-        temperature: 0.0, // kesin bir cevap için sıcaklığı düşürdük
-        maxTokens: 200,
-      ),
-    );
-
-    // Gelen cevabı String olarak döndür
-    final description =
-        res.choices.first.message.content?.trim() ?? 'Tanımlama alınamadı.';
-    return description;
   }
 }

@@ -1,70 +1,66 @@
-// lib/screens/test_screen.dart
-
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:login_page/widgets/custom_button.dart';
 import '../services/openai_service.dart';
 
 class TestScreen extends StatefulWidget {
-  final String imageUrl;
-
-  const TestScreen({super.key, required this.imageUrl});
+  const TestScreen({super.key});
 
   @override
   _TestScreenState createState() => _TestScreenState();
 }
 
 class _TestScreenState extends State<TestScreen> {
-  String? _description;
   final _service = OpenAIService();
+  PlatformFile? _selectedFile;
+  String _status = 'Lütfen bir PDF dosyası seçin';
+  String? _analysis;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadDescription();
-  }
-
-  Future<void> _loadDescription() async {
-    try {
-      final desc = await _service.identifyFruit(widget.imageUrl);
-      setState(() {
-        _description = desc;
-      });
-    } catch (e) {
-      setState(() {
-        _description = 'Meyve tanımlanırken hata oluştu: $e';
-      });
-    }
+  Future<void> _pickFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+      allowMultiple: false,
+      withData: true,
+    );
+    if (result == null) return;
+    setState(() {
+      _selectedFile = result.files.first;
+      _status = 'Seçilen dosya: ${_selectedFile!.name}';
+      _analysis = null;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Test Screen')),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.network(
-                widget.imageUrl,
-                errorBuilder:
-                    (_, __, ___) =>
-                        Icon(Icons.broken_image, size: 80, color: Colors.grey),
-              ),
-              SizedBox(height: 12),
-              if (_description == null)
-                CircularProgressIndicator()
-              else
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    _description!,
-                    style: TextStyle(fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
+      appBar: AppBar(title: Text('PDF Analiz')),
+      body: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          children: [
+            ElevatedButton.icon(
+              icon: Icon(Icons.attach_file),
+              label: Text('PDF Seç'),
+              onPressed: _pickFile,
+            ),
+            SizedBox(height: 12),
+            Text(_status, textAlign: TextAlign.center),
+            SizedBox(height: 24),
+            CustomButton(
+              label: 'Yükle ve Analiz Et',
+              onPressed: () {},
+              backgroundColor: Colors.teal.shade600,
+              foregroundColor: Colors.white,
+            ),
+            SizedBox(height: 24),
+            if (_analysis != null)
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Text(_analysis!, style: TextStyle(fontSize: 16)),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );
