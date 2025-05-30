@@ -15,6 +15,7 @@ class _TestScreenState extends State<TestScreen> {
   PlatformFile? _selectedFile;
   String _status = 'Lütfen bir PDF dosyası seçin';
   String? _analysis;
+  bool _isLoading = false;
 
   Future<void> _pickFile() async {
     final result = await FilePicker.platform.pickFiles(
@@ -29,6 +30,31 @@ class _TestScreenState extends State<TestScreen> {
       _status = 'Seçilen dosya: ${_selectedFile!.name}';
       _analysis = null;
     });
+  }
+
+  Future<void> _analyzePdf() async {
+    if (_selectedFile == null) {
+      setState(() => _status = 'Önce bir PDF seçmelisiniz.');
+      return;
+    }
+    setState(() {
+      _isLoading = true;
+      _status = 'Analiz yapılıyor…';
+    });
+
+    try {
+      final result = await _service.analyzePdf(_selectedFile!.path!);
+      setState(() {
+        _analysis = result;
+        _status = 'Analiz tamamlandı.';
+      });
+    } catch (e) {
+      setState(() {
+        _status = 'Analiz sırasında hata: $e';
+      });
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -49,7 +75,7 @@ class _TestScreenState extends State<TestScreen> {
             SizedBox(height: 24),
             CustomButton(
               label: 'Yükle ve Analiz Et',
-              onPressed: () {},
+              onPressed: _analyzePdf,
               backgroundColor: Colors.teal.shade600,
               foregroundColor: Colors.white,
             ),

@@ -1,12 +1,20 @@
 // lib/services/openai_service.dart
 
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'package:openai_dart/openai_dart.dart';
 
 class OpenAIService {
   final String _apiKey = dotenv.env['OPENAI_API_KEY']!;
   final Uri _endpoint = Uri.parse('https://api.openai.com/v1/chat/completions');
+
+  late final OpenAIClient client;
+  OpenAIService() {
+    client = OpenAIClient(apiKey: _apiKey);
+  }
 
   /// 1. Adım: Kullanıcı verilerindeki eksik/ belirsiz noktaları
   /// madde madde sorulara dönüştürür.
@@ -103,11 +111,78 @@ class OpenAIService {
         'OpenAI API hata: ${response.statusCode} ${response.body}',
       );
     }
-
     // 1) Byte dizisini UTF-8 ile decode et
     final utf8Body = utf8.decode(response.bodyBytes);
     // 2) JSON parse
     final data = jsonDecode(utf8Body) as Map<String, dynamic>;
     return (data['choices'][0]['message']['content'] as String?)?.trim() ?? '';
+  }
+
+  //
+  //
+  //
+  //
+  //
+  Future<String> extractTextFromPdf(File file) async {
+    final bytes = await file.readAsBytes();
+    final PdfDocument document = PdfDocument(inputBytes: bytes);
+    final String text = PdfTextExtractor(document).extractText();
+    document.dispose();
+    return text;
+  }
+
+  List<String> chunkText(String text, int chunkSize) {
+    List<String> words = text.split(RegExp(r'\s+'));
+    List<String> chunks = [];
+    for (var i = 0; i < words.length; i += chunkSize) {
+      int end = (i + chunkSize < words.length) ? i + chunkSize : words.length;
+      chunks.add(words.sublist(i, end).join(' '));
+    }
+    return chunks;
+  }
+
+  Future<String> analyzePdf(String filePath) async {
+    final file = File(filePath);
+    final fullText = await extractTextFromPdf(file);
+
+    // Eğer metin boşsa erken dön
+    if (fullText.trim().isEmpty) {
+      return 'PDF içeriği okunamadı veya boş.';
+    }
+
+    final chunks = chunkText(fullText, 1500);
+    StringBuffer aggregated = StringBuffer();
+
+    for (var part in chunks) {
+      try {
+        final res = await client.createChatCompletion(
+          request: CreateChatCompletionRequest(
+            model: ChatCompletionModel.model(
+              ChatCompletionModels.chatgpt4oLatest,
+            ),
+            messages: [
+              ChatCompletionMessage.system(
+                content:
+                    "Bir doktor titizliğiyle gelen metni incele. Kullanıcının anlayabileceği sade bir dille, karşılaşılabilecek olası durumlardan bahset. Anlaşılması güç tıbbi terimler kullanmaktan kaçın. Eğer metinde bir sorun tespit edersen detaylıca açıkla; aksi halde kullanıcının genel olarak sağlıklı olduğunu kısaca belirt. Sorunlu gördüğün kısımlar hakkında ayrıntılı yorum yap, diğer bölümler için yalnızca kısa ve öz bilgi ver",
+              ),
+              ChatCompletionMessage.user(
+                content: ChatCompletionUserMessageContent.parts([
+                  ChatCompletionMessageContentPart.text(text: part),
+                ]),
+              ),
+            ],
+            temperature: 0.0,
+            maxTokens: 500,
+          ),
+        );
+
+        final reply = res.choices.first.message.content?.trim() ?? '';
+        aggregated.writeln(reply);
+      } catch (e) {
+        aggregated.writeln('— Bu bölüm işlenirken bir hata oluştu.');
+      }
+    }
+
+    return aggregated.toString();
   }
 }
