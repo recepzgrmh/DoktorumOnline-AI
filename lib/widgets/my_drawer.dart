@@ -6,6 +6,7 @@ import 'package:login_page/screens/opening.dart';
 
 import 'package:login_page/screens/settings_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:login_page/screens/test_screen.dart';
 
 class MyDrawer extends StatefulWidget {
   const MyDrawer({super.key});
@@ -119,7 +120,13 @@ class _MyDrawerState extends State<MyDrawer> {
 
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => SettingsScreen()),
+                      MaterialPageRoute(
+                        builder:
+                            (context) => TestScreen(
+                              imageUrl:
+                                  'https://www.kaburga.gen.tr/images/Kaburga-Kirigi-29.jpg',
+                            ),
+                      ),
                     );
                   },
                 ),
