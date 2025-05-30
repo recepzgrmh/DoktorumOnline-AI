@@ -120,13 +120,7 @@ class _MyDrawerState extends State<MyDrawer> {
 
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder:
-                            (context) => TestScreen(
-                              imageUrl:
-                                  'https://www.kaburga.gen.tr/images/Kaburga-Kirigi-29.jpg',
-                            ),
-                      ),
+                      MaterialPageRoute(builder: (context) => TestScreen()),
                     );
                   },
                 ),
