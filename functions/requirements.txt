@@ -1,0 +1,8 @@
+firebase-functions
+openai>=1.25.0
+requests>=2.32.0
+python-dotenv
+setuptools
+wheel
+
+
