@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:openai_dart/openai_dart.dart';
 
 class OpenAIService {
