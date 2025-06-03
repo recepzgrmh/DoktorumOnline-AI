@@ -10,6 +10,8 @@ import 'package:openai_dart/openai_dart.dart';
 class OpenAIService {
   final String _apiKey = dotenv.env['OPENAI_API_KEY']!;
   final Uri _endpoint = Uri.parse('https://api.openai.com/v1/chat/completions');
+  final String backendUrl =
+      'http://10.0.2.2:5000/analyze'; // Android Emulator için
 
   late final OpenAIClient client;
   OpenAIService() {
@@ -123,6 +125,27 @@ class OpenAIService {
   //
   //
   //
+
+  Future<String> analyzePdf(String filePath) async {
+    var request = http.MultipartRequest('POST', Uri.parse(backendUrl));
+    request.files.add(await http.MultipartFile.fromPath('file', filePath));
+    var streamed = await request.send();
+
+    final body = await streamed.stream.bytesToString();
+
+    if (streamed.statusCode == 200) {
+      return body; // JSON decode yok → düz metin
+    } else {
+      throw Exception('Sunucu hatası ${streamed.statusCode}: $body');
+    }
+  }
+}
+
+/**
+ * 
+ * 
+ * 
+ * 
   Future<String> extractTextFromPdf(File file) async {
     final bytes = await file.readAsBytes();
     final PdfDocument document = PdfDocument(inputBytes: bytes);
@@ -185,4 +208,7 @@ class OpenAIService {
 
     return aggregated.toString();
   }
-}
+ * 
+ * 
+ * 
+ */

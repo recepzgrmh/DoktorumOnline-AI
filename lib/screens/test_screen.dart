@@ -32,28 +32,28 @@ class _TestScreenState extends State<TestScreen> {
     });
   }
 
-  Future<void> _analyzePdf() async {
-    if (_selectedFile == null) {
-      setState(() => _status = 'Önce bir PDF seçmelisiniz.');
-      return;
-    }
-    setState(() {
-      _isLoading = true;
-      _status = 'Analiz yapılıyor…';
-    });
+  String _result = '';
 
-    try {
-      final result = await _service.analyzePdf(_selectedFile!.path!);
-      setState(() {
-        _analysis = result;
-        _status = 'Analiz tamamlandı.';
-      });
-    } catch (e) {
-      setState(() {
-        _status = 'Analiz sırasında hata: $e';
-      });
-    } finally {
-      setState(() => _isLoading = false);
+  Future<void> _pickAndAnalyzeFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+    );
+
+    if (result != null && result.files.single.path != null) {
+      setState(() => _isLoading = true);
+      try {
+        final analysis = await _service.analyzePdf(result.files.single.path!);
+        setState(() {
+          _result = analysis;
+          _isLoading = false;
+        });
+      } catch (e) {
+        setState(() {
+          _result = 'Sunucu hatası: $e';
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -75,15 +75,17 @@ class _TestScreenState extends State<TestScreen> {
             SizedBox(height: 24),
             CustomButton(
               label: 'Yükle ve Analiz Et',
-              onPressed: _analyzePdf,
+              onPressed: _pickAndAnalyzeFile,
               backgroundColor: Colors.teal.shade600,
               foregroundColor: Colors.white,
             ),
             SizedBox(height: 24),
-            if (_analysis != null)
+            if (_isLoading)
+              const CircularProgressIndicator()
+            else if (_result.isNotEmpty)
               Expanded(
                 child: SingleChildScrollView(
-                  child: Text(_analysis!, style: TextStyle(fontSize: 16)),
+                  child: Text(_result, style: TextStyle(fontSize: 16)),
                 ),
               ),
           ],

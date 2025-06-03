@@ -1,0 +1,88 @@
+from flask import Flask, request, jsonify
+from openai import OpenAI
+from dotenv import load_dotenv
+import os, time
+
+# .env dosyanızdaki OPENAI_API_KEY'i içeri aktar
+dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'assets', '.env'))
+load_dotenv(dotenv_path)
+api_key = os.getenv("OPENAI_API_KEY")
+client  = OpenAI(api_key=api_key)
+
+app = Flask(__name__)
+
+# --------------------------------------------
+# Uygulama ayağa kalkarken tek seferlik nesneler
+# --------------------------------------------
+VECTOR_STORE     = client.vector_stores.create(
+    name="KullaniciBelgeleri",
+    expires_after={"anchor": "last_active_at", "days": 30}
+)
+
+ASSISTANT = client.beta.assistants.create(
+    name="Doktor Asistanı",
+    model="gpt-4o",
+    instructions=(
+        "PDF’lerdeki tıbbi bilgileri doktor titizliğiyle incele. "
+        "Kullanıcıya anlaşılır, empatik, kısa ama doyurucu özet sun. "
+        "Tıbbi terimleri basitleştir; gerekli uyarıları yap, acil durum varsa hekime yönlendir."
+    ),
+    tools=[{
+        "type": "file_search",
+        "vector_store_ids": [VECTOR_STORE.id]
+    }]
+)
+
+# --------------------------------------------
+#  PDF yükle + analiz et
+# --------------------------------------------
+@app.route("/analyze", methods=["POST"])
+def analyze():
+    try:
+        pdf = request.files.get("file")
+        if pdf is None:
+            return jsonify({"error": "PDF bulunamadı"}), 400
+
+        # 1) PDF’i OpenAI’ya yükle
+        upload = client.files.create(file=pdf, purpose="assistants")
+
+        # 2) VectorStore’a ekle & indekslenmesini bekle
+        client.vector_stores.files.create(
+            vector_store_id=VECTOR_STORE.id,
+            file_id=upload.id
+        )
+        client.vector_stores.files.poll(   # bloklayıcı bekleyiş
+            vector_store_id=VECTOR_STORE.id,
+            file_id=upload.id
+        )
+
+        # 3) Kullanıcı için bir thread oluştur, soruyu gönder
+        thread   = client.beta.threads.create()
+        client.beta.threads.messages.create(
+            thread_id=thread.id,
+            role="user",
+            content="Lütfen yüklediğim PDF’teki bilgileri analiz et ve özetle."
+        )
+
+        # 4) Asistanı çalıştır, bitene kadar bekle
+        run      = client.beta.threads.runs.create(
+            thread_id=thread.id,
+            assistant_id=ASSISTANT.id
+        )
+        run      = client.beta.threads.runs.poll(
+            thread_id=thread.id,
+            run_id=run.id
+        )
+
+        # 5) En yeni asistan mesajını al
+        messages = client.beta.threads.messages.list(thread_id=thread.id)
+        answer   = messages.data[0].content[0].text.value
+
+        return jsonify({"result": answer})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+if __name__ == "__main__":
+    # Android emülatörüyle uyumlu olması için 0.0.0.0’a bağla
+    app.run(host="0.0.0.0", port=5000, debug=True)
