@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'DoktorumOnline AI',
       theme: AppTheme.lightTheme,
       debugShowCheckedModeBanner: false,

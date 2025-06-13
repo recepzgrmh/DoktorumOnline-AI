@@ -5,6 +5,7 @@ import 'package:login_page/widgets/custom_button.dart';
 import 'package:get/get.dart';
 import 'package:login_page/screens/home_Screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
 
 class VerifyAccount extends StatefulWidget {
   const VerifyAccount({super.key});
@@ -14,6 +15,23 @@ class VerifyAccount extends StatefulWidget {
 }
 
 class _VerifyAccountState extends State<VerifyAccount> {
+  Timer? _verificationTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Start periodic verification check
+    _verificationTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      checkVerification();
+    });
+  }
+
+  @override
+  void dispose() {
+    _verificationTimer?.cancel();
+    super.dispose();
+  }
+
   // Mevcut kullanıcıya doğrulama emaili gönderir
   Future<void> verifyAccount() async {
     User? user = FirebaseAuth.instance.currentUser;

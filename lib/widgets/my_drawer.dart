@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:login_page/screens/home_screen.dart';
-
 import 'package:login_page/screens/old_chat_screen.dart';
 import 'package:login_page/screens/opening.dart';
-
 import 'package:login_page/screens/settings_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:login_page/screens/test_screen.dart';
@@ -28,37 +26,52 @@ class _MyDrawerState extends State<MyDrawer> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            children: [
-              // logo
-              DrawerHeader(
-                child: Center(
-                  child: Text(
-                    'Doktorum Online AI',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.white, Colors.blue.shade100],
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              children: [
+                // User profile header
+                UserAccountsDrawerHeader(
+                  accountName: Text(
+                    currentUser?.displayName ?? 'User',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
-                ),
-              ),
-
-              // home list tile
-              Padding(
-                padding: const EdgeInsets.only(left: 25.0),
-                child: ListTile(
-                  title: Text(
-                    'HOME',
-                    style: TextStyle(
-                      letterSpacing: 7,
-                      color: const Color.fromARGB(193, 105, 105, 105),
-                      fontWeight: FontWeight.bold,
+                  accountEmail: Text(
+                    currentUser?.email ?? '',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  currentAccountPicture: CircleAvatar(
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      Icons.person,
+                      size: 40,
+                      color: Colors.blue.shade600,
                     ),
                   ),
-                  leading: Icon(
-                    Icons.home,
-                    color: Color.fromARGB(193, 105, 105, 105),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Colors.blue.shade600, Colors.blue.shade400],
+                    ),
                   ),
+                ),
+
+                const SizedBox(height: 10),
+
+                // Home list tile
+                _buildDrawerItem(
+                  icon: Icons.home_rounded,
+                  title: 'HOME',
                   onTap: () {
                     Navigator.of(context).pop();
                     Navigator.push(
@@ -67,24 +80,11 @@ class _MyDrawerState extends State<MyDrawer> {
                     );
                   },
                 ),
-              ),
 
-              // Chat
-              Padding(
-                padding: const EdgeInsets.only(left: 25.0),
-                child: ListTile(
-                  title: Text(
-                    'OLD  CHATS',
-                    style: TextStyle(
-                      letterSpacing: 7,
-                      color: const Color.fromARGB(193, 105, 105, 105),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  leading: Icon(
-                    Icons.chat,
-                    color: Color.fromARGB(193, 105, 105, 105),
-                  ),
+                // Chat list tile
+                _buildDrawerItem(
+                  icon: Icons.chat_bubble_rounded,
+                  title: 'OLD CHATS',
                   onTap: () {
                     Navigator.of(context).pop();
                     Navigator.push(
@@ -97,56 +97,63 @@ class _MyDrawerState extends State<MyDrawer> {
                     );
                   },
                 ),
-              ),
 
-              //settings list tile
-              Padding(
-                padding: const EdgeInsets.only(left: 25.0),
-                child: ListTile(
-                  title: Text(
-                    'FILE UPLOAD',
-                    style: TextStyle(
-                      letterSpacing: 7,
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(193, 105, 105, 105),
-                    ),
-                  ),
-                  leading: Icon(
-                    Icons.settings,
-                    color: Color.fromARGB(193, 105, 105, 105),
-                  ),
+                // File Upload list tile
+                _buildDrawerItem(
+                  icon: Icons.upload_file_rounded,
+                  title: 'FILE UPLOAD',
                   onTap: () {
                     Navigator.of(context).pop();
-
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => TestScreen()),
                     );
                   },
                 ),
-              ),
-            ],
-          ),
-          //logout list tile
-          Padding(
-            padding: const EdgeInsets.only(left: 25, bottom: 25),
-            child: ListTile(
-              title: Text(
-                'LOGOUT',
-                style: TextStyle(
-                  letterSpacing: 7,
-                  fontWeight: FontWeight.bold,
-                  color: const Color.fromARGB(199, 244, 67, 54),
-                ),
-              ),
-              leading: Icon(
-                Icons.logout,
-                color: const Color.fromARGB(199, 244, 67, 54),
-              ),
-              onTap: signOut,
+              ],
             ),
+
+            // Logout list tile
+            Container(
+              margin: const EdgeInsets.only(bottom: 20),
+              child: _buildDrawerItem(
+                icon: Icons.logout_rounded,
+                title: 'LOGOUT',
+                textColor: Colors.red.shade700,
+                iconColor: Colors.red.shade700,
+                onTap: signOut,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    Color? textColor,
+    Color? iconColor,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0),
+      child: ListTile(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        leading: Icon(icon, color: iconColor ?? Colors.blue.shade600, size: 26),
+        title: Text(
+          title,
+          style: TextStyle(
+            letterSpacing: 2,
+            fontWeight: FontWeight.bold,
+            color: textColor ?? Colors.blue.shade600,
+            fontSize: 14,
           ),
-        ],
+        ),
+        onTap: onTap,
+        hoverColor: Colors.blue.shade50,
+        selectedTileColor: Colors.blue.shade50,
       ),
     );
   }
