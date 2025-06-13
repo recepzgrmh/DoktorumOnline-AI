@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:login_page/theme/app_theme.dart';
 import 'firebase_options.dart';
 import 'package:login_page/wrapper.dart';
+import 'package:login_page/screens/opening.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,11 +39,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Login Page',
+    return MaterialApp(
+      title: 'DoktorumOnline AI',
       theme: AppTheme.lightTheme,
-      home: const Wrapper(),
+      debugShowCheckedModeBanner: false,
+      home: const Opening(),
     );
   }
 }

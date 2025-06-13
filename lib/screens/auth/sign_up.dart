@@ -103,19 +103,22 @@ class _SignUpState extends State<SignUp> {
               const SizedBox(height: 30),
 
               // "Kayıt Ol" butonu
-              CustomButton(
-                label: "Kayıt Ol",
-                onPressed: signUpUser,
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-                verticalPadding: 16,
-                minHeight: 48,
-                elevation: 3,
-                borderRadius: const BorderRadius.all(Radius.circular(6)),
-                textStyle: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1,
+              SizedBox(
+                width: double.infinity,
+                child: CustomButton(
+                  label: "Kayıt Ol",
+                  onPressed: signUpUser,
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  verticalPadding: 16,
+                  minHeight: 48,
+                  elevation: 3,
+                  borderRadius: const BorderRadius.all(Radius.circular(6)),
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
                 ),
               ),
             ],

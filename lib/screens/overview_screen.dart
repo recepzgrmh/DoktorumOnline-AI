@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:login_page/services/openai_service.dart';
+import 'package:login_page/widgets/error_widget.dart';
 
 class OverviewScreen extends StatefulWidget {
   final String uid;
@@ -29,14 +30,14 @@ class _OverviewScreenState extends State<OverviewScreen> {
   late final OpenAI _openAI;
   final OpenAIService _service = OpenAIService();
   late final String _apiKey;
+  final TextEditingController _textController = TextEditingController();
 
-  bool _emojiShowing = false;
   String _gptState = 'Çevrimiçi';
 
   final ChatUser _currentUser = ChatUser(id: '1', firstName: 'Sen');
   final ChatUser _gptChatUser = ChatUser(
     id: '2',
-    firstName: 'ChatGPT',
+    firstName: 'Sağlık Asistanı',
     profileImage: "assets/images/avatar.png",
   );
 
@@ -82,62 +83,62 @@ class _OverviewScreenState extends State<OverviewScreen> {
   Future<void> _onSendMessage(ChatMessage userMsg) async {
     setState(() => _gptState = '...yazıyor');
 
-    // 1. Kullanıcı cevabını kaydet
-    await _messagesRef.add({
-      'text': userMsg.text,
-      'senderId': _currentUser.id,
-      'sentAt': FieldValue.serverTimestamp(),
-    });
+    try {
+      // 1. Kullanıcı cevabını kaydet
+      await _messagesRef.add({
+        'text': userMsg.text,
+        'senderId': _currentUser.id,
+        'sentAt': FieldValue.serverTimestamp(),
+      });
 
-    // 2. Eğer sorular akışı bitmediyse
-    if (!_flowComplete && _currentQIndex < widget.questions.length) {
-      // Gelen cevabı listeye ekle
-      _answers.add(userMsg.text.trim());
+      // 2. Eğer sorular akışı bitmediyse
+      if (!_flowComplete && _currentQIndex < widget.questions.length) {
+        // Gelen cevabı listeye ekle
+        _answers.add(userMsg.text.trim());
 
-      // a) Daha soru varsa → bir sonraki soruyu ekle
-      if (_currentQIndex + 1 < widget.questions.length) {
-        final nextQ = widget.questions[_currentQIndex + 1];
-        await _messagesRef.add({
-          'text': nextQ,
-          'senderId': _gptChatUser.id,
-          'sentAt': FieldValue.serverTimestamp(),
-        });
-        setState(() => _currentQIndex++);
+        // a) Daha soru varsa → bir sonraki soruyu ekle
+        if (_currentQIndex + 1 < widget.questions.length) {
+          final nextQ = widget.questions[_currentQIndex + 1];
+          await _messagesRef.add({
+            'text': nextQ,
+            'senderId': _gptChatUser.id,
+            'sentAt': FieldValue.serverTimestamp(),
+          });
+          setState(() => _currentQIndex++);
+        }
+        // b) Son soruya da cevap verildiyse → nihai değerlendirmeyi al ve göster
+        else {
+          final report = await _service.getFinalEvaluation(
+            widget.inputs,
+            _answers,
+          );
+          await _messagesRef.add({
+            'text': report,
+            'senderId': _gptChatUser.id,
+            'sentAt': FieldValue.serverTimestamp(),
+          });
+          setState(() => _flowComplete = true);
+        }
       }
-      // b) Son soruya da cevap verildiyse → nihai değerlendirmeyi al ve göster
+      // 3. Eğer takip akışı tamamlandıysa, klasik ChatGPT sohbetine dön
       else {
-        final report = await _service.getFinalEvaluation(
-          widget.inputs,
-          _answers,
+        final historySnapshot = await _messagesRef.orderBy('sentAt').get();
+        final openAIHistory =
+            historySnapshot.docs.map((doc) {
+              final data = doc.data();
+              return {
+                'role':
+                    data['senderId'] == _currentUser.id ? 'user' : 'assistant',
+                'content': data['text'] ?? '',
+              };
+            }).toList();
+
+        final request = ChatCompleteText(
+          model: Gpt4oMiniChatModel(),
+          messages: openAIHistory,
+          maxToken: 1000,
         );
-        await _messagesRef.add({
-          'text': report,
-          'senderId': _gptChatUser.id,
-          'sentAt': FieldValue.serverTimestamp(),
-        });
-        setState(() => _flowComplete = true);
-      }
-    }
-    // 3. Eğer takip akışı tamamlandıysa, klasik ChatGPT sohbetine dön
-    else {
-      final historySnapshot = await _messagesRef.orderBy('sentAt').get();
-      final openAIHistory =
-          historySnapshot.docs.map((doc) {
-            final data = doc.data();
-            return {
-              'role':
-                  data['senderId'] == _currentUser.id ? 'user' : 'assistant',
-              'content': data['text'] ?? '',
-            };
-          }).toList();
 
-      final request = ChatCompleteText(
-        model: Gpt4oMiniChatModel(),
-        messages: openAIHistory,
-        maxToken: 1000,
-      );
-
-      try {
         final resp = await _openAI.onChatCompletion(request: request);
         final aiContent = resp?.choices.first.message?.content.trim() ?? '';
         if (aiContent.isNotEmpty) {
@@ -147,10 +148,17 @@ class _OverviewScreenState extends State<OverviewScreen> {
             'sentAt': FieldValue.serverTimestamp(),
           });
         }
-      } catch (e) {
-        debugPrint('❌ OpenAI error: $e');
+      }
+    } catch (e) {
+      debugPrint('❌ OpenAI error: $e');
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('OpenAI ile iletişim kurulamadı')),
+          SnackBar(
+            content: CustomErrorWidget(
+              message: 'OpenAI ile iletişim kurulamadı',
+              onRetry: () => _onSendMessage(userMsg),
+            ),
+          ),
         );
       }
     }
@@ -162,147 +170,163 @@ class _OverviewScreenState extends State<OverviewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.teal,
-        iconTheme: const IconThemeData(color: Colors.white),
-        toolbarHeight: 70,
-        elevation: 4,
+        backgroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.black87),
+        toolbarHeight: 80,
+        elevation: 0,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
               children: [
-                const CircleAvatar(
-                  radius: 24,
-                  backgroundImage: AssetImage('assets/images/avatar.png'),
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.blue.shade50,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withOpacity(0.15),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const CircleAvatar(
+                    radius: 26,
+                    backgroundColor: Colors.blue,
+                    child: Icon(
+                      Icons.medical_services_outlined,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                  ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 14),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'ChatGPT',
+                      'Sağlık Asistanı',
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: Colors.lightGreenAccent.shade200,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          _gptState,
-                          style: TextStyle(
-                            color: Colors.lightGreenAccent.shade200,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      _gptState,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color:
+                            _gptState == 'Çevrimiçi'
+                                ? Colors.green
+                                : Colors.orange,
+                      ),
                     ),
                   ],
                 ),
               ],
             ),
-            IconButton(
-              icon: const Icon(Icons.more_vert, color: Colors.white),
-              onPressed: () {},
-            ),
           ],
         ),
       ),
-      body: Container(
-        color: Colors.teal.shade50,
-        child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          stream: _messagesRef.orderBy('sentAt', descending: true).snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            final docs = snapshot.data?.docs ?? [];
-            final messages =
-                docs.map((doc) {
-                  final data = doc.data();
-                  final raw = data['sentAt'];
-                  final createdAt =
-                      raw is Timestamp ? raw.toDate() : DateTime.now();
-                  return ChatMessage(
-                    user:
-                        data['senderId'] == _currentUser.id
-                            ? _currentUser
-                            : _gptChatUser,
-                    createdAt: createdAt,
-                    text: data['text'] ?? '',
-                  );
-                }).toList();
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: _messagesRef.orderBy('sentAt').snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text('Bir hata oluştu: ${snapshot.error}'));
+          }
 
-            return DashChat(
-              messages: messages,
-              currentUser: _currentUser,
-              onSend: _onSendMessage,
-              inputOptions: InputOptions(
-                sendOnEnter: false,
-                sendButtonBuilder:
-                    (send) => IconButton(
-                      onPressed: send,
-                      icon: const Icon(Icons.send),
-                    ),
-                inputDecoration: InputDecoration(
-                  fillColor: Colors.white,
-                  hintText: 'Mesajınızı yazın...',
-                  border: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final messages =
+              snapshot.data?.docs.map((doc) {
+                final data = doc.data();
+                return ChatMessage(
+                  text: data['text'] ?? '',
+                  user:
+                      data['senderId'] == _currentUser.id
+                          ? _currentUser
+                          : _gptChatUser,
+                  createdAt:
+                      (data['sentAt'] as Timestamp?)?.toDate() ??
+                      DateTime.now(),
+                );
+              }).toList() ??
+              [];
+
+          return DashChat(
+            currentUser: _currentUser,
+            onSend: (ChatMessage message) {
+              _onSendMessage(message);
+            },
+            messages: messages,
+            messageOptions: MessageOptions(
+              showTime: true,
+              messageDecorationBuilder: (message, prev, next) {
+                final isMe = message.user.id == _currentUser.id;
+                return BoxDecoration(
+                  color: isMe ? Colors.blue : Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: const Radius.circular(16),
+                    topRight: const Radius.circular(16),
+                    bottomLeft: Radius.circular(isMe ? 16 : 4),
+                    bottomRight: Radius.circular(isMe ? 4 : 16),
                   ),
+                );
+              },
+              messageTextBuilder: (message, prev, next) {
+                return Text(
+                  message.text,
+                  style: TextStyle(
+                    color:
+                        message.user.id == _currentUser.id
+                            ? Colors.white
+                            : Colors.black87,
+                    fontSize: 15,
+                  ),
+                );
+              },
+              avatarBuilder: (user, onTap, onLongPress) {
+                return CircleAvatar(
+                  backgroundColor:
+                      user.id == _currentUser.id
+                          ? Colors.blue.shade100
+                          : Colors.teal.shade100,
+                  child: Icon(
+                    user.id == _currentUser.id
+                        ? Icons.person
+                        : Icons.medical_services,
+                    color:
+                        user.id == _currentUser.id ? Colors.blue : Colors.teal,
+                  ),
+                );
+              },
+            ),
+            inputOptions: InputOptions(
+              inputTextStyle: const TextStyle(
+                fontSize: 16,
+                color: Colors.black87,
+              ),
+              inputDecoration: InputDecoration(
+                hintText: 'Mesajınızı yazın...',
+                hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 16),
+                filled: true,
+                fillColor: Colors.grey.shade50,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
                 ),
-                leading: [
-                  IconButton(
-                    onPressed:
-                        () => setState(() => _emojiShowing = !_emojiShowing),
-                    icon: const Icon(
-                      Icons.emoji_emotions_outlined,
-                      color: Colors.teal,
-                      size: 30,
-                    ),
-                  ),
-                ],
-                trailing: [
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.attach_file,
-                      color: Colors.teal,
-                      size: 30,
-                    ),
-                  ),
-                ],
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
-              messageOptions: MessageOptions(
-                messageDecorationBuilder: (message, prev, next) {
-                  final isMe = message.user.id == _currentUser.id;
-                  return BoxDecoration(
-                    color: isMe ? Colors.teal : Colors.grey.shade300,
-                    boxShadow: const [
-                      BoxShadow(offset: Offset(1, 1), blurRadius: 2),
-                    ],
-                    border: Border.all(
-                      width: 2,
-                      color: isMe ? Colors.teal : Colors.white,
-                    ),
-                    borderRadius: BorderRadius.circular(18),
-                  );
-                },
-              ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

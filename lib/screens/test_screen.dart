@@ -48,45 +48,226 @@ class _TestScreenState extends State<TestScreen> {
         _analysis = result;
         _status = 'Analiz tamamlandı.';
       });
+      _showAnalysisResult(result);
     } catch (e) {
       setState(() {
         _status = 'Analiz sırasında hata: $e';
       });
     } finally {
-      setState(() => _isLoading = false);
+      setState(() {
+        _isLoading = false;
+      });
     }
+  }
+
+  void _showAnalysisResult(String result) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (context) => Container(
+            height: MediaQuery.of(context).size.height * 0.85,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.teal.shade600,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Analiz Sonucu',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close, color: Colors.white),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          result,
+                          style: TextStyle(
+                            fontSize: 16,
+                            height: 1.6,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('PDF Analiz')),
-      body: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          children: [
-            ElevatedButton.icon(
-              icon: Icon(Icons.attach_file),
-              label: Text('PDF Seç'),
-              onPressed: _pickFile,
-            ),
-            SizedBox(height: 12),
-            Text(_status, textAlign: TextAlign.center),
-            SizedBox(height: 24),
-            CustomButton(
-              label: 'Yükle ve Analiz Et',
-              onPressed: _analyzePdf,
-              backgroundColor: Colors.teal.shade600,
-              foregroundColor: Colors.white,
-            ),
-            SizedBox(height: 24),
-            if (_analysis != null)
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Text(_analysis!, style: TextStyle(fontSize: 16)),
+      appBar: AppBar(
+        title: Text('PDF Analiz'),
+        elevation: 0,
+        backgroundColor: Colors.teal.shade600,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.teal.shade50, Colors.white],
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.picture_as_pdf,
+                        size: 64,
+                        color: Colors.teal.shade600,
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'PDF Dosyası Seçin',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.teal.shade800,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Analiz etmek istediğiniz PDF dosyasını yükleyin',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey.shade600),
+                      ),
+                      SizedBox(height: 20),
+                      ElevatedButton.icon(
+                        icon: Icon(Icons.upload_file),
+                        label: Text('PDF Seç'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal.shade600,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: _pickFile,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-          ],
+              SizedBox(height: 20),
+              if (_selectedFile != null)
+                Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.insert_drive_file,
+                          color: Colors.teal.shade600,
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _selectedFile!.name,
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                '${(_selectedFile!.size / 1024).toStringAsFixed(1)} KB',
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              SizedBox(height: 20),
+              if (_selectedFile != null)
+                CustomButton(
+                  label:
+                      _isLoading ? 'Analiz Yapılıyor...' : 'Yükle ve Analiz Et',
+                  onPressed: _isLoading ? () {} : _analyzePdf,
+                  backgroundColor: Colors.teal.shade600,
+                  foregroundColor: Colors.white,
+                ),
+              SizedBox(height: 16),
+              if (_status.isNotEmpty)
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color:
+                        _status.contains('hata')
+                            ? Colors.red.shade50
+                            : Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    _status,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color:
+                          _status.contains('hata')
+                              ? Colors.red.shade700
+                              : Colors.green.shade700,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

@@ -9,14 +9,55 @@ class Opening extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Center(
-          child: Row(
-            children: [
-              Expanded(
-                child: CustomButton(
-                  label: "Sign In!",
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).primaryColor.withOpacity(0.1),
+              Colors.white,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Logo and Welcome Text
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.medical_services_outlined,
+                    size: 80,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Text(
+                  'DoktorumOnline AI',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Yapay zeka destekli sağlık asistanınıza hoş geldiniz',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
+                ),
+                const SizedBox(height: 48),
+                // Buttons
+                CustomButton(
+                  label: "Giriş Yap",
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(builder: (context) => const SignIn()),
@@ -25,33 +66,39 @@ class Opening extends StatelessWidget {
                   backgroundColor: Theme.of(context).primaryColor,
                   foregroundColor: Colors.white,
                   verticalPadding: 16,
-                  borderRadius: BorderRadius.zero,
+                  horizontalPadding: 32,
+                  borderRadius: BorderRadius.circular(12),
                   textStyle: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
+                  isFullWidth: true,
+                  elevation: 2,
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: CustomButton(
-                  label: "Sign Up!",
+                const SizedBox(height: 16),
+                CustomButton(
+                  label: "Kayıt Ol",
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(builder: (context) => const SignUp()),
                     );
                   },
-                  backgroundColor: Theme.of(context).primaryColor,
-                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.white,
+                  foregroundColor: Theme.of(context).primaryColor,
                   verticalPadding: 16,
-                  borderRadius: BorderRadius.zero,
+                  horizontalPadding: 32,
+                  borderRadius: BorderRadius.circular(12),
                   textStyle: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
+                  isFullWidth: true,
+                  isOutlined: true,
+                  borderColor: Theme.of(context).primaryColor,
+                  elevation: 0,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

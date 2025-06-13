@@ -65,14 +65,18 @@ class _OldChatScreenState extends State<OldChatScreen> {
         .collection('complaints');
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
         centerTitle: true,
+        elevation: 0,
         title: const Text(
           'DoktorumOnline AI',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+        ),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
         ),
       ),
       drawer: MyDrawer(),
@@ -81,105 +85,197 @@ class _OldChatScreenState extends State<OldChatScreen> {
             complaintsRef.orderBy('lastAnalyzed', descending: true).snapshots(),
         builder: (context, chatSnapshots) {
           if (chatSnapshots.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.teal),
+            );
           }
           if (chatSnapshots.hasError) {
-            return Center(child: Text("Bir hata oluştu"));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Bir hata oluştu",
+                    style: TextStyle(color: Colors.red[300], fontSize: 16),
+                  ),
+                ],
+              ),
+            );
           }
           if (!chatSnapshots.hasData || chatSnapshots.data!.docs.isEmpty) {
-            return const Center(child: Text('Henüz Mesaj Yok'));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.chat_bubble_outline,
+                    size: 48,
+                    color: Colors.grey[400],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Henüz Mesaj Yok',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                  ),
+                ],
+              ),
+            );
           }
 
           final loadMessages = chatSnapshots.data!.docs;
 
           return ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 12),
             itemCount: loadMessages.length,
             itemBuilder: (context, index) {
               final complaintDoc = loadMessages[index];
-
               final color =
                   _avatarPalette[complaintDoc.id.hashCode %
                       _avatarPalette.length];
 
-              return Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 6,
                 ),
-                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    radius: 24,
-                    backgroundColor: Colors.transparent,
-                    child: ClipOval(
-                      child: Image.asset(
-                        'assets/images/avatar.png',
-                        color: color,
-                        colorBlendMode: BlendMode.modulate,
-                        fit: BoxFit.cover,
-                        width: 48,
-                        height: 48,
-                      ),
-                    ),
+                child: Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  title: Text(
-                    complaintDoc['sikayet'] ?? '',
-                    maxLines: 1,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                    stream:
-                        complaintsRef
-                            .doc(complaintDoc.id)
-                            .collection('messages')
-                            .orderBy('sentAt', descending: true)
-                            .limit(1)
-                            .snapshots(),
-                    builder: (context, snap) {
-                      if (snap.connectionState == ConnectionState.waiting) {
-                        return const Text(
-                          'Yükleniyor…',
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
-                        );
-                      }
-                      if (!snap.hasData || snap.data!.docs.isEmpty) {
-                        return const Text(
-                          'Henüz Mesaj Yok',
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
-                        );
-                      }
-                      final msg = snap.data!.docs.first.data();
-                      final text = msg['text'] ?? '';
-                      return Text(
-                        text,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (_) => ChatHistoryDetailScreen(
+                                userId: widget.userId,
+                                complaintId: complaintDoc.id,
+                              ),
                         ),
                       );
                     },
-                  ),
-                  trailing: Text(
-                    // Tarihi biçimlendirilebilir:
-                    DateFormat('yyyy-MM-dd').format(
-                      (complaintDoc['lastAnalyzed'] as Timestamp).toDate(),
-                    ),
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (_) => ChatHistoryDetailScreen(
-                              userId: widget.userId,
-                              complaintId: complaintDoc.id,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: color.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
+                            child: CircleAvatar(
+                              radius: 28,
+                              backgroundColor: Colors.white,
+                              child: ClipOval(
+                                child: Image.asset(
+                                  'assets/images/avatar.png',
+                                  color: color,
+                                  colorBlendMode: BlendMode.modulate,
+                                  fit: BoxFit.cover,
+                                  width: 56,
+                                  height: 56,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  complaintDoc['sikayet'] ?? '',
+                                  maxLines: 1,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                StreamBuilder<
+                                  QuerySnapshot<Map<String, dynamic>>
+                                >(
+                                  stream:
+                                      complaintsRef
+                                          .doc(complaintDoc.id)
+                                          .collection('messages')
+                                          .orderBy('sentAt', descending: true)
+                                          .limit(1)
+                                          .snapshots(),
+                                  builder: (context, snap) {
+                                    if (snap.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return Text(
+                                        'Yükleniyor…',
+                                        style: TextStyle(
+                                          color: Colors.grey[500],
+                                          fontSize: 13,
+                                        ),
+                                      );
+                                    }
+                                    if (!snap.hasData ||
+                                        snap.data!.docs.isEmpty) {
+                                      return Text(
+                                        'Henüz Mesaj Yok',
+                                        style: TextStyle(
+                                          color: Colors.grey[500],
+                                          fontSize: 13,
+                                        ),
+                                      );
+                                    }
+                                    final msg = snap.data!.docs.first.data();
+                                    final text = msg['text'] ?? '';
+                                    return Text(
+                                      text,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 13,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.teal.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              DateFormat('dd/MM/yyyy').format(
+                                (complaintDoc['lastAnalyzed'] as Timestamp)
+                                    .toDate(),
+                              ),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.teal[700],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    );
-                  },
+                    ),
+                  ),
                 ),
               );
             },

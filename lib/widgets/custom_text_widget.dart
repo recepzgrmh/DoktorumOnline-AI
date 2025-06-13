@@ -8,9 +8,8 @@ class CustomTextWidget extends StatelessWidget {
   final TextInputType keyboardType;
   final int maxLines;
   final TextEditingController controller;
-
-  // hatalar için bunlar
   final String? Function(String?)? validator;
+  final Function(String)? onChanged;
   final TextStyle? errorStyle;
   final OutlineInputBorder? errorBorder;
   final OutlineInputBorder? focusedErrorBorder;
@@ -23,6 +22,7 @@ class CustomTextWidget extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.maxLines = 1,
     this.validator,
+    this.onChanged,
     this.errorStyle,
     this.errorBorder,
     this.focusedErrorBorder,
@@ -31,41 +31,67 @@ class CustomTextWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 8),
+      elevation: 4,
+      shadowColor: Colors.teal.withOpacity(0.3),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
       child: TextFormField(
         keyboardType: keyboardType,
         maxLines: maxLines,
         controller: controller,
         validator: validator,
+        onChanged: onChanged,
+        style: const TextStyle(fontSize: 16, color: Colors.black87),
         decoration: InputDecoration(
           labelText: title,
-          prefixIcon: Icon(icon, color: Colors.teal),
-          labelStyle: TextStyle(color: Colors.black),
-
+          prefixIcon: Icon(icon, color: Colors.teal, size: 22),
+          labelStyle: const TextStyle(
+            color: Colors.teal,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide(
+              color: Colors.teal.withOpacity(0.2),
+              width: 1.5,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: const BorderSide(color: Colors.teal, width: 2),
+          ),
           errorStyle:
               errorStyle ??
               const TextStyle(
                 color: Colors.redAccent,
                 fontSize: 12,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
               ),
-          // Normal hata kenarlığı
           errorBorder:
               errorBorder ??
               OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
                 borderSide: const BorderSide(
                   color: Color.fromARGB(141, 255, 82, 82),
                   width: 1.5,
                 ),
-                borderRadius: BorderRadius.circular(8),
               ),
-          // Fokuslanmış (textarea seçiliyken) hata kenarlığı
           focusedErrorBorder:
               focusedErrorBorder ??
               OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
                 borderSide: const BorderSide(color: Colors.redAccent, width: 2),
-                borderRadius: BorderRadius.circular(8),
               ),
         ),
       ),

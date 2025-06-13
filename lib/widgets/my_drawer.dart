@@ -104,7 +104,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 padding: const EdgeInsets.only(left: 25.0),
                 child: ListTile(
                   title: Text(
-                    'SETTINGS',
+                    'FILE UPLOAD',
                     style: TextStyle(
                       letterSpacing: 7,
                       fontWeight: FontWeight.bold,

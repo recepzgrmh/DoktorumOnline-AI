@@ -4,40 +4,64 @@ class InputField extends StatelessWidget {
   final String label;
   final TextInputType keyboardType;
   final int maxLines;
+  final TextEditingController? controller;
+  final bool obscureText;
+  final String? Function(String?)? validator;
 
   const InputField({
     super.key,
     required this.label,
     this.keyboardType = TextInputType.text,
     this.maxLines = 1,
+    this.controller,
+    this.obscureText = false,
+    this.validator,
   });
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
+      controller: controller,
       keyboardType: keyboardType,
       maxLines: maxLines,
+      obscureText: obscureText,
+      validator: validator,
+      style: const TextStyle(fontSize: 16, color: Colors.black87),
       decoration: InputDecoration(
-        // Label’in hep üstte durmasını sağlar:
         floatingLabelBehavior: FloatingLabelBehavior.always,
         labelText: label,
-        // Kutunun kenarlığı, köşe yarıçapı sıfır:
-        border: const OutlineInputBorder(
-          borderRadius: BorderRadius.zero,
-          borderSide: BorderSide(color: Colors.black54),
+        labelStyle: const TextStyle(
+          color: Colors.black54,
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
         ),
-        enabledBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.zero,
-          borderSide: BorderSide(color: Colors.black54),
+        filled: true,
+        fillColor: Colors.grey[50],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[300]!),
         ),
-        focusedBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.zero,
-          borderSide: BorderSide(color: Colors.blue),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.blue, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 1),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(
-          vertical: 12,
-          horizontal: 12,
+          vertical: 16,
+          horizontal: 16,
         ),
+        errorStyle: const TextStyle(color: Colors.red, fontSize: 12),
       ),
     );
   }

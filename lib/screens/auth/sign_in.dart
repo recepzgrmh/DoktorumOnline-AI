@@ -34,111 +34,161 @@ class _SignInState extends State<SignIn> {
         print("📌 Kullanıcı UID: ${user.uid}");
 
         // Ana ekrana yönlendir
-        Get.offAll(() => const Wrapper());
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const Wrapper()),
+          );
+        }
       }
     } catch (e) {
       print("🚨 Firebase Giriş Hatası: $e");
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Giriş yapılamadı: $e")));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Giriş yapılamadı: $e")));
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      // Klavye açıldığında taşma olmaması için
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        toolbarHeight: 50,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [theme.primaryColor.withOpacity(0.1), Colors.white],
+          ),
         ),
-        backgroundColor: Colors.white,
-        elevation: 1,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 10),
-              Text(
-                "Tekrar Hoşgeldin!",
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade900,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Back button and title
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.arrow_back, color: theme.primaryColor),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Giriş Yap",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: theme.primaryColor,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                "Devam etmek için gerekli yerleri doldurun.",
-                style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
-              ),
-              const SizedBox(height: 40),
-              TextInputs(labelText: 'E-mail', controller: email, isEmail: true),
-              const SizedBox(height: 20),
-              TextInputs(
-                labelText: 'Şifre',
-                controller: password,
-                isPassword: true,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                "Devam ederek Kullanım Şartları'nı kabul etmiş olursunuz.\nGizlilik Politikamızı okuyun.",
-                style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-              ),
-              const SizedBox(height: 30),
-
-              // "Giriş Yap" butonu
-              CustomButton(
-                label: "Giriş Yap",
-                onPressed: signInUser,
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-                verticalPadding: 16,
-                minHeight: 48,
-                elevation: 3,
-                borderRadius: const BorderRadius.all(Radius.circular(6)),
-                textStyle: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1,
+                const SizedBox(height: 40),
+                // Welcome text
+                Text(
+                  "Tekrar Hoşgeldin!",
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade900,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-
-              // "Şifremi Unuttum" butonu
-              CustomButton(
-                label: "Şifremi Unuttum",
-                onPressed: () => Get.to(const ResetPassword()),
-                backgroundColor: Color(0xFFE8EEF2),
-                foregroundColor: Colors.black,
-                verticalPadding: 16,
-                minHeight: 48,
-                elevation:
-                    0, // Orijinal kodda yoktu, isterseniz 3 de yapabilirsiniz
-                borderRadius: const BorderRadius.all(Radius.circular(6)),
-                textStyle: const TextStyle(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 10),
-
-              // "Şimdi Hesap Oluştur" butonu
-              CustomButton(
-                label: "Şimdi Hesap Oluştur",
-                onPressed: () => Get.to(const SignUp()),
-                backgroundColor: Color(0xFFE8EEF2),
-                foregroundColor: Colors.black,
-                verticalPadding: 16,
-                minHeight: 48,
-                elevation: 0,
-                borderRadius: const BorderRadius.all(Radius.circular(6)),
-                textStyle: const TextStyle(fontWeight: FontWeight.w700),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  "Devam etmek için gerekli yerleri doldurun.",
+                  style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+                ),
+                const SizedBox(height: 40),
+                // Input fields
+                TextInputs(
+                  labelText: 'E-mail',
+                  controller: email,
+                  isEmail: true,
+                ),
+                const SizedBox(height: 20),
+                TextInputs(
+                  labelText: 'Şifre',
+                  controller: password,
+                  isPassword: true,
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  "Devam ederek Kullanım Şartları'nı kabul etmiş olursunuz.\nGizlilik Politikamızı okuyun.",
+                  style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                ),
+                const SizedBox(height: 30),
+                // Sign in button
+                CustomButton(
+                  label: "Giriş Yap",
+                  onPressed: signInUser,
+                  backgroundColor: theme.primaryColor,
+                  foregroundColor: Colors.white,
+                  verticalPadding: 16,
+                  horizontalPadding: 32,
+                  borderRadius: BorderRadius.circular(12),
+                  textStyle: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  isFullWidth: true,
+                  elevation: 2,
+                ),
+                const SizedBox(height: 16),
+                // Forgot password button
+                CustomButton(
+                  label: "Şifremi Unuttum",
+                  onPressed:
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ResetPassword(),
+                        ),
+                      ),
+                  backgroundColor: Colors.white,
+                  foregroundColor: theme.primaryColor,
+                  verticalPadding: 16,
+                  horizontalPadding: 32,
+                  borderRadius: BorderRadius.circular(12),
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  isFullWidth: true,
+                  isOutlined: true,
+                  borderColor: theme.primaryColor,
+                  elevation: 0,
+                ),
+                const SizedBox(height: 16),
+                // Create account button
+                CustomButton(
+                  label: "Şimdi Hesap Oluştur",
+                  onPressed:
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SignUp()),
+                      ),
+                  backgroundColor: Colors.white,
+                  foregroundColor: theme.primaryColor,
+                  verticalPadding: 16,
+                  horizontalPadding: 32,
+                  borderRadius: BorderRadius.circular(12),
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  isFullWidth: true,
+                  isOutlined: true,
+                  borderColor: theme.primaryColor,
+                  elevation: 0,
+                ),
+              ],
+            ),
           ),
         ),
       ),
