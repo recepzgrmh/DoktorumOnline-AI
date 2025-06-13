@@ -18,12 +18,17 @@ class ChatHistoryDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: Theme.of(context).primaryColor,
+        elevation: 0,
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'DoktorumOnline AI',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+            color: Theme.of(context).primaryColor,
+          ),
         ),
       ),
       drawer: const MyDrawer(),
@@ -32,7 +37,7 @@ class ChatHistoryDetailScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.teal.shade50, Colors.white],
+            colors: [Colors.blue.shade50, Colors.white],
           ),
         ),
         child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -85,10 +90,10 @@ class ChatHistoryDetailScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           CircleAvatar(
-                            backgroundColor: Colors.teal.shade100,
+                            backgroundColor: Colors.blue.shade100,
                             child: const Icon(
                               Icons.medical_services,
-                              color: Colors.teal,
+                              color: Colors.blue,
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -149,7 +154,7 @@ class ChatHistoryDetailScreen extends StatelessWidget {
                                   vertical: 10,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.teal,
+                                  color: Colors.blue,
                                   borderRadius: BorderRadius.circular(20),
                                   boxShadow: [
                                     BoxShadow(
@@ -183,10 +188,10 @@ class ChatHistoryDetailScreen extends StatelessWidget {
                             ),
                             const SizedBox(width: 8),
                             CircleAvatar(
-                              backgroundColor: Colors.teal.shade200,
+                              backgroundColor: Colors.blue.shade200,
                               child: const Icon(
                                 Icons.person,
-                                color: Colors.teal,
+                                color: Colors.blue,
                               ),
                             ),
                           ],

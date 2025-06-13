@@ -61,85 +61,108 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   void _showAnalysisResult(String result) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder:
-          (context) => Container(
-            height: MediaQuery.of(context).size.height * 0.85,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.teal.shade600,
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(20),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Analiz Sonucu',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.close, color: Colors.white),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => Scaffold(
+              appBar: AppBar(
+                backgroundColor: Colors.white,
+                foregroundColor: Theme.of(context).primaryColor,
+                elevation: 0,
+                centerTitle: true,
+                title: Text(
+                  'DoktorumOnline AI',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 20,
+                    color: Theme.of(context).primaryColor,
                   ),
                 ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          result,
-                          style: TextStyle(
-                            fontSize: 16,
-                            height: 1.6,
-                            color: Colors.black87,
+              ),
+              body: Container(
+                color: Colors.white,
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.analytics,
+                            color: Theme.of(context).primaryColor,
+                            size: 24,
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'PDF Analiz Sonucu',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: SingleChildScrollView(
+                          child: Text(
+                            result,
+                            style: TextStyle(
+                              fontSize: 16,
+                              height: 1.6,
+                              color: Colors.black87,
+                            ),
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('PDF Analiz'),
+        backgroundColor: Colors.white,
+        foregroundColor: theme.primaryColor,
         elevation: 0,
-        backgroundColor: Colors.teal.shade600,
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.teal.shade50, Colors.white],
+        centerTitle: true,
+        title: Text(
+          'DoktorumOnline AI',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+            color: theme.primaryColor,
           ),
         ),
+      ),
+      body: Container(
+        color: Colors.white,
         child: Padding(
           padding: EdgeInsets.all(24),
           child: Column(
@@ -154,10 +177,17 @@ class _TestScreenState extends State<TestScreen> {
                   padding: EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      Icon(
-                        Icons.picture_as_pdf,
-                        size: 64,
-                        color: Colors.teal.shade600,
+                      Container(
+                        padding: EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: theme.primaryColor.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.picture_as_pdf,
+                          size: 64,
+                          color: theme.primaryColor,
+                        ),
                       ),
                       SizedBox(height: 16),
                       Text(
@@ -165,7 +195,7 @@ class _TestScreenState extends State<TestScreen> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.teal.shade800,
+                          color: theme.primaryColor,
                         ),
                       ),
                       SizedBox(height: 8),
@@ -175,21 +205,15 @@ class _TestScreenState extends State<TestScreen> {
                         style: TextStyle(color: Colors.grey.shade600),
                       ),
                       SizedBox(height: 20),
-                      ElevatedButton.icon(
-                        icon: Icon(Icons.upload_file),
-                        label: Text('PDF Seç'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal.shade600,
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
+                      CustomButton(
+                        label: 'PDF Seç',
                         onPressed: _pickFile,
+                        backgroundColor: theme.primaryColor,
+                        foregroundColor: Colors.white,
+                        icon: Icon(Icons.upload_file),
+                        isFullWidth: true,
+                        borderRadius: BorderRadius.circular(12),
+                        elevation: 2,
                       ),
                     ],
                   ),
@@ -208,7 +232,7 @@ class _TestScreenState extends State<TestScreen> {
                       children: [
                         Icon(
                           Icons.insert_drive_file,
-                          color: Colors.teal.shade600,
+                          color: theme.primaryColor,
                         ),
                         SizedBox(width: 12),
                         Expanded(
@@ -241,8 +265,12 @@ class _TestScreenState extends State<TestScreen> {
                   label:
                       _isLoading ? 'Analiz Yapılıyor...' : 'Yükle ve Analiz Et',
                   onPressed: _isLoading ? () {} : _analyzePdf,
-                  backgroundColor: Colors.teal.shade600,
+                  backgroundColor: theme.primaryColor,
                   foregroundColor: Colors.white,
+                  icon: Icon(Icons.analytics),
+                  isFullWidth: true,
+                  borderRadius: BorderRadius.circular(12),
+                  elevation: 2,
                 ),
               SizedBox(height: 16),
               if (_status.isNotEmpty)

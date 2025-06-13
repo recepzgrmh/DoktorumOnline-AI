@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:login_page/constants/app_constants.dart';
 import 'package:login_page/models/medical_form_data.dart';
 import 'package:login_page/services/validation_service.dart';
 import 'package:login_page/theme/app_theme.dart';
@@ -82,10 +81,8 @@ class MedicalForm extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  AppConstants.formInfoMessage,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.primary,
-                  ),
+                  'Lütfen aşağıdaki bilgileri doldurunuz. Bu bilgiler doktorunuzun size daha iyi yardımcı olmasını sağlayacaktır.',
+                  style: theme.textTheme.bodyMedium,
                 ),
               ),
             ],
@@ -93,7 +90,7 @@ class MedicalForm extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         CustomTextWidget(
-          title: AppConstants.heightLabel,
+          title: 'Boy (cm)',
           icon: Icons.height,
           controller: boyController,
           keyboardType: TextInputType.number,
@@ -101,7 +98,7 @@ class MedicalForm extends StatelessWidget {
           onChanged: (_) => _notifyFormChanged(),
         ),
         CustomTextWidget(
-          title: AppConstants.ageLabel,
+          title: 'Yaş',
           icon: Icons.calendar_today,
           controller: yasController,
           keyboardType: TextInputType.number,
@@ -109,7 +106,7 @@ class MedicalForm extends StatelessWidget {
           onChanged: (_) => _notifyFormChanged(),
         ),
         CustomTextWidget(
-          title: AppConstants.weightLabel,
+          title: 'Kilo (kg)',
           icon: Icons.monitor_weight,
           controller: kiloController,
           keyboardType: TextInputType.number,
@@ -120,7 +117,7 @@ class MedicalForm extends StatelessWidget {
         DropdownButtonFormField<String>(
           value: cinsiyet,
           decoration: InputDecoration(
-            labelText: AppConstants.genderLabel,
+            labelText: 'Cinsiyet',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(borderRadius),
             ),
@@ -139,7 +136,7 @@ class MedicalForm extends StatelessWidget {
         DropdownButtonFormField<String>(
           value: kanGrubu,
           decoration: InputDecoration(
-            labelText: AppConstants.bloodTypeLabel,
+            labelText: 'Kan Grubu',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(borderRadius),
             ),
@@ -162,7 +159,7 @@ class MedicalForm extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         CustomTextWidget(
-          title: AppConstants.complaintLabel,
+          title: 'Şikayetiniz',
           icon: Icons.medical_services,
           controller: sikayetController,
           maxLines: 3,
@@ -170,14 +167,14 @@ class MedicalForm extends StatelessWidget {
           onChanged: (_) => _notifyFormChanged(),
         ),
         CustomTextWidget(
-          title: AppConstants.durationLabel,
+          title: 'Şikayet Süresi',
           icon: Icons.timer,
           controller: sureController,
           validator: ValidationService.validateDuration,
           onChanged: (_) => _notifyFormChanged(),
         ),
         CustomTextWidget(
-          title: AppConstants.medicationLabel,
+          title: 'Mevcut İlaçlar',
           icon: Icons.medication,
           controller: ilacController,
           maxLines: 2,
@@ -185,7 +182,7 @@ class MedicalForm extends StatelessWidget {
           onChanged: (_) => _notifyFormChanged(),
         ),
         CustomTextWidget(
-          title: AppConstants.chronicDiseaseLabel,
+          title: 'Kronik Rahatsızlık',
           icon: Icons.health_and_safety,
           controller: illnessController,
           maxLines: 2,

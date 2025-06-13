@@ -6,7 +6,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:login_page/constants/app_constants.dart';
 import 'package:login_page/models/medical_form_data.dart';
 import 'package:login_page/screens/opening.dart';
 import 'package:login_page/screens/overview_screen.dart';
@@ -138,41 +137,43 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        foregroundColor: theme.primaryColor,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'DoktorumOnline AI',
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 20,
-            color: Colors.black87,
+            color: theme.primaryColor,
           ),
         ),
         actions: [
           IconButton(
             onPressed: _signOut,
             icon: const Icon(Icons.logout_rounded),
-            color: Colors.black87,
+            color: theme.primaryColor,
           ),
         ],
       ),
       drawer: const MyDrawer(),
       body:
           _loading
-              ? const LoadingWidget(message: AppConstants.loadingMessage)
+              ? const LoadingWidget(message: "Şikayetiniz işleniyor...")
               : SafeArea(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const SizedBox(height: 24),
                         MedicalForm(
                           boyController: boyController,
                           yasController: yasController,
@@ -195,22 +196,30 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(height: 24),
                         CustomButton(
-                          label: AppConstants.uploadFileLabel,
+                          label: 'Dosya Yükle',
                           onPressed: _pickFile,
-                          backgroundColor: Colors.blue.shade50,
-                          foregroundColor: Colors.blue.shade900,
-                          icon: const Icon(Icons.upload_file),
+                          backgroundColor: Colors.white,
+                          foregroundColor: theme.primaryColor,
+                          icon: Icon(
+                            Icons.upload_file,
+                            color: theme.primaryColor,
+                          ),
                           isOutlined: true,
                           isFullWidth: true,
+                          borderRadius: BorderRadius.circular(12),
+                          borderColor: theme.primaryColor,
+                          elevation: 0,
                         ),
                         const SizedBox(height: 16),
                         CustomButton(
-                          label: AppConstants.startComplaintLabel,
+                          label: 'Şikayeti Başlat',
                           onPressed: _startFollowUp,
-                          backgroundColor: Colors.blue,
+                          backgroundColor: theme.primaryColor,
                           foregroundColor: Colors.white,
                           icon: const Icon(Icons.medical_services),
                           isFullWidth: true,
+                          borderRadius: BorderRadius.circular(12),
+                          elevation: 2,
                         ),
                         const SizedBox(height: 24),
                       ],

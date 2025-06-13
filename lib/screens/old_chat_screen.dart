@@ -59,6 +59,7 @@ class _OldChatScreenState extends State<OldChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final complaintsRef = FirebaseFirestore.instance
         .collection('users')
         .doc(widget.userId)
@@ -67,17 +68,27 @@ class _OldChatScreenState extends State<OldChatScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
-        centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: theme.primaryColor,
         elevation: 0,
-        title: const Text(
+        centerTitle: true,
+        title: Text(
           'DoktorumOnline AI',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+            color: theme.primaryColor,
+          ),
         ),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
-        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              // Çıkış işlemi
+            },
+            icon: const Icon(Icons.logout_rounded),
+            color: theme.primaryColor,
+          ),
+        ],
       ),
       drawer: MyDrawer(),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -86,7 +97,7 @@ class _OldChatScreenState extends State<OldChatScreen> {
         builder: (context, chatSnapshots) {
           if (chatSnapshots.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: Colors.teal),
+              child: CircularProgressIndicator(color: Colors.blue),
             );
           }
           if (chatSnapshots.hasError) {
@@ -257,7 +268,7 @@ class _OldChatScreenState extends State<OldChatScreen> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.teal.withOpacity(0.1),
+                              color: Colors.blue.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
@@ -267,7 +278,7 @@ class _OldChatScreenState extends State<OldChatScreen> {
                               ),
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.teal[700],
+                                color: Colors.blue[700],
                                 fontWeight: FontWeight.w500,
                               ),
                             ),

@@ -16,33 +16,56 @@ class _ResetPasswordState extends State<ResetPassword> {
   Future<void> resetPassword() async {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email.text);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Reset link sent!")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Şifre sıfırlama bağlantısı gönderildi!")),
+      );
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      ).showSnackBar(SnackBar(content: Text("Hata: $e")));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back),
+      resizeToAvoidBottomInset: true,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [theme.primaryColor.withOpacity(0.1), Colors.white],
+          ),
         ),
-        toolbarHeight: 50,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
-          child: Center(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Back button and title
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.arrow_back, color: theme.primaryColor),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Şifre Sıfırlama",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: theme.primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 40),
+                // Welcome text
                 Text(
                   "Şifreni mi Unuttun?",
                   style: TextStyle(
@@ -51,24 +74,32 @@ class _ResetPasswordState extends State<ResetPassword> {
                     color: Colors.grey.shade900,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Text(
                   "Hesabınızla ilişkili e-posta adresini girin, size şifrenizi sıfırlamanız için bir bağlantı gönderelim.",
                   style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
                 ),
                 const SizedBox(height: 40),
-                TextInputs(labelText: 'E-mail', controller: email),
-                const SizedBox(height: 20),
+                TextInputs(
+                  labelText: 'E-mail',
+                  controller: email,
+                  isEmail: true,
+                ),
+                const SizedBox(height: 30),
                 CustomButton(
                   label: "Sıfırlama Linki Gönder",
                   onPressed: resetPassword,
-                  backgroundColor: Colors.blue,
+                  backgroundColor: theme.primaryColor,
                   foregroundColor: Colors.white,
                   verticalPadding: 16,
-                  minHeight: 48,
-                  elevation: 3,
-                  borderRadius: const BorderRadius.all(Radius.circular(6)),
-                  textStyle: const TextStyle(fontSize: 16),
+                  horizontalPadding: 32,
+                  borderRadius: BorderRadius.circular(12),
+                  textStyle: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  isFullWidth: true,
+                  elevation: 2,
                 ),
               ],
             ),
