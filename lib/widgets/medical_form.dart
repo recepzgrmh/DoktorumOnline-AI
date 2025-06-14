@@ -19,7 +19,7 @@ class MedicalForm extends StatelessWidget {
   final Function(MedicalFormData) onFormChanged;
 
   const MedicalForm({
-    Key? key,
+    super.key,
     required this.boyController,
     required this.yasController,
     required this.kiloController,
@@ -32,7 +32,7 @@ class MedicalForm extends StatelessWidget {
     required this.onCinsiyetChanged,
     required this.onKanGrubuChanged,
     required this.onFormChanged,
-  }) : super(key: key);
+  });
 
   void _notifyFormChanged() {
     final formData = MedicalFormData(

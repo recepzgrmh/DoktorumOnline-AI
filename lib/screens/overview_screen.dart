@@ -242,19 +242,23 @@ class _OverviewScreenState extends State<OverviewScreen> {
           }
 
           final messages =
-              snapshot.data?.docs.map((doc) {
-                final data = doc.data();
-                return ChatMessage(
-                  text: data['text'] ?? '',
-                  user:
-                      data['senderId'] == _currentUser.id
-                          ? _currentUser
-                          : _gptChatUser,
-                  createdAt:
-                      (data['sentAt'] as Timestamp?)?.toDate() ??
-                      DateTime.now(),
-                );
-              }).toList() ??
+              snapshot.data?.docs
+                  .map((doc) {
+                    final data = doc.data();
+                    return ChatMessage(
+                      text: data['text'] ?? '',
+                      user:
+                          data['senderId'] == _currentUser.id
+                              ? _currentUser
+                              : _gptChatUser,
+                      createdAt:
+                          (data['sentAt'] as Timestamp?)?.toDate() ??
+                          DateTime.now(),
+                    );
+                  })
+                  .toList()
+                  .reversed
+                  .toList() ??
               [];
 
           return DashChat(

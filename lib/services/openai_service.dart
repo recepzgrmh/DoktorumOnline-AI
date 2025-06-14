@@ -44,7 +44,7 @@ class OpenAIService {
           ..writeln("Her aşamada net, anlaşılır ve empatik bir dil kullan.");
 
     final raw = await _postToChatGPT(prompt.toString());
-    // “1. …  2. …” formatını parçalara ayır
+    // "1. ...  2. ..." formatını parçalara ayır
     final parts =
         raw
             .split(RegExp(r'\n(?=\d+\.)'))
@@ -80,14 +80,14 @@ class OpenAIService {
           )
           ..writeln("")
           ..writeln(
-            "Yukarıdaki tüm bilgileri dikkate alarak kapsamlı bir tıbbi değerlendirme yap ve önerilerde bulun hastanın sikayetini çözmeye çalış.  eğer hastanın doktora gitmesi gerekiyorsa bile onun şikayetini azaltacak şeyler öner",
+            "Yukarıdaki tüm bilgileri dikkate alarak kapsamlı bir tıbbi değerlendirme yap ve önerilerde bulun hastanın sikayetini çözmeye çalış. eğer hastanın doktora gitmesi gerekiyorsa bile onun şikayetini azaltacak şeyler öner",
           );
 
     final result = await _postToChatGPT(buffer.toString());
     return result.trim();
   }
 
-  /// Ortak: Bir prompt’u ChatGPT’ye gönderir ve cevabını döner.
+  /// Ortak: Bir prompt'u ChatGPT'ye gönderir ve cevabını döner.
   Future<String> _postToChatGPT(String content) async {
     final response = await http.post(
       _endpoint,
@@ -141,17 +141,17 @@ class OpenAIService {
     return chunks;
   }
 
-  Future<String> analyzePdf(String filePath) async {
+  Future<Map<String, String>> analyzePdf(String filePath) async {
     final file = File(filePath);
     final fullText = await extractTextFromPdf(file);
 
     // Eğer metin boşsa erken dön
     if (fullText.trim().isEmpty) {
-      return 'PDF içeriği okunamadı veya boş.';
+      return {'Hata': 'PDF içeriği okunamadı veya boş.'};
     }
 
-    final chunks = chunkText(fullText, 1500);
-    StringBuffer aggregated = StringBuffer();
+    final chunks = chunkText(fullText, 3000);
+    Map<String, String> analysisResults = {};
 
     for (var part in chunks) {
       try {
@@ -163,7 +163,13 @@ class OpenAIService {
             messages: [
               ChatCompletionMessage.system(
                 content:
-                    "Bir doktor titizliğiyle gelen metni incele. Kullanıcının anlayabileceği sade bir dille, karşılaşılabilecek olası durumlardan bahset. Anlaşılması güç tıbbi terimler kullanmaktan kaçın. Eğer metinde bir sorun tespit edersen detaylıca açıkla; aksi halde kullanıcının genel olarak sağlıklı olduğunu kısaca belirt. Sorunlu gördüğün kısımlar hakkında ayrıntılı yorum yap, diğer bölümler için yalnızca kısa ve öz bilgi ver",
+                    "Bir doktor titizliğiyle gelen metni detaylıca incele. Lütfen aşağıdaki başlıklar altında kapsamlı bir analiz yap, Kullanıcının Anlayabileceği Yalın bir dil kullan. Her başlığı '##' işareti ile başlat ve içeriğini altına yaz:\n\n" +
+                    "## Genel Değerlendirme\n" +
+                    "## Tespit Edilen Durumlar\n" +
+                    "## Risk Faktörleri\n" +
+                    "## Öneriler\n" +
+                    "## Takip Önerileri\n\n" +
+                    "Kullanıcının anlayabileceği sade bir dil kullan, ancak gerekli tıbbi terimleri de açıklayarak kullan. Her bölüm için detaylı ve kapsamlı bilgi ver.",
               ),
               ChatCompletionMessage.user(
                 content: ChatCompletionUserMessageContent.parts([
@@ -171,18 +177,33 @@ class OpenAIService {
                 ]),
               ),
             ],
-            temperature: 0.0,
-            maxTokens: 500,
+            temperature: 0.3,
+            maxTokens: 3000,
           ),
         );
 
         final reply = res.choices.first.message.content?.trim() ?? '';
-        aggregated.writeln(reply);
+
+        // Başlıkları ve içerikleri ayır
+        final sections = reply.split('##');
+        for (var section in sections) {
+          if (section.trim().isEmpty) continue;
+
+          final lines = section.split('\n');
+          if (lines.isEmpty) continue;
+
+          final title = lines[0].trim();
+          final content = lines.skip(1).join('\n').trim();
+
+          if (title.isNotEmpty && content.isNotEmpty) {
+            analysisResults[title] = content;
+          }
+        }
       } catch (e) {
-        aggregated.writeln('— Bu bölüm işlenirken bir hata oluştu.');
+        analysisResults['Hata'] = 'Bu bölüm işlenirken bir hata oluştu: $e';
       }
     }
 
-    return aggregated.toString();
+    return analysisResults;
   }
 }

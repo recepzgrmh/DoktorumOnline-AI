@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:login_page/widgets/custom_button.dart';
 import '../services/openai_service.dart';
+import '../services/pdf_analysis_service.dart';
+import 'saved_analyses_screen.dart';
 
 class TestScreen extends StatefulWidget {
   const TestScreen({super.key});
@@ -12,9 +14,10 @@ class TestScreen extends StatefulWidget {
 
 class _TestScreenState extends State<TestScreen> {
   final _service = OpenAIService();
+  final _analysisService = PdfAnalysisService();
   PlatformFile? _selectedFile;
   String _status = 'Lütfen bir PDF dosyası seçin';
-  String? _analysis;
+  Map<String, String>? _analysis;
   bool _isLoading = false;
 
   Future<void> _pickFile() async {
@@ -48,6 +51,13 @@ class _TestScreenState extends State<TestScreen> {
         _analysis = result;
         _status = 'Analiz tamamlandı.';
       });
+
+      // Save the analysis
+      await _analysisService.saveAnalysis(
+        fileName: _selectedFile!.name,
+        analysis: result,
+      );
+
       _showAnalysisResult(result);
     } catch (e) {
       setState(() {
@@ -60,7 +70,7 @@ class _TestScreenState extends State<TestScreen> {
     }
   }
 
-  void _showAnalysisResult(String result) {
+  void _showAnalysisResult(Map<String, String> result) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -72,7 +82,7 @@ class _TestScreenState extends State<TestScreen> {
                 elevation: 0,
                 centerTitle: true,
                 title: Text(
-                  'DoktorumOnline AI',
+                  'PDF Analiz Sonucu',
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 20,
@@ -82,12 +92,12 @@ class _TestScreenState extends State<TestScreen> {
               ),
               body: Container(
                 color: Colors.white,
-                padding: EdgeInsets.all(20),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Theme.of(context).primaryColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
@@ -99,10 +109,10 @@ class _TestScreenState extends State<TestScreen> {
                             color: Theme.of(context).primaryColor,
                             size: 24,
                           ),
-                          SizedBox(width: 12),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              'PDF Analiz Sonucu',
+                              _selectedFile?.name ?? 'PDF Analiz Sonucu',
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -113,25 +123,42 @@ class _TestScreenState extends State<TestScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Expanded(
-                      child: Container(
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey.shade200),
-                        ),
-                        child: SingleChildScrollView(
-                          child: Text(
-                            result,
-                            style: TextStyle(
-                              fontSize: 16,
-                              height: 1.6,
-                              color: Colors.black87,
+                      child: ListView.builder(
+                        itemCount: result.length,
+                        itemBuilder: (context, index) {
+                          final title = result.keys.elementAt(index);
+                          final content = result[title]!;
+
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                          ),
-                        ),
+                            child: ExpansionTile(
+                              title: Text(
+                                title,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Text(
+                                    content,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      height: 1.5,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -153,18 +180,28 @@ class _TestScreenState extends State<TestScreen> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'DoktorumOnline AI',
+          'PDF Analiz',
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 20,
             color: theme.primaryColor,
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SavedAnalysesScreen()),
+              );
+            },
+          ),
+        ],
       ),
-      body: Container(
-        color: Colors.white,
+      body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -174,11 +211,11 @@ class _TestScreenState extends State<TestScreen> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
                       Container(
-                        padding: EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
                           color: theme.primaryColor.withOpacity(0.1),
                           shape: BoxShape.circle,
@@ -189,7 +226,7 @@ class _TestScreenState extends State<TestScreen> {
                           color: theme.primaryColor,
                         ),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       Text(
                         'PDF Dosyası Seçin',
                         style: TextStyle(
@@ -198,19 +235,19 @@ class _TestScreenState extends State<TestScreen> {
                           color: theme.primaryColor,
                         ),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Text(
                         'Analiz etmek istediğiniz PDF dosyasını yükleyin',
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.grey.shade600),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       CustomButton(
                         label: 'PDF Seç',
                         onPressed: _pickFile,
                         backgroundColor: theme.primaryColor,
                         foregroundColor: Colors.white,
-                        icon: Icon(Icons.upload_file),
+                        icon: const Icon(Icons.upload_file),
                         isFullWidth: true,
                         borderRadius: BorderRadius.circular(12),
                         elevation: 2,
@@ -219,7 +256,7 @@ class _TestScreenState extends State<TestScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               if (_selectedFile != null)
                 Card(
                   elevation: 2,
@@ -227,55 +264,53 @@ class _TestScreenState extends State<TestScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Padding(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     child: Row(
                       children: [
-                        Icon(
-                          Icons.insert_drive_file,
-                          color: theme.primaryColor,
-                        ),
-                        SizedBox(width: 12),
+                        Icon(Icons.picture_as_pdf, color: theme.primaryColor),
+                        const SizedBox(width: 12),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _selectedFile!.name,
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(
-                                '${(_selectedFile!.size / 1024).toStringAsFixed(1)} KB',
-                                style: TextStyle(
-                                  color: Colors.grey.shade600,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
+                          child: Text(
+                            _selectedFile!.name,
+                            style: const TextStyle(fontWeight: FontWeight.w500),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () {
+                            setState(() {
+                              _selectedFile = null;
+                              _status = 'Lütfen bir PDF dosyası seçin';
+                            });
+                          },
                         ),
                       ],
                     ),
                   ),
                 ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               if (_selectedFile != null)
                 CustomButton(
                   label:
                       _isLoading ? 'Analiz Yapılıyor...' : 'Yükle ve Analiz Et',
-                  onPressed: _isLoading ? () {} : _analyzePdf,
+                  onPressed: () {
+                    if (!_isLoading) {
+                      _analyzePdf();
+                    }
+                  },
                   backgroundColor: theme.primaryColor,
                   foregroundColor: Colors.white,
-                  icon: Icon(Icons.analytics),
+                  icon: const Icon(Icons.analytics),
                   isFullWidth: true,
                   borderRadius: BorderRadius.circular(12),
                   elevation: 2,
                 ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               if (_status.isNotEmpty)
                 Container(
-                  padding: EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color:
                         _status.contains('hata')
