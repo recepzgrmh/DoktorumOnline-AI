@@ -11,6 +11,7 @@ import 'package:login_page/screens/opening.dart';
 import 'package:login_page/screens/overview_screen.dart';
 import 'package:login_page/services/form_service.dart';
 import 'package:login_page/services/openai_service.dart';
+import 'package:login_page/widgets/custom_appBar.dart';
 import 'package:login_page/widgets/custom_button.dart';
 import 'package:login_page/widgets/loading_widget.dart';
 import 'package:login_page/widgets/medical_form.dart';
@@ -128,39 +129,12 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _signOut() async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => const Opening()));
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: theme.primaryColor,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'DoktorumOnline AI',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-            color: theme.primaryColor,
-          ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: _signOut,
-            icon: const Icon(Icons.logout_rounded),
-            color: theme.primaryColor,
-          ),
-        ],
-      ),
+      appBar: CustomAppBar(title: 'DoktorumOnline AI'),
       drawer: const MyDrawer(),
       body:
           _loading

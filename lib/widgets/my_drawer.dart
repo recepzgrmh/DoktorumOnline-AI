@@ -18,9 +18,11 @@ class _MyDrawerState extends State<MyDrawer> {
 
   Future<void> signOut() async {
     await FirebaseAuth.instance.signOut();
-    Navigator.of(
+    Navigator.pushAndRemoveUntil(
       context,
-    ).pushReplacement(MaterialPageRoute(builder: (context) => Opening()));
+      MaterialPageRoute(builder: (context) => Opening()),
+      (route) => false,
+    );
   }
 
   @override

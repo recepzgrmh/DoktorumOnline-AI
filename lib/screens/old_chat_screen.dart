@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:login_page/screens/chat_history_detail_screen.dart';
+import 'package:login_page/widgets/custom_appBar.dart';
 import 'package:login_page/widgets/my_drawer.dart';
 
 class OldChatScreen extends StatefulWidget {
@@ -59,7 +60,6 @@ class _OldChatScreenState extends State<OldChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final complaintsRef = FirebaseFirestore.instance
         .collection('users')
         .doc(widget.userId)
@@ -67,29 +67,7 @@ class _OldChatScreenState extends State<OldChatScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: theme.primaryColor,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'DoktorumOnline AI',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-            color: theme.primaryColor,
-          ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              // Çıkış işlemi
-            },
-            icon: const Icon(Icons.logout_rounded),
-            color: theme.primaryColor,
-          ),
-        ],
-      ),
+      appBar: CustomAppBar(title: 'DoktorumOnline AI'),
       drawer: MyDrawer(),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream:
@@ -188,15 +166,10 @@ class _OldChatScreenState extends State<OldChatScreen> {
                             child: CircleAvatar(
                               radius: 28,
                               backgroundColor: Colors.white,
-                              child: ClipOval(
-                                child: Image.asset(
-                                  'assets/images/avatar.png',
-                                  color: color,
-                                  colorBlendMode: BlendMode.modulate,
-                                  fit: BoxFit.cover,
-                                  width: 56,
-                                  height: 56,
-                                ),
+                              child: Icon(
+                                Icons.medical_services,
+                                color: color,
+                                size: 32,
                               ),
                             ),
                           ),
