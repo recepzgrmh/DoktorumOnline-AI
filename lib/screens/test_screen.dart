@@ -4,6 +4,7 @@ import 'package:login_page/widgets/custom_button.dart';
 import '../services/openai_service.dart';
 import '../services/pdf_analysis_service.dart';
 import 'saved_analyses_screen.dart';
+import 'package:login_page/widgets/custom_appBar.dart';
 
 class TestScreen extends StatefulWidget {
   const TestScreen({super.key});
@@ -76,20 +77,7 @@ class _TestScreenState extends State<TestScreen> {
       MaterialPageRoute(
         builder:
             (context) => Scaffold(
-              appBar: AppBar(
-                backgroundColor: Colors.white,
-                foregroundColor: Theme.of(context).primaryColor,
-                elevation: 0,
-                centerTitle: true,
-                title: Text(
-                  'PDF Analiz Sonucu',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 20,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ),
-              ),
+              appBar: CustomAppBar(title: 'PDF Analiz Sonucu'),
               body: Container(
                 color: Colors.white,
                 padding: const EdgeInsets.all(20),
@@ -174,19 +162,8 @@ class _TestScreenState extends State<TestScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: theme.primaryColor,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'PDF Analiz',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-            color: theme.primaryColor,
-          ),
-        ),
+      appBar: CustomAppBar(
+        title: 'PDF Analiz',
         actions: [
           IconButton(
             icon: const Icon(Icons.history),

@@ -4,8 +4,9 @@ import 'package:login_page/screens/opening.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
+  final List<Widget>? actions;
 
-  const CustomAppBar({super.key, required this.title});
+  const CustomAppBar({super.key, required this.title, this.actions});
 
   @override
   State<CustomAppBar> createState() => _CustomAppBarState();
@@ -40,13 +41,15 @@ class _CustomAppBarState extends State<CustomAppBar> {
           color: theme.primaryColor,
         ),
       ),
-      actions: [
-        IconButton(
-          onPressed: _signOut,
-          icon: const Icon(Icons.logout_rounded),
-          color: theme.primaryColor,
-        ),
-      ],
+      actions:
+          widget.actions ??
+          [
+            IconButton(
+              onPressed: _signOut,
+              icon: const Icon(Icons.logout_rounded),
+              color: theme.primaryColor,
+            ),
+          ],
     );
   }
 }

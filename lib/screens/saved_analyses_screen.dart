@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:login_page/widgets/custom_appBar.dart';
 import '../models/pdf_analysis.dart';
 import '../services/pdf_analysis_service.dart';
 import '../widgets/custom_button.dart';
@@ -20,20 +21,7 @@ class SavedAnalysesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: Theme.of(context).primaryColor,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'Kaydedilmiş Analizler',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-            color: Theme.of(context).primaryColor,
-          ),
-        ),
-      ),
+      appBar: CustomAppBar(title: 'Kaydedilmiş Analizler', actions: const []),
       body: StreamBuilder<List<PdfAnalysis>>(
         stream: _service.getAnalyses(),
         builder: (context, snapshot) {
@@ -154,20 +142,7 @@ class AnalysisDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: Theme.of(context).primaryColor,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'Analiz Detayı',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-            color: Theme.of(context).primaryColor,
-          ),
-        ),
-      ),
+      appBar: CustomAppBar(title: 'Analiz Detayı', actions: const []),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(

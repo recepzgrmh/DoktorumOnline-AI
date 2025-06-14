@@ -7,6 +7,7 @@ import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:login_page/services/openai_service.dart';
 import 'package:login_page/widgets/error_widget.dart';
+import 'package:login_page/widgets/custom_appBar.dart';
 
 class OverviewScreen extends StatefulWidget {
   final String uid;
@@ -169,67 +170,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.black87),
-        toolbarHeight: 80,
-        elevation: 0,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.blue.shade50,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.blue.withOpacity(0.15),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: const CircleAvatar(
-                    radius: 26,
-                    backgroundColor: Colors.blue,
-                    child: Icon(
-                      Icons.medical_services_outlined,
-                      color: Colors.white,
-                      size: 30,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Sağlık Asistanı',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    Text(
-                      _gptState,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color:
-                            _gptState == 'Çevrimiçi'
-                                ? Colors.green
-                                : Colors.orange,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+      appBar: CustomAppBar(title: 'DoktorumOnline AI'),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: _messagesRef.orderBy('sentAt').snapshots(),
         builder: (context, snapshot) {

@@ -15,32 +15,59 @@ class _WrapperState extends State<Wrapper> {
   @override
   void initState() {
     super.initState();
-    _reloadUser();
+    _checkUserState();
   }
 
-  Future<void> _reloadUser() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null && !user.emailVerified) {
-      await user.reload();
-      setState(() {});
+  Future<void> _checkUserState() async {
+    try {
+      // Mevcut kullanıcıyı kontrol et
+      User? user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        // Kullanıcı oturumu varsa, token'ı yenile
+        await user.getIdToken(true);
+
+        if (!user.emailVerified) {
+          await user.reload();
+          setState(() {});
+        }
+      }
+    } catch (e) {
+      print("🚨 Kullanıcı durumu kontrol hatası: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: StreamBuilder(
+      body: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            if (snapshot.data!.emailVerified) {
-              return const HomeScreen();
-            } else {
-              return const VerifyAccount();
-            }
-          } else {
+          // Yükleme durumu
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // Hata durumu
+          if (snapshot.hasError) {
+            print("🚨 Auth State Error: ${snapshot.error}");
             return const Opening();
           }
+
+          // Kullanıcı durumu
+          if (snapshot.hasData) {
+            User? user = snapshot.data;
+            if (user != null) {
+              if (user.emailVerified) {
+                return const HomeScreen();
+              } else {
+                return const VerifyAccount();
+              }
+            }
+          }
+
+          // Kullanıcı yoksa giriş ekranına yönlendir
+          return const Opening();
         },
       ),
     );
