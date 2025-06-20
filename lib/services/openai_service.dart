@@ -19,7 +19,11 @@ class OpenAIService {
   /// 1. Adım: Kullanıcı verilerindeki eksik/ belirsiz noktaları
   /// madde madde sorulara dönüştürür.
   /// burası sorularla alakalı
-  Future<List<String>> getFollowUpQuestions(Map<String, String> inputs) async {
+  Future<List<String>> getFollowUpQuestions(
+    Map<String, String> inputs,
+    String userName,
+  ) async {
+    // —— 1) Prompt’u oluştur ————————————————————————————
     final prompt =
         StringBuffer()
           ..writeln("Kullanıcı bilgileri:")
@@ -32,25 +36,42 @@ class OpenAIService {
           ..writeln("- Cinsiyet: ${inputs['Cinsiyet']}")
           ..writeln("- Kan Grubu: ${inputs['Kan Grubu']}")
           ..writeln("- Kronik Rahatsızlık: ${inputs['Kronik Rahatsızlık']}")
-          ..writeln("")
+          ..writeln()
           ..writeln(
             "Lütfen kullanıcının sağladığı tüm hasta bilgilerini dikkatle incele ve aşağıdaki adımları takip et:",
           )
-          ..writeln("")
+          ..writeln()
           ..writeln(
-            "Sunulan verilerde eksik veya belirsiz kalan noktaları belirt ve netleştirmek için kullanıcıya spesifik sorular sor. bu soruları madde madde sor. herbir soru birbirinden farklı olmalı.",
+            "Sunulan verilerde eksik veya belirsiz kalan noktaları belirt ve netleştirmek için kullanıcıya spesifik sorular sor. Bu soruları madde madde sor. Her bir soru birbirinden farklı olmalı.",
           )
-          ..writeln("")
-          ..writeln("Her aşamada net, anlaşılır ve empatik bir dil kullan.");
+          ..writeln()
+          ..writeln(
+            // Burada hâlâ talimat veriyoruz; selamlama ve ilk soruyu kod tarafında birleştireceğiz
+            "Her aşamada net, anlaşılır ve empatik bir dil kullan.",
+          );
 
+    // —— 2) ChatGPT’den yanıtı al ————————————————————————————
     final raw = await _postToChatGPT(prompt.toString());
-    // "1. ...  2. ..." formatını parçalara ayır
+
+    // —— 3) “1. … 2. …” yapısını listeye çevir ——————————————————
     final parts =
         raw
-            .split(RegExp(r'\n(?=\d+\.)'))
+            .split(RegExp(r'\n(?=\d+\.)')) // “\n1.”, “\n2.”’lerden kes
             .map((p) => p.replaceFirst(RegExp(r'^\d+\.\s*'), '').trim())
             .where((p) => p.isNotEmpty)
             .toList();
+
+    // —— 4) Selamlama + ilk soruyu tek mesaja dönüştür —————————
+    if (parts.isNotEmpty) {
+      final greeting =
+          "Merhaba $userName, ben kişisel sağlık danışmanın DoktorumOnline. "
+          "Şikayetine daha sağlıklı yorum yapabilmem için bazı sorular soracağım. "
+          "Bu sorulara cevap verirsen daha iyi sonuç verebilirim.\n\n";
+
+      parts[0] = greeting + parts[0]; // ilk soruyla selamlamayı birleştir
+    }
+
+    // —— 5) Geri dön ————————————————————————————————————————————
     return parts;
   }
 
@@ -60,7 +81,7 @@ class OpenAIService {
     Map<String, String> inputs,
     List<String> answers,
   ) async {
-    final buffer =
+    final prompt =
         StringBuffer()
           ..writeln("Kullanıcı bilgileri:")
           ..writeln("- Boy: ${inputs['Boy']}")
@@ -72,18 +93,23 @@ class OpenAIService {
           ..writeln("- Cinsiyet: ${inputs['Cinsiyet']}")
           ..writeln("- Kan Grubu: ${inputs['Kan Grubu']}")
           ..writeln("- Kronik Hastalık: ${inputs['Kronik Rahatsızlık']}")
-          ..writeln("")
-          ..writeln("Kullanıcının takip sorulara verdiği cevaplar:")
+          ..writeln()
+          ..writeln("Kullanıcının takip sorularına verdiği cevaplar:")
           ..writeAll(
             answers.asMap().entries.map((e) => "${e.key + 1}. ${e.value}"),
             "\n",
           )
-          ..writeln("")
+          ..writeln()
           ..writeln(
-            "Yukarıdaki tüm bilgileri dikkate alarak kapsamlı bir tıbbi değerlendirme yap ve önerilerde bulun hastanın sikayetini çözmeye çalış. eğer hastanın doktora gitmesi gerekiyorsa bile onun şikayetini azaltacak şeyler öner",
+            "Yukarıdaki tüm bilgileri dikkate alarak kapsamlı bir tıbbi değerlendirme yap ve önerilerde bulun. "
+            "Hastanın şikayetini hafifletecek öneriler ver; gerekirse doktora yönlendir.",
+          )
+          ..writeln(
+            "Yanıtına mutlaka şu cümleyle BAŞLA ve kullanıcı bilgilerini yeniden listeleme: "
+            "\"Verdiğiniz bilgilere dayanarak çıkarımlarım şöyle:\"",
           );
 
-    final result = await _postToChatGPT(buffer.toString());
+    final result = await _postToChatGPT(prompt.toString());
     return result.trim();
   }
 

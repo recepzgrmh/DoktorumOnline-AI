@@ -74,7 +74,10 @@ class _HomeScreenState extends State<HomeScreen> {
         complaintId: complaintId,
       );
 
-      final parts = await _service.getFollowUpQuestions(_formData!.toMap());
+      final parts = await _service.getFollowUpQuestions(
+        _formData!.toMap(),
+        FirebaseAuth.instance.currentUser?.displayName as String,
+      );
 
       if (parts.isNotEmpty) {
         await _formService.saveMessage(
