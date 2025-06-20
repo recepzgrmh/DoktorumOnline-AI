@@ -1,3 +1,12 @@
+import java.util.Properties
+import java.io.FileInputStream
+
+// key.prop dosyasını okuyup içindeki bilgileri hazırlayan bölüm
+val keystorePropertiesFile = rootProject.file("key.properties")
+val keystoreProperties = Properties()
+keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+
+
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -9,9 +18,9 @@ plugins {
 }
 
 android {
-    namespace = "com.example.login_page"
+    namespace = "com.zgr.doktorumOnline"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion =  "27.0.12077973"
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -22,11 +31,19 @@ android {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
+    // Sürüm imzalama ayarları (Kotlin DSL formatında)
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties["keyAlias"] as String
+            keyPassword = keystoreProperties["keyPassword"] as String
+            storeFile = file(keystoreProperties["storeFile"] as String)
+            storePassword = keystoreProperties["storePassword"] as String
+        }
+    }
+
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.login_page"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        applicationId = "com.zgr.doktorumOnline"
         minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -35,9 +52,8 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Sürüm (release) derlemesi için yukarıda oluşturduğumuz imza yapılandırmasını kullanıyoruz
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }

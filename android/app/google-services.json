@@ -56,6 +56,58 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:325913484637:android:98c25f71b692b069911cb4",
+        "android_client_info": {
+          "package_name": "com.zgr.doktorumOnline"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "325913484637-fbvot6mbudvs9okvko4dnianv0te85vm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zgr.doktorumOnline",
+            "certificate_hash": "24099334a55568f8583cb0313e06ae32e74714a4"
+          }
+        },
+        {
+          "client_id": "325913484637-tp0ehpvestd732ol68tooo5go8peog3e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zgr.doktorumOnline",
+            "certificate_hash": "c1d970948a07ab9f278f3bdc4b4ebdc840f57f94"
+          }
+        },
+        {
+          "client_id": "325913484637-80fha91qrunaiafu8ld2jidennuvovhg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqL8bfbHK9VANojExNwT_o6BxdG09qwRQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "325913484637-80fha91qrunaiafu8ld2jidennuvovhg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "325913484637-1cre3jc48hrvr196nnjad32vsns4eikt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.loginPage"
+              }
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"
