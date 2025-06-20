@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_launcher_icons/xml_templates.dart';
 import 'package:login_page/models/medical_form_data.dart';
 import 'package:login_page/services/validation_service.dart';
 import 'package:login_page/theme/app_theme.dart';
+import 'package:login_page/widgets/custom_dropdown_widget.dart';
 import 'package:login_page/widgets/custom_text_widget.dart';
 
 class MedicalForm extends StatelessWidget {
@@ -113,15 +115,11 @@ class MedicalForm extends StatelessWidget {
           validator: ValidationService.validateWeight,
           onChanged: (_) => _notifyFormChanged(),
         ),
-        const SizedBox(height: 16),
-        DropdownButtonFormField<String>(
+
+        CustomDropdownWidget<String>(
+          label: 'Cinsiyet',
+          icon: Icons.person,
           value: cinsiyet,
-          decoration: InputDecoration(
-            labelText: 'Cinsiyet',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(borderRadius),
-            ),
-          ),
           items: const [
             DropdownMenuItem(value: 'Erkek', child: Text('Erkek')),
             DropdownMenuItem(value: 'Kadın', child: Text('Kadın')),
@@ -132,15 +130,11 @@ class MedicalForm extends StatelessWidget {
           },
           validator: ValidationService.validateGender,
         ),
-        const SizedBox(height: 16),
-        DropdownButtonFormField<String>(
+
+        CustomDropdownWidget<String>(
+          label: 'Kan Grubu',
+          icon: Icons.bloodtype,
           value: kanGrubu,
-          decoration: InputDecoration(
-            labelText: 'Kan Grubu',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(borderRadius),
-            ),
-          ),
           items: const [
             DropdownMenuItem(value: 'A Rh+', child: Text('A Rh+')),
             DropdownMenuItem(value: 'A Rh-', child: Text('A Rh-')),
@@ -157,7 +151,7 @@ class MedicalForm extends StatelessWidget {
           },
           validator: ValidationService.validateBloodType,
         ),
-        const SizedBox(height: 16),
+
         CustomTextWidget(
           title: 'Şikayetiniz',
           icon: Icons.medical_services,

@@ -3,7 +3,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:file_picker/file_picker.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/models/medical_form_data.dart';
@@ -38,25 +38,6 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _cinsiyet;
   String? _kanGrubu;
   MedicalFormData? _formData;
-
-  PlatformFile? _selectedFile;
-
-  Future<void> _pickFile() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
-      allowMultiple: false,
-    );
-
-    if (result == null) return;
-
-    setState(() {
-      _selectedFile = result.files.first;
-    });
-
-    final filePath = _selectedFile!.path!;
-    final file = File(filePath);
-    final bytes = await file.readAsBytes();
-  }
 
   bool _loading = false;
   final _uid = FirebaseAuth.instance.currentUser!.uid;
@@ -168,22 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             setState(() => _formData = formData);
                           },
                         ),
-                        const SizedBox(height: 24),
-                        CustomButton(
-                          label: 'Dosya Yükle',
-                          onPressed: _pickFile,
-                          backgroundColor: Colors.white,
-                          foregroundColor: theme.primaryColor,
-                          icon: Icon(
-                            Icons.upload_file,
-                            color: theme.primaryColor,
-                          ),
-                          isOutlined: true,
-                          isFullWidth: true,
-                          borderRadius: BorderRadius.circular(12),
-                          borderColor: theme.primaryColor,
-                          elevation: 0,
-                        ),
+
                         const SizedBox(height: 16),
                         CustomButton(
                           label: 'Şikayeti Başlat',

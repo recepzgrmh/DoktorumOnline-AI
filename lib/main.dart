@@ -8,6 +8,9 @@ import 'package:login_page/wrapper.dart';
 import 'package:login_page/screens/opening.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+// GetX için navigator anahtarını tanımla
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -52,7 +55,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    return MaterialApp(
+      navigatorKey: navigatorKey, // GetX navigator anahtarını kullan
       title: 'DoktorumOnline AI',
       theme: AppTheme.lightTheme,
       debugShowCheckedModeBanner: false,

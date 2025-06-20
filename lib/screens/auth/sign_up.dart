@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:login_page/screens/auth/verify_account.dart';
+import 'package:login_page/screens/home_screen.dart';
 import 'package:login_page/widgets/text_inputs.dart';
 import 'package:get/get.dart';
 import 'package:login_page/widgets/custom_button.dart';
@@ -87,7 +89,7 @@ class _SignUpState extends State<SignUp> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 30),
                 // Welcome text
                 Text(
                   "Hesap Oluştur",
@@ -106,15 +108,15 @@ class _SignUpState extends State<SignUp> {
 
                 // TextInputs widget'ları
                 TextInputs(labelText: 'İsim', controller: fullName),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 TextInputs(labelText: 'Soyisim', controller: lastName),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 TextInputs(
                   labelText: 'E-mail',
                   controller: email,
                   isEmail: true,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 TextInputs(
                   labelText: 'Şifre',
                   controller: password,
@@ -166,11 +168,273 @@ class _SignUpState extends State<SignUp> {
                   borderColor: theme.primaryColor,
                   elevation: 0,
                 ),
+                const SizedBox(height: 30),
+
+                // Divider with "veya" text
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: Colors.grey.shade300)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        "veya",
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    Expanded(child: Divider(color: Colors.grey.shade300)),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Social media buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () async {
+                              final navigator = Navigator.of(context);
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder:
+                                    (_) => const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                              );
+
+                              final userCredential = await signInWithGoogle(
+                                context,
+                              );
+
+                              await navigator
+                                  .maybePop(); // Yükleme ekranını kapat
+
+                              if (userCredential != null) {
+                                navigator.pushAndRemoveUntil(
+                                  MaterialPageRoute(
+                                    builder: (_) => const HomeScreen(),
+                                  ),
+                                  (route) => false,
+                                );
+                              }
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.network(
+                                  'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png',
+                                  height: 20,
+                                  width: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Google',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade700,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () {
+                              // Facebook sign-in functionality
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.network(
+                                  'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Facebook_logo_%28square%29.png/960px-Facebook_logo_%28square%29.png',
+                                  height: 20,
+                                  width: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Facebook',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade700,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+Future<UserCredential?> signInWithGoogle(BuildContext context) async {
+  try {
+    print("🔍 Google Sign-In başlatılıyor...");
+
+    // Basit Google Sign-In konfigürasyonu
+    final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
+    if (gUser == null) {
+      print("❌ Kullanıcı Google Sign-In'i iptal etti");
+      return null;
+    }
+
+    print("✅ Google hesabı seçildi: ${gUser.email}");
+
+    // Token'ları al
+    print("🔑 Token'lar alınıyor...");
+    final gAuth = await gUser.authentication;
+    final credential = GoogleAuthProvider.credential(
+      idToken: gAuth.idToken,
+      accessToken: gAuth.accessToken,
+    );
+
+    print("✅ Token'lar başarıyla alındı");
+
+    // Firebase'e ilet
+    print("🔥 Firebase'e kimlik doğrulama yapılıyor...");
+    final userCred = await FirebaseAuth.instance.signInWithCredential(
+      credential,
+    );
+
+    print("✅ Firebase kimlik doğrulama başarılı");
+    return userCred;
+  } on FirebaseAuthException catch (e) {
+    print("🔥 Firebase Auth Hatası: ${e.code} - ${e.message}");
+    if (!context.mounted) return null;
+
+    switch (e.code) {
+      case 'account-exists-with-different-credential':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Bu e-posta zaten başka bir oturum yöntemiyle kayıtlı.',
+            ),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        break;
+      case 'invalid-credential':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Geçersiz kimlik bilgileri.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        break;
+      case 'operation-not-allowed':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Google Sign-In bu projede etkin değil.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        break;
+      case 'user-disabled':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Bu hesap devre dışı bırakılmış.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        break;
+      case 'user-not-found':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Kullanıcı bulunamadı.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        break;
+      case 'weak-password':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Şifre çok zayıf.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        break;
+      case 'email-already-in-use':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Bu e-posta adresi zaten kullanımda.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        break;
+      default:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Kimlik doğrulama hatası: ${e.message}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+    }
+    return null;
+  } catch (e) {
+    print("❌ Genel hata: $e");
+    if (!context.mounted) return null;
+
+    // PlatformException için özel hata yönetimi
+    if (e.toString().contains('ApiException: 10')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Google Sign-In konfigürasyon hatası. Firebase Console\'u kontrol edin.',
+          ),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 5),
+        ),
+      );
+    } else if (e.toString().contains('sign_in_failed')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Google Sign-In başarısız. Lütfen tekrar deneyin.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Beklenmeyen hata: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+    return null;
   }
 }
