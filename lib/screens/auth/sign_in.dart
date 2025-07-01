@@ -4,6 +4,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:login_page/screens/auth/reset_password.dart';
 import 'package:login_page/screens/auth/sign_up.dart';
 import 'package:login_page/screens/home_screen.dart';
+import 'package:login_page/screens/profiles_screen.dart';
 import 'package:login_page/widgets/text_inputs.dart';
 import 'package:get/get.dart';
 import 'package:login_page/wrapper.dart';
@@ -245,7 +246,7 @@ class _SignInState extends State<SignIn> {
                               if (userCredential != null) {
                                 navigator.pushAndRemoveUntil(
                                   MaterialPageRoute(
-                                    builder: (_) => HomeScreen(),
+                                    builder: (_) => ProfilesScreen(),
                                   ),
                                   (route) => false,
                                 );

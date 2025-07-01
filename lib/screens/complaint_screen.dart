@@ -1,58 +1,40 @@
-// lib/screens/home_screen.dart
-
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/models/medical_form_data.dart';
-import 'package:login_page/screens/opening.dart';
 import 'package:login_page/screens/overview_screen.dart';
 import 'package:login_page/services/form_service.dart';
 import 'package:login_page/services/openai_service.dart';
 import 'package:login_page/services/profile_service.dart';
+import 'package:login_page/widgets/complaint_form.dart';
 import 'package:login_page/widgets/custom_appBar.dart';
 import 'package:login_page/widgets/custom_button.dart';
 import 'package:login_page/widgets/loading_widget.dart';
-import 'package:login_page/widgets/medical_form.dart';
-import 'package:login_page/widgets/complaint_form.dart';
 import 'package:login_page/widgets/my_drawer.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class ComplaintScreen extends StatefulWidget {
+  const ComplaintScreen({Key? key}) : super(key: key);
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<ComplaintScreen> createState() => _ComplaintScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _ComplaintScreenState extends State<ComplaintScreen> {
   final _service = OpenAIService();
   final _formService = FormService();
   final _profileService = ProfileService();
   final _formKey = GlobalKey<FormState>();
 
-  // Tam form için controller'lar
-  final boyController = TextEditingController();
-  final yasController = TextEditingController();
-  final kiloController = TextEditingController();
   final sikayetController = TextEditingController();
   final sureController = TextEditingController();
   final ilacController = TextEditingController();
-  final illnessController = TextEditingController();
 
-  // Sadece şikayet formu için controller'lar
-  final complaintSikayetController = TextEditingController();
-  final complaintSureController = TextEditingController();
-  final complaintIlacController = TextEditingController();
-
-  String? _cinsiyet;
-  String? _kanGrubu;
   MedicalFormData? _formData;
   Map<String, String> _userProfileData = {};
 
   bool _loading = false;
   bool _isLoadingProfile = true;
-  bool _hasProfileData = false;
   final _uid = FirebaseAuth.instance.currentUser!.uid;
 
   @override
@@ -63,20 +45,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    // Tam form controller'ları
-    boyController.dispose();
-    yasController.dispose();
-    kiloController.dispose();
     sikayetController.dispose();
     sureController.dispose();
     ilacController.dispose();
-    illnessController.dispose();
-
-    // Şikayet formu controller'ları
-    complaintSikayetController.dispose();
-    complaintSureController.dispose();
-    complaintIlacController.dispose();
-
     super.dispose();
   }
 
@@ -86,20 +57,11 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _userProfileData = profileData;
         _isLoadingProfile = false;
-
-        // Profil bilgilerinin dolu olup olmadığını kontrol et
-        _hasProfileData =
-            profileData['Boy']?.isNotEmpty == true &&
-            profileData['Yaş']?.isNotEmpty == true &&
-            profileData['Kilo']?.isNotEmpty == true &&
-            profileData['Cinsiyet']?.isNotEmpty == true &&
-            profileData['Kan Grubu']?.isNotEmpty == true;
       });
     } catch (e) {
       debugPrint('Profil yükleme hatası: $e');
       setState(() {
         _isLoadingProfile = false;
-        _hasProfileData = false;
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -152,7 +114,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 (_) => OverviewScreen(
                   uid: _uid,
                   complaintId: complaintId,
-                  inputs: _formData!.toMap(),
+                  inputs:
+                      _formData!
+                          .toMap(), // Bu parametre artık kullanılmıyor ama geriye uyumluluk için bırakıyoruz
                   questions: parts,
                 ),
           ),
@@ -177,17 +141,15 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_isLoadingProfile) {
       return Scaffold(
         backgroundColor: Colors.white,
-        appBar: CustomAppBar(title: 'DoktorumOnline AI'),
+        appBar: CustomAppBar(title: 'Şikayet Bildirimi'),
         drawer: const MyDrawer(),
-        body: const LoadingWidget(
-          message: "Profil bilgileri kontrol ediliyor...",
-        ),
+        body: const LoadingWidget(message: "Profil bilgileri yükleniyor..."),
       );
     }
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(title: 'DoktorumOnline AI'),
+      appBar: CustomAppBar(title: 'Şikayet Bildirimi'),
       drawer: const MyDrawer(),
       body:
           _loading
@@ -201,39 +163,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 24),
-
-                        // Profil bilgileri varsa ComplaintForm, yoksa MedicalForm göster
-                        _hasProfileData
-                            ? ComplaintForm(
-                              sikayetController: complaintSikayetController,
-                              sureController: complaintSureController,
-                              ilacController: complaintIlacController,
-                              userProfileData: _userProfileData,
-                              onFormChanged: (formData) {
-                                setState(() => _formData = formData);
-                              },
-                            )
-                            : MedicalForm(
-                              boyController: boyController,
-                              yasController: yasController,
-                              kiloController: kiloController,
-                              sikayetController: sikayetController,
-                              sureController: sureController,
-                              ilacController: ilacController,
-                              illnessController: illnessController,
-                              cinsiyet: _cinsiyet,
-                              kanGrubu: _kanGrubu,
-                              onCinsiyetChanged: (value) {
-                                setState(() => _cinsiyet = value);
-                              },
-                              onKanGrubuChanged: (value) {
-                                setState(() => _kanGrubu = value);
-                              },
-                              onFormChanged: (formData) {
-                                setState(() => _formData = formData);
-                              },
-                            ),
-
+                        ComplaintForm(
+                          sikayetController: sikayetController,
+                          sureController: sureController,
+                          ilacController: ilacController,
+                          userProfileData: _userProfileData,
+                          onFormChanged: (formData) {
+                            setState(() => _formData = formData);
+                          },
+                        ),
                         const SizedBox(height: 16),
                         CustomButton(
                           label: 'Şikayeti Başlat',

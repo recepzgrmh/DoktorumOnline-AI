@@ -16,15 +16,6 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _CustomAppBarState extends State<CustomAppBar> {
-  Future<void> _signOut() async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => Opening()),
-      (route) => false,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -41,15 +32,6 @@ class _CustomAppBarState extends State<CustomAppBar> {
           color: theme.primaryColor,
         ),
       ),
-      actions:
-          widget.actions ??
-          [
-            IconButton(
-              onPressed: _signOut,
-              icon: const Icon(Icons.logout_rounded),
-              color: theme.primaryColor,
-            ),
-          ],
     );
   }
 }

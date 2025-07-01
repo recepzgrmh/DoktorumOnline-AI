@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/screens/opening.dart';
+import 'package:login_page/screens/profiles_screen.dart';
 import 'package:login_page/widgets/custom_button.dart';
 import 'package:get/get.dart';
 import 'package:login_page/screens/home_Screen.dart';
@@ -73,7 +74,7 @@ class _VerifyAccountState extends State<VerifyAccount> {
               });
         }
         // Doğrulama başarılı, anasayfaya yönlendir
-        Get.offAll(() => const HomeScreen());
+        Get.offAll(() => ProfilesScreen());
       } else {
         Get.snackbar(
           "Hesap Doğrulanmadı",

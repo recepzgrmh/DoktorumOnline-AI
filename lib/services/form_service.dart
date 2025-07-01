@@ -5,8 +5,69 @@ class FormService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  // Kullanıcı profil bilgilerini kaydet
+  Future<void> saveUserProfile({
+    required Map<String, String> profileData,
+  }) async {
+    final uid = _auth.currentUser!.uid;
+    final userDoc = _firestore.collection('users').doc(uid);
+
+    // Mevcut kullanıcı verilerini al
+    final currentData = await userDoc.get();
+    final profiles =
+        currentData.exists
+            ? (currentData.data()?['profiles'] as List<dynamic>? ?? [])
+            : [];
+
+    if (profiles.isNotEmpty) {
+      // Profil sistemi varsa, aktif profili güncelle
+      final updatedProfiles =
+          profiles.map((profile) {
+            final profileMap = Map<String, dynamic>.from(profile);
+            if (profileMap['isActive'] == true) {
+              return {
+                ...profileMap,
+                'height':
+                    int.tryParse(profileData['Boy'] ?? '') ??
+                    profileMap['height'],
+                'age':
+                    int.tryParse(profileData['Yaş'] ?? '') ?? profileMap['age'],
+                'weight':
+                    double.tryParse(profileData['Kilo'] ?? '') ??
+                    profileMap['weight'],
+                'gender': profileData['Cinsiyet'] ?? profileMap['gender'],
+                'bloodType':
+                    profileData['Kan Grubu'] ?? profileMap['bloodType'],
+                'chronicIllness':
+                    profileData['Kronik Rahatsızlık'] ??
+                    profileMap['chronicIllness'],
+                'updatedAt': DateTime.now().toIso8601String(),
+              };
+            }
+            return profile;
+          }).toList();
+
+      await userDoc.set({
+        'profiles': updatedProfiles,
+        'lastUpdated': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } else {
+      // Eski yapıyı kullan (geriye uyumluluk için)
+      await userDoc.set({
+        'boy': profileData['Boy'],
+        'yas': profileData['Yaş'],
+        'kilo': profileData['Kilo'],
+        'cinsiyet': profileData['Cinsiyet'],
+        'kan_grubu': profileData['Kan Grubu'],
+        'kronik_rahatsizlik': profileData['Kronik Rahatsızlık'],
+        'lastUpdated': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    }
+  }
+
+  // Sadece şikayet bilgilerini kaydet
   Future<String> saveComplaint({
-    required Map<String, String> inputs,
+    required Map<String, String> complaintData,
     required String complaintId,
   }) async {
     final uid = _auth.currentUser!.uid;
@@ -17,17 +78,44 @@ class FormService {
         .doc(complaintId);
 
     await complaintDoc.set({
-      'boy': inputs['Boy'],
-      'yas': inputs['Yaş'],
-      'kilo': inputs['Kilo'],
-      'sikayet': inputs['Şikayet'],
-      'sure': inputs['Şikayet Süresi'],
-      'ilac': inputs['Mevcut İlaçlar'],
-      'Kronik Rahatsızlık': inputs['Kronik Rahatsızlık'],
-      'cinsiyet': inputs['Cinsiyet'],
-      'kan_grubu': inputs['Kan Grubu'],
+      'sikayet': complaintData['Şikayet'],
+      'sure': complaintData['Şikayet Süresi'],
+      'ilac': complaintData['Mevcut İlaçlar'],
+      'createdAt': FieldValue.serverTimestamp(),
       'lastAnalyzed': FieldValue.serverTimestamp(),
     });
+
+    return complaintId;
+  }
+
+  // Şikayet ve kullanıcı profil bilgilerini birlikte kaydet
+  Future<String> saveComplaintWithProfile({
+    required Map<String, String> formData,
+    required String complaintId,
+  }) async {
+    final uid = _auth.currentUser!.uid;
+
+    // Önce kullanıcı profil bilgilerini kaydet
+    await saveUserProfile(
+      profileData: {
+        'Boy': formData['Boy'] ?? '',
+        'Yaş': formData['Yaş'] ?? '',
+        'Kilo': formData['Kilo'] ?? '',
+        'Cinsiyet': formData['Cinsiyet'] ?? '',
+        'Kan Grubu': formData['Kan Grubu'] ?? '',
+        'Kronik Rahatsızlık': formData['Kronik Rahatsızlık'] ?? '',
+      },
+    );
+
+    // Sonra sadece şikayet bilgilerini kaydet
+    await saveComplaint(
+      complaintData: {
+        'Şikayet': formData['Şikayet'] ?? '',
+        'Şikayet Süresi': formData['Şikayet Süresi'] ?? '',
+        'Mevcut İlaçlar': formData['Mevcut İlaçlar'] ?? '',
+      },
+      complaintId: complaintId,
+    );
 
     return complaintId;
   }
@@ -66,5 +154,70 @@ class FormService {
             .get();
 
     return snapshot.docs.map((doc) => doc.data()).toList();
+  }
+
+  Future<Map<String, String>> getUserProfileData() async {
+    final uid = _auth.currentUser!.uid;
+    final userDoc = await _firestore.collection('users').doc(uid).get();
+
+    if (userDoc.exists) {
+      final data = userDoc.data() as Map<String, dynamic>;
+
+      // Önce aktif profil bilgilerini kontrol et
+      final profiles = data['profiles'] as List<dynamic>? ?? [];
+      final activeProfile = profiles.firstWhere(
+        (profile) => profile['isActive'] == true,
+        orElse: () => {},
+      );
+
+      if (activeProfile.isNotEmpty) {
+        // Aktif profil varsa onun bilgilerini kullan
+        return {
+          'Boy': activeProfile['height']?.toString() ?? '',
+          'Yaş': activeProfile['age']?.toString() ?? '',
+          'Kilo': activeProfile['weight']?.toString() ?? '',
+          'Cinsiyet': activeProfile['gender']?.toString() ?? '',
+          'Kan Grubu': activeProfile['bloodType']?.toString() ?? '',
+          'Kronik Rahatsızlık':
+              activeProfile['chronicIllness']?.toString() ?? '',
+        };
+      } else {
+        // Eski yapıyı kullan (geriye uyumluluk için)
+        return {
+          'Boy': data['boy']?.toString() ?? '',
+          'Yaş': data['yas']?.toString() ?? '',
+          'Kilo': data['kilo']?.toString() ?? '',
+          'Cinsiyet': data['cinsiyet']?.toString() ?? '',
+          'Kan Grubu': data['kan_grubu']?.toString() ?? '',
+          'Kronik Rahatsızlık': data['kronik_rahatsizlik']?.toString() ?? '',
+        };
+      }
+    }
+
+    return {};
+  }
+
+  // Şikayet detaylarını kullanıcı profil bilgileriyle birlikte getir
+  Future<Map<String, dynamic>> getComplaintWithProfile(
+    String complaintId,
+  ) async {
+    final uid = _auth.currentUser!.uid;
+
+    // Kullanıcı profil bilgilerini al
+    final userDoc = await _firestore.collection('users').doc(uid).get();
+    final userData = userDoc.data() as Map<String, dynamic>? ?? {};
+
+    // Şikayet bilgilerini al
+    final complaintDoc =
+        await _firestore
+            .collection('users')
+            .doc(uid)
+            .collection('complaints')
+            .doc(complaintId)
+            .get();
+    final complaintData = complaintDoc.data() as Map<String, dynamic>? ?? {};
+
+    // Birleştir
+    return {...userData, ...complaintData};
   }
 }

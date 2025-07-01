@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:login_page/screens/complaint_screen.dart';
 import 'package:login_page/screens/home_screen.dart';
 import 'package:login_page/screens/old_chat_screen.dart';
 import 'package:login_page/screens/opening.dart';
-import 'package:login_page/screens/settings_screen.dart';
+import 'package:login_page/screens/pdf_analysis_screen.dart';
+import 'package:login_page/screens/profiles_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:login_page/screens/test_screen.dart';
 
 class MyDrawer extends StatefulWidget {
   const MyDrawer({super.key});
@@ -73,7 +74,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 // Home list tile
                 _buildDrawerItem(
                   icon: Icons.home_rounded,
-                  title: 'HOME',
+                  title: 'ŞİKAYET BAŞLAT',
                   onTap: () {
                     Navigator.of(context).pop();
                     Navigator.push(
@@ -86,7 +87,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 // Chat list tile
                 _buildDrawerItem(
                   icon: Icons.chat_bubble_rounded,
-                  title: 'OLD CHATS',
+                  title: 'ANALİZ GEÇMİŞİ',
                   onTap: () {
                     Navigator.of(context).pop();
                     Navigator.push(
@@ -103,12 +104,25 @@ class _MyDrawerState extends State<MyDrawer> {
                 // File Upload list tile
                 _buildDrawerItem(
                   icon: Icons.upload_file_rounded,
-                  title: 'FILE UPLOAD',
+                  title: 'TAHLİL YÜKLEME',
                   onTap: () {
                     Navigator.of(context).pop();
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => TestScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => PdfAnalysisScreen(),
+                      ),
+                    );
+                  },
+                ),
+
+                _buildDrawerItem(
+                  icon: Icons.person,
+                  title: 'PROFİLLER',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => ProfilesScreen()),
                     );
                   },
                 ),

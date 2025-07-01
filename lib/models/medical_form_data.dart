@@ -21,6 +21,7 @@ class MedicalFormData {
     required this.chronicDisease,
   });
 
+  // Tüm form verilerini döndür
   Map<String, String> toMap() {
     return {
       'Boy': height,
@@ -32,6 +33,27 @@ class MedicalFormData {
       'Şikayet Süresi': duration,
       'Mevcut İlaçlar': medication,
       'Kronik Rahatsızlık': chronicDisease,
+    };
+  }
+
+  // Sadece kişisel profil bilgilerini döndür
+  Map<String, String> toProfileMap() {
+    return {
+      'Boy': height,
+      'Yaş': age,
+      'Kilo': weight,
+      'Cinsiyet': gender,
+      'Kan Grubu': bloodType,
+      'Kronik Rahatsızlık': chronicDisease,
+    };
+  }
+
+  // Sadece şikayet bilgilerini döndür
+  Map<String, String> toComplaintMap() {
+    return {
+      'Şikayet': complaint,
+      'Şikayet Süresi': duration,
+      'Mevcut İlaçlar': medication,
     };
   }
 

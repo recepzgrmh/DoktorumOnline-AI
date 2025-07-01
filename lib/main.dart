@@ -55,7 +55,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       navigatorKey: navigatorKey, // GetX navigator anahtarını kullan
       title: 'DoktorumOnline AI',
       theme: AppTheme.lightTheme,

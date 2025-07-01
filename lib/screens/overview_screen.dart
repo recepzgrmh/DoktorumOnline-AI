@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:login_page/services/openai_service.dart';
+import 'package:login_page/services/form_service.dart';
 import 'package:login_page/widgets/error_widget.dart';
 import 'package:login_page/widgets/custom_appBar.dart';
 import 'package:login_page/widgets/my_drawer.dart';
@@ -35,6 +36,7 @@ class _OverviewScreenState extends State<OverviewScreen>
     with TickerProviderStateMixin {
   late final OpenAI _openAI;
   final OpenAIService _service = OpenAIService();
+  final FormService _formService = FormService();
   late final String _apiKey;
 
   final ChatUser _currentUser = ChatUser(id: '1', firstName: 'Sen');
@@ -115,6 +117,11 @@ class _OverviewScreenState extends State<OverviewScreen>
         .collection('complaints')
         .doc(widget.complaintId)
         .collection('messages');
+
+    // Eğer sadece tek mesaj varsa (değerlendirme mesajı), flow'u tamamla
+    if (widget.questions.length == 1) {
+      _flowComplete = true;
+    }
   }
 
   @override
@@ -380,7 +387,9 @@ class _OverviewScreenState extends State<OverviewScreen>
       });
 
       // İlk tanısal soru–cevap akışı
-      if (!_flowComplete && _currentQIndex < widget.questions.length) {
+      if (!_flowComplete &&
+          widget.questions.length > 1 &&
+          _currentQIndex < widget.questions.length) {
         _answers.add(userMsg.text.trim());
 
         if (_currentQIndex + 1 < widget.questions.length) {
@@ -394,8 +403,27 @@ class _OverviewScreenState extends State<OverviewScreen>
           setState(() => _currentQIndex++);
         } else {
           // Nihai rapor
+          final complaintData = await _formService.getComplaintWithProfile(
+            widget.complaintId,
+          );
+          final profileData = {
+            'Boy': complaintData['boy']?.toString() ?? '',
+            'Yaş': complaintData['yas']?.toString() ?? '',
+            'Kilo': complaintData['kilo']?.toString() ?? '',
+            'Cinsiyet': complaintData['cinsiyet']?.toString() ?? '',
+            'Kan Grubu': complaintData['kan_grubu']?.toString() ?? '',
+            'Kronik Rahatsızlık':
+                complaintData['kronik_rahatsizlik']?.toString() ?? '',
+          };
+          final complaintInfo = {
+            'Şikayet': complaintData['sikayet']?.toString() ?? '',
+            'Şikayet Süresi': complaintData['sure']?.toString() ?? '',
+            'Mevcut İlaçlar': complaintData['ilac']?.toString() ?? '',
+          };
+
           final report = await _service.getFinalEvaluation(
-            widget.inputs,
+            profileData,
+            complaintInfo,
             _answers,
           );
           await _messagesRef.add({
@@ -406,7 +434,7 @@ class _OverviewScreenState extends State<OverviewScreen>
           setState(() => _flowComplete = true);
         }
       } else {
-        // Normal ChatGPT modu
+        // Normal ChatGPT modu - soru-cevap akışı tamamlandı veya hiç soru yok
         final historySnapshot = await _messagesRef.orderBy('sentAt').get();
         final openAIHistory =
             historySnapshot.docs.map((doc) {

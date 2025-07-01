@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:login_page/screens/home_Screen.dart';
 import 'package:login_page/screens/opening.dart';
 import 'package:login_page/screens/auth/verify_account.dart';
+import 'package:login_page/screens/profiles_screen.dart';
 
 class Wrapper extends StatefulWidget {
   const Wrapper({super.key});
@@ -59,7 +60,7 @@ class _WrapperState extends State<Wrapper> {
             User? user = snapshot.data;
             if (user != null) {
               if (user.emailVerified) {
-                return const HomeScreen();
+                return ProfilesScreen();
               } else {
                 return const VerifyAccount();
               }

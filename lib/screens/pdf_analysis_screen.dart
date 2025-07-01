@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:login_page/widgets/custom_button.dart';
+import 'package:login_page/widgets/my_drawer.dart';
 import '../services/openai_service.dart';
 import '../services/pdf_analysis_service.dart';
 import 'saved_analyses_screen.dart';
 import 'package:login_page/widgets/custom_appBar.dart';
 
-class TestScreen extends StatefulWidget {
-  const TestScreen({super.key});
+class PdfAnalysisScreen extends StatefulWidget {
+  const PdfAnalysisScreen({super.key});
 
   @override
-  _TestScreenState createState() => _TestScreenState();
+  _PdfAnalysisScreenState createState() => _PdfAnalysisScreenState();
 }
 
-class _TestScreenState extends State<TestScreen> {
+class _PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
   final _service = OpenAIService();
   final _analysisService = PdfAnalysisService();
   PlatformFile? _selectedFile;
   String _status = 'Lütfen bir PDF dosyası seçin';
+  // ignore: unused_field
   Map<String, String>? _analysis;
   bool _isLoading = false;
 
@@ -162,8 +164,10 @@ class _TestScreenState extends State<TestScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: CustomAppBar(
-        title: 'PDF Analiz',
+      drawer: MyDrawer(),
+      appBar: AppBar(
+        foregroundColor: Colors.blue,
+        title: Text('PDF Analiz', style: TextStyle(color: Colors.blue)),
         actions: [
           IconButton(
             icon: const Icon(Icons.history),

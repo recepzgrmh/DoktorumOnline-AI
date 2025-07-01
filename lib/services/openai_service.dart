@@ -20,22 +20,27 @@ class OpenAIService {
   /// madde madde sorulara dönüştürür.
   /// burası sorularla alakalı
   Future<List<String>> getFollowUpQuestions(
-    Map<String, String> inputs,
+    Map<String, String> profileData,
+    Map<String, String> complaintData,
     String userName,
   ) async {
-    // —— 1) Prompt’u oluştur ————————————————————————————
+    // —— 1) Prompt'u oluştur ————————————————————————————
     final prompt =
         StringBuffer()
-          ..writeln("Kullanıcı bilgileri:")
-          ..writeln("- Boy: ${inputs['Boy']}")
-          ..writeln("- Yaş: ${inputs['Yaş']}")
-          ..writeln("- Kilo: ${inputs['Kilo']}")
-          ..writeln("- Şikayet: ${inputs['Şikayet']}")
-          ..writeln("- Şikayet Süresi: ${inputs['Şikayet Süresi']}")
-          ..writeln("- Mevcut İlaçlar: ${inputs['Mevcut İlaçlar']}")
-          ..writeln("- Cinsiyet: ${inputs['Cinsiyet']}")
-          ..writeln("- Kan Grubu: ${inputs['Kan Grubu']}")
-          ..writeln("- Kronik Rahatsızlık: ${inputs['Kronik Rahatsızlık']}")
+          ..writeln("Kullanıcı profil bilgileri:")
+          ..writeln("- Boy: ${profileData['Boy']}")
+          ..writeln("- Yaş: ${profileData['Yaş']}")
+          ..writeln("- Kilo: ${profileData['Kilo']}")
+          ..writeln("- Cinsiyet: ${profileData['Cinsiyet']}")
+          ..writeln("- Kan Grubu: ${profileData['Kan Grubu']}")
+          ..writeln(
+            "- Kronik Rahatsızlık: ${profileData['Kronik Rahatsızlık']}",
+          )
+          ..writeln()
+          ..writeln("Şikayet bilgileri:")
+          ..writeln("- Şikayet: ${complaintData['Şikayet']}")
+          ..writeln("- Şikayet Süresi: ${complaintData['Şikayet Süresi']}")
+          ..writeln("- Mevcut İlaçlar: ${complaintData['Mevcut İlaçlar']}")
           ..writeln()
           ..writeln(
             "Lütfen kullanıcının sağladığı tüm hasta bilgilerini dikkatle incele ve aşağıdaki adımları takip et:",
@@ -50,49 +55,69 @@ class OpenAIService {
             "Her aşamada net, anlaşılır ve empatik bir dil kullan.",
           );
 
-    // —— 2) ChatGPT’den yanıtı al ————————————————————————————
+    // —— 2) ChatGPT'den yanıtı al ————————————————————————————
     final raw = await _postToChatGPT(prompt.toString());
 
-    // —— 3) “1. … 2. …” yapısını listeye çevir ——————————————————
+    // —— 3) "1. … 2. …" yapısını listeye çevir ——————————————————
     final parts =
         raw
-            .split(RegExp(r'\n(?=\d+\.)')) // “\n1.”, “\n2.”’lerden kes
+            .split(RegExp(r'\n(?=\d+\.)')) // "\n1.", "\n2."'lerden kes
             .map((p) => p.replaceFirst(RegExp(r'^\d+\.\s*'), '').trim())
             .where((p) => p.isNotEmpty)
             .toList();
 
-    // —— 4) Selamlama + ilk soruyu tek mesaja dönüştür —————————
-    if (parts.isNotEmpty) {
+    // —— 4) Eğer hiç soru yoksa, doğrudan değerlendirme yap —————————
+    if (parts.isEmpty) {
+      // Hiç soru yoksa, doğrudan selamlama ve değerlendirme mesajı oluştur
       final greeting =
           "Merhaba $userName, ben kişisel sağlık danışmanın DoktorumOnline. "
-          "Şikayetine daha sağlıklı yorum yapabilmem için bazı sorular soracağım. "
-          "Bu sorulara cevap verirsen daha iyi sonuç verebilirim.\n\n";
+          "Verdiğiniz bilgiler yeterli görünüyor. Şikayetinizi değerlendirip size önerilerde bulunacağım.\n\n";
 
-      parts[0] = greeting + parts[0]; // ilk soruyla selamlamayı birleştir
+      // Doğrudan değerlendirme yap
+      final evaluation = await getFinalEvaluation(
+        profileData,
+        complaintData,
+        [], // Boş cevap listesi
+      );
+
+      return [greeting + evaluation];
     }
 
-    // —— 5) Geri dön ————————————————————————————————————————————
+    // —— 5) Selamlama + ilk soruyu tek mesaja dönüştür —————————
+    final greeting =
+        "Merhaba $userName, ben kişisel sağlık danışmanın DoktorumOnline. "
+        "Şikayetine daha sağlıklı yorum yapabilmem için bazı sorular soracağım. "
+        "Bu sorulara cevap verirsen daha iyi sonuç verebilirim.\n\n";
+
+    parts[0] = greeting + parts[0]; // ilk soruyla selamlamayı birleştir
+
+    // —— 6) Geri dön ————————————————————————————————————————————
     return parts;
   }
 
   /// 2. Adım: kullanıcın mesajlarını değerlendirip tıbbi yanıt alma
   /// burası son mesaj
   Future<String> getFinalEvaluation(
-    Map<String, String> inputs,
+    Map<String, String> profileData,
+    Map<String, String> complaintData,
     List<String> answers,
   ) async {
     final prompt =
         StringBuffer()
-          ..writeln("Kullanıcı bilgileri:")
-          ..writeln("- Boy: ${inputs['Boy']}")
-          ..writeln("- Yaş: ${inputs['Yaş']}")
-          ..writeln("- Kilo: ${inputs['Kilo']}")
-          ..writeln("- Şikayet: ${inputs['Şikayet']}")
-          ..writeln("- Şikayet Süresi: ${inputs['Şikayet Süresi']}")
-          ..writeln("- Mevcut İlaçlar: ${inputs['Mevcut İlaçlar']}")
-          ..writeln("- Cinsiyet: ${inputs['Cinsiyet']}")
-          ..writeln("- Kan Grubu: ${inputs['Kan Grubu']}")
-          ..writeln("- Kronik Hastalık: ${inputs['Kronik Rahatsızlık']}")
+          ..writeln("Kullanıcı profil bilgileri:")
+          ..writeln("- Boy: ${profileData['Boy']}")
+          ..writeln("- Yaş: ${profileData['Yaş']}")
+          ..writeln("- Kilo: ${profileData['Kilo']}")
+          ..writeln("- Cinsiyet: ${profileData['Cinsiyet']}")
+          ..writeln("- Kan Grubu: ${profileData['Kan Grubu']}")
+          ..writeln(
+            "- Kronik Rahatsızlık: ${profileData['Kronik Rahatsızlık']}",
+          )
+          ..writeln()
+          ..writeln("Şikayet bilgileri:")
+          ..writeln("- Şikayet: ${complaintData['Şikayet']}")
+          ..writeln("- Şikayet Süresi: ${complaintData['Şikayet Süresi']}")
+          ..writeln("- Mevcut İlaçlar: ${complaintData['Mevcut İlaçlar']}")
           ..writeln()
           ..writeln("Kullanıcının takip sorularına verdiği cevaplar:")
           ..writeAll(
