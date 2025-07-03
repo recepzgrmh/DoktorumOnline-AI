@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:login_page/widgets/custom_appBar.dart';
+import 'package:login_page/widgets/coachmark_desc.dart';
 import 'package:login_page/widgets/custom_button.dart';
 import 'package:login_page/widgets/my_drawer.dart';
 import 'package:login_page/widgets/profile_form.dart';
 import 'package:login_page/widgets/empty_state_widget.dart';
 import 'package:login_page/widgets/loading_widget.dart';
 import 'package:login_page/services/profile_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilesScreen extends StatefulWidget {
   const ProfilesScreen({super.key});
@@ -16,6 +17,14 @@ class ProfilesScreen extends StatefulWidget {
 }
 
 class _ProfilesScreenState extends State<ProfilesScreen> {
+  TutorialCoachMark? tutorialCoachMark;
+  List<TargetFocus> targets = [];
+
+  final GlobalKey _menuDrawer = GlobalKey();
+  final GlobalKey _newUser = GlobalKey();
+  GlobalKey keyButton2 = GlobalKey();
+  GlobalKey keyButton3 = GlobalKey();
+
   final _profileService = ProfileService();
   final _formKey = GlobalKey<FormState>();
 
@@ -38,6 +47,120 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
     _loadProfiles();
   }
 
+  Future<void> _checkAndShowTutorial() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final hasSeenTutorial = prefs.getBool('hasSeenProfilesTutorial') ?? false;
+
+      if (!hasSeenTutorial) {
+        _showTutorialCoachmar();
+        // Tutorial'ı gördüğünü kaydet
+        await prefs.setBool('hasSeenProfilesTutorial', true);
+      }
+    } catch (e) {
+      // SharedPreferences hatası durumunda tutorial'ı göster
+      _showTutorialCoachmar();
+    }
+  }
+
+  void _showTutorialCoachmar() {
+    _iniTarget();
+    tutorialCoachMark = TutorialCoachMark(targets: targets)
+      ..show(context: context, rootOverlay: true);
+  }
+
+  void _iniTarget() {
+    targets = [
+      TargetFocus(
+        identify: "Drawer Key",
+        keyTarget: _menuDrawer,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return CoachmarkDesc(
+                text: 'Menüye buradan ulaşabilirsin',
+                next: 'İleri',
+                skip: 'Geç',
+                onNext: controller.next,
+                onSkip: controller.skip,
+              );
+            },
+          ),
+        ],
+      ),
+
+      TargetFocus(
+        identify: "Help Button",
+        keyTarget: keyButton3,
+
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return CoachmarkDesc(
+                text:
+                    'İhtiyacın olduğunda bilgileri tekrar buradan ulaşbilirsin',
+                next: 'İleri',
+                skip: 'Geç',
+                onNext: controller.next,
+                onSkip: controller.skip,
+              );
+            },
+          ),
+        ],
+      ),
+    ];
+
+    // Eğer profil varsa profil kartı tutorial'ını ekle
+    if (_profiles.isNotEmpty) {
+      targets.add(
+        TargetFocus(
+          shape: ShapeLightFocus.RRect,
+          identify: "Profile Card Key",
+          keyTarget: keyButton2,
+          contents: [
+            TargetContent(
+              align: ContentAlign.bottom,
+              builder: (context, controller) {
+                return CoachmarkDesc(
+                  text:
+                      'Profil kartına tıklayarak düzenleyebilir veya aktif yapabilirsin',
+                  next: 'İleri',
+                  skip: 'Geç',
+                  onNext: controller.next,
+                  onSkip: controller.skip,
+                );
+              },
+            ),
+          ],
+        ),
+      );
+    }
+
+    targets.add(
+      TargetFocus(
+        identify: "Button Key",
+        keyTarget: _newUser,
+        shape: ShapeLightFocus.RRect,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            builder: (context, controller) {
+              return CoachmarkDesc(
+                text: 'Buradan yeni profil ekleyebilirsin',
+                next: 'İleri',
+                skip: 'Geç',
+                onNext: controller.next,
+                onSkip: controller.skip,
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -55,6 +178,13 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
         _profiles = profiles;
         _isLoading = false;
       });
+
+      // Profiller yüklendikten sonra tutorial'ı kontrol et
+      if (mounted) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _checkAndShowTutorial();
+        });
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -300,7 +430,42 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       drawer: MyDrawer(),
-      appBar: const CustomAppBar(title: ''),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF2196F3),
+        elevation: 0,
+        centerTitle: true,
+        title: const Text(
+          'Profiller',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+            color: Color(0xFF2196F3),
+          ),
+        ),
+        leading: Builder(
+          builder:
+              (context) => IconButton(
+                key: _menuDrawer,
+                icon: const Icon(Icons.menu),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              ),
+        ),
+        actions: [
+          IconButton(
+            key: keyButton3,
+            icon: const Icon(Icons.help_outline),
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setBool('hasSeenProfilesTutorial', false);
+              _showTutorialCoachmar();
+            },
+            tooltip: 'Tutorial\'ı Tekrar Göster',
+          ),
+        ],
+      ),
       body:
           _isLoading
               ? const LoadingWidget(message: "Profiller yükleniyor...")
@@ -345,7 +510,7 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
                                       padding: const EdgeInsets.only(
                                         bottom: 16.0,
                                       ),
-                                      child: _buildProfileCard(profile),
+                                      child: _buildProfileCard(profile, index),
                                     );
                                   },
                                 ),
@@ -353,6 +518,7 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
 
                       const SizedBox(height: 16),
                       CustomButton(
+                        key: _newUser,
                         label: 'Yeni Profil Ekle',
                         onPressed: () => _showProfileForm(),
                         icon: const Icon(Icons.add),
@@ -374,11 +540,15 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
     );
   }
 
-  Widget _buildProfileCard(Map<String, dynamic> profile) {
+  Widget _buildProfileCard(Map<String, dynamic> profile, int index) {
     final isActive = profile['isActive'] as bool;
     final profileId = profile['id'] as String;
 
+    // İlk profil kartı için GlobalKey kullan
+    final GlobalKey cardKey = index == 0 ? keyButton2 : GlobalKey();
+
     return Card(
+      key: cardKey,
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(

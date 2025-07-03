@@ -5,8 +5,14 @@ import 'package:login_page/screens/opening.dart';
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
   final List<Widget>? actions;
+  final GlobalKey? menuKey;
 
-  const CustomAppBar({super.key, required this.title, this.actions});
+  const CustomAppBar({
+    super.key,
+    required this.title,
+    this.actions,
+    this.menuKey,
+  });
 
   @override
   State<CustomAppBar> createState() => _CustomAppBarState();
