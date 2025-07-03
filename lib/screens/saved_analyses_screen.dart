@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:login_page/widgets/custom_appBar.dart';
 import '../models/pdf_analysis.dart';
 import '../services/pdf_analysis_service.dart';
-import '../widgets/custom_button.dart';
 
 class SavedAnalysesScreen extends StatelessWidget {
   final PdfAnalysisService _service = PdfAnalysisService();

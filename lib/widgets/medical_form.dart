@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_launcher_icons/xml_templates.dart';
 import 'package:login_page/models/medical_form_data.dart';
 import 'package:login_page/services/validation_service.dart';
-import 'package:login_page/theme/app_theme.dart';
 import 'package:login_page/widgets/custom_dropdown_widget.dart';
 import 'package:login_page/widgets/custom_text_widget.dart';
 

@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:login_page/screens/auth/verify_account.dart';
-import 'package:login_page/screens/home_screen.dart';
 import 'package:login_page/screens/profiles_screen.dart';
 import 'package:login_page/widgets/text_inputs.dart';
 import 'package:get/get.dart';

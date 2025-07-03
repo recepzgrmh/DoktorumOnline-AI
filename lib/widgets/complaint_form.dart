@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:login_page/models/medical_form_data.dart';
 import 'package:login_page/services/validation_service.dart';
-import 'package:login_page/theme/app_theme.dart';
 import 'package:login_page/widgets/custom_text_widget.dart';
 
 class ComplaintForm extends StatelessWidget {
