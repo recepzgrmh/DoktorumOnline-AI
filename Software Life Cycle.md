@@ -1,6 +1,84 @@
+flowchart TD
+%% ───────────── 1) Launch & Auth ─────────────
+subgraph LAUNCH\_&_AUTH[" 1 Launch & Authentication "]
+A["App Launch<br/>(main.dart)"] --> B{Auth State?}
+B -->|Loading| C["Loading …"]
+B -->|Error| D["Opening Screen"]
+B -->|No User| D
+B -->|User Logged-In| E{Email Verified?}
+E -->|Yes| F["ProfilesScreen"]
+E -->|No| G["VerifyAccount"]
+end
+
+%% ───────────── 2) Opening / Sign in / Sign up ─────────────
+D --> H{Opening Choice}
+H --> I["Sign In"]
+H --> J["Sign Up"]
+
+subgraph SIGN_IN_FLOW[" 2 Sign In Flow "]
+I --> K["Firebase signIn()"]
+K -->|Success| B
+I --> L["ResetPassword"]
+end
+
+subgraph SIGN_UP_FLOW[" 3 Sign Up Flow "]
+J --> M["Create User"]
+M --> N["sendEmailVerification()"]
+N --> G
+end
+
+%% ───────────── 3) Verify ─────────────
+subgraph VERIFY_FLOW[" 4 Verify Flow "]
+G -->|Email Verified| F
+end
+
+%% ───────────── 4) Drawer Navigation ─────────────
+subgraph DRAWER[" 5 Drawer Navigation "]
+F --> O["Drawer Menu"]
+O --> P["HomeScreen (Şikayet)"]
+O --> Q["OldChatScreen"]
+O --> R["PdfAnalysisScreen"]
+O --> S["ProfilesScreen"]
+O --> T["Sign Out"]
+T --> D
+end
+
+%% ───────────── 5) Complaint / AI Q&A ─────────────
+subgraph COMPLAINT[" 6 Complaint Flow "]
+P --> U{Active Profile?}
+U -->|Yes| V["Mini Complaint Form"]
+U -->|No| W["Full Complaint Form"]
+V --> X["Validate + Save"]
+W --> X
+X --> Y["Generate AI Questions"]
+Y --> Z["OverviewScreen"]
+end
+
+subgraph QNA[" 7 AI Q&A Loop "]
+Z --> AA["AI asks<br/>follow-up"]
+AA --> BB["User answers"]
+BB --> AA
+AA --> CC["Final Evaluation"]
+end
+
+%% ───────────── 6) History ─────────────
+subgraph HISTORY[" 8 Analysis History "]
+Q --> DD["Complaint Cards"]
+DD --> EE["ChatHistoryDetail"]
+end
+
+%% ───────────── 7) PDF Analysis ─────────────
+subgraph PDF[" 9 PDF Analysis "]
+R --> FF["Select PDF"]
+FF --> GG["Extract Text"]
+GG --> HH["Chunk & AI Analyse"]
+HH --> II["Save + Show Result"]
+end
+
 # DoktorumOnline AI - Uygulama Akış Rehberi
 
 ## 📋 İçindekiler
+
 - [1. Açılış ve Kimlik Doğrulama](#1-açılış-ve-kimlik-doğrulama)
 - [2. Giriş ve Kayıt Akışları](#2-giriş-ve-kayıt-akışları)
 - [3. Mail Doğrulama Ekranı](#3-mail-doğrulama-ekranı)
@@ -19,18 +97,20 @@
 ## 1. Açılış ve Kimlik Doğrulama
 
 ### 🔄 Ana Akış
+
 Uygulama `main.dart` ile başlar ve `Wrapper` widget'ına yönlendirilir. `Wrapper` içinde bir `StreamBuilder` ile `FirebaseAuth.instance.authStateChanges()` dinlenir.
 
 ### 📱 Senaryolar
 
-| Durum | Gösterilen | Yönlendirme |
-|-------|------------|-------------|
-| **Yükleniyor** | `CircularProgressIndicator` | - |
-| **Hata** | Hata konsola basılır | `Opening` ekranı |
-| **Kullanıcı var** | - | Mail doğrulanmışsa → `ProfilesScreen`<br/>Mail doğrulanmamışsa → `VerifyAccount` |
-| **Kullanıcı yok** | - | `Opening` ekranı |
+| Durum             | Gösterilen                  | Yönlendirme                                                                      |
+| ----------------- | --------------------------- | -------------------------------------------------------------------------------- |
+| **Yükleniyor**    | `CircularProgressIndicator` | -                                                                                |
+| **Hata**          | Hata konsola basılır        | `Opening` ekranı                                                                 |
+| **Kullanıcı var** | -                           | Mail doğrulanmışsa → `ProfilesScreen`<br/>Mail doğrulanmamışsa → `VerifyAccount` |
+| **Kullanıcı yok** | -                           | `Opening` ekranı                                                                 |
 
 ### 🔧 Teknik Detaylar
+
 ```dart
 // main.dart - Firebase başlatma
 await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -50,12 +130,16 @@ StreamBuilder<User?>(
 ## 2. Giriş ve Kayıt Akışları
 
 ### 🚪 Opening Ekranı
+
 İki ana seçenek sunar:
+
 - **"Giriş Yap"** → `SignIn` ekranı
 - **"Kayıt Ol"** → `SignUp` ekranı
 
 ### 📝 Giriş Yap (SignIn)
+
 **Bileşenler:**
+
 - E-posta ve şifre input'ları
 - "Giriş Yap" butonu
 - "Şifremi Unuttum" butonu → `ResetPassword` ekranı
@@ -63,24 +147,29 @@ StreamBuilder<User?>(
 - Google & Facebook giriş (şu anda sadece Google aktif)
 
 **Akış:**
+
 1. Firebase Auth ile giriş yapılır
 2. Başarılı girişte `Wrapper`'a yönlendirilir
 3. Hata durumunda SnackBar ile bilgi verilir
 
 ### 📋 Kayıt Ol (SignUp)
+
 **Bileşenler:**
+
 - Ad, soyad, e-posta, şifre input'ları
 - "Kayıt Ol" butonu
 - "Zaten Hesabım Var" butonu → `SignIn` ekranı
 - Google & Facebook kayıt
 
 **Akış:**
+
 1. Firebase Auth ile kullanıcı oluşturulur
 2. `displayName` güncellenir
 3. `sendEmailVerification()` ile doğrulama maili gönderilir
 4. `VerifyAccount` ekranına yönlendirilir
 
 ### 🔐 Şifremi Unuttum (ResetPassword)
+
 - E-posta adresi ile şifre sıfırlama maili gönderir
 - Firebase Auth'un `sendPasswordResetEmail()` fonksiyonu kullanılır
 
@@ -89,16 +178,20 @@ StreamBuilder<User?>(
 ## 3. Mail Doğrulama Ekranı (VerifyAccount)
 
 ### ⏰ Otomatik Kontrol
+
 - **Her 3 saniyede bir** `user.reload()` yapılır
 - `emailVerified` durumu kontrol edilir
 - Doğrulandığı an otomatik `ProfilesScreen`'e geçiş
 
 ### 🔄 Manuel Kontrol
+
 - "Devam Et" butonu ile manuel kontrol
 - "Tekrar Gönder" butonu ile yeni doğrulama maili
 
 ### 💾 Firestore Kayıt
+
 Doğrulama başarılı olduğunda:
+
 ```dart
 await FirebaseFirestore.instance
     .collection("users")
@@ -115,17 +208,20 @@ await FirebaseFirestore.instance
 ## 4. İlk Kez Girişte Tutorial
 
 ### 🎯 Tutorial Sistemi
+
 - **İlk girişte** otomatik tutorial gösterilir
 - `SharedPreferences` ile "görüldü" durumu kaydedilir
 - `ProfilesScreen`'deki Help ikonu ile tekrar gösterilebilir
 
 ### 📱 Tutorial İçeriği
+
 - Drawer menü kullanımı
 - Profil kartı düzenleme
 - Yeni profil ekleme
 - Help butonu kullanımı
 
 ### 🔧 Teknik Detaylar
+
 ```dart
 // Tutorial kontrolü
 final hasSeenTutorial = prefs.getBool('hasSeenProfilesTutorial') ?? false;
@@ -140,13 +236,17 @@ if (!hasSeenTutorial) {
 ## 5. ProfilesScreen
 
 ### 🏠 Ana Ekran
+
 **İlk girişte (profil yokken):**
+
 - Drawer menü
 - Help ikonu
 - **"Yeni Profil Ekle"** butonu
 
 ### 📝 Profil Formu
+
 **Zorunlu alanlar:**
+
 - Profil adı
 - Boy (1-300 cm)
 - Kilo (1-500 kg)
@@ -155,11 +255,13 @@ if (!hasSeenTutorial) {
 - Kan grubu
 
 **Validasyon:**
+
 - Boy: 1-300 cm
 - Kilo: 1-500 kg
 - Yaş: 1-120
 
 ### 💾 Veri Yapısı
+
 ```json
 users/{uid}/
 ├── profiles: [
@@ -182,6 +284,7 @@ users/{uid}/
 ```
 
 ### 🎴 Profil Kartları
+
 - Profil kartı tıklandığında düzenleme formu açılır
 - Sağ üst "more" menüsü:
   - **Düzenle**: Profil bilgilerini güncelle
@@ -189,6 +292,7 @@ users/{uid}/
   - **Sil**: Profili sil
 
 ### 🎯 Amaç
+
 Aynı kullanıcının farklı aile bireylerini tanımlayıp tek dokunuşla aralarında geçiş yapabilmesi.
 
 ---
@@ -196,6 +300,7 @@ Aynı kullanıcının farklı aile bireylerini tanımlayıp tek dokunuşla arala
 ## 6. Drawer Menüsü
 
 ### 📋 Menü Öğeleri
+
 - **Şikayet Başlat** → `HomeScreen`
 - **Analiz Geçmişi** → `OldChatScreen`
 - **Tahlil Yükle** → `PdfAnalysisScreen`
@@ -203,6 +308,7 @@ Aynı kullanıcının farklı aile bireylerini tanımlayıp tek dokunuşla arala
 - **Çıkış Yap** → Firebase Auth signOut
 
 ### 🔧 Teknik Detaylar
+
 ```dart
 // Çıkış işlemi
 await FirebaseAuth.instance.signOut();
@@ -215,18 +321,20 @@ Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const
 
 ### 📊 Form Durumları
 
-| Durum | Gösterilen Form |
-|-------|-----------------|
-| **Aktif profil varsa** | Küçük profil kartı + "Şikayet / Süre / Mevcut İlaçlar" alanları |
-| **Profil yoksa** | Geniş form: boy, kilo, yaş, cinsiyet, kan grubu + şikayet alanları |
+| Durum                  | Gösterilen Form                                                    |
+| ---------------------- | ------------------------------------------------------------------ |
+| **Aktif profil varsa** | Küçük profil kartı + "Şikayet / Süre / Mevcut İlaçlar" alanları    |
+| **Profil yoksa**       | Geniş form: boy, kilo, yaş, cinsiyet, kan grubu + şikayet alanları |
 
 ### 🚀 "Şikayet Başlat" Akışı
 
 1. **Form Validasyonu**
+
    - Tüm zorunlu alanlar kontrol edilir
    - Hata durumunda SnackBar gösterilir
 
 2. **Veri Kaydetme**
+
    ```dart
    await FormService.saveComplaintWithProfile(
      formData: formData,
@@ -235,6 +343,7 @@ Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const
    ```
 
 3. **AI Soru Üretimi**
+
    ```dart
    final questions = await OpenAIService.getFollowUpQuestions(
      profileData,
@@ -244,6 +353,7 @@ Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const
    ```
 
 4. **İlk AI Mesajı**
+
    - Firestore `/messages` alt koleksiyonuna kaydedilir
    - `senderId: '2'` (AI) olarak işaretlenir
 
@@ -252,6 +362,7 @@ Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const
    - Şikayet ID'si ve sorular parametre olarak geçilir
 
 ### 🎯 Tutorial Sistemi
+
 - İlk kullanımda otomatik tutorial
 - "Şikayet Başlat" butonuna odaklanır
 - `SharedPreferences` ile durum takibi
@@ -263,10 +374,12 @@ Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const
 ### 🤖 AI Akışı
 
 1. **İlk Değerlendirme**
+
    - AI eksik bilgileri madde madde sorulara çevirir
    - Selamlama + ilk soru tek mesajda birleştirilir
 
 2. **Soru-Cevap Döngüsü**
+
    - Kullanıcı soruları yanıtlar
    - Her cevap Firestore'a kaydedilir
    - AI bir sonraki soruyu sorar
@@ -276,6 +389,7 @@ Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const
    - Detaylı tıbbi değerlendirme tek parça mesaj olarak döner
 
 ### 💬 Mesaj Yapısı
+
 ```json
 messages/
 ├── {
@@ -292,11 +406,13 @@ messages/
 ```
 
 ### 📊 Progress Tracking
+
 - Kalan soru sayısı gösterilir
 - Progress bar ile ilerleme takibi
 - Animasyonlu progress indicator
 
 ### 🎨 UI Özellikleri
+
 - **DashChat2** kütüphanesi kullanılır
 - Gerçek zamanlı mesaj görüntüleme
 - Kullanıcı ve AI mesajları farklı renklerde
@@ -307,22 +423,27 @@ messages/
 ## 9. Analiz Geçmişi (OldChatScreen)
 
 ### 📋 Şikayet Listesi
+
 - Firestore'dan çekilen her şikayet kart olarak listelenir
 - `lastAnalyzed` tarihine göre sıralanır (en yeni üstte)
 
 ### 🎴 Kart Tasarımı
+
 - **Avatar**: Renkli medical_services ikonu
 - **Başlık**: Şikayet metni (tek satır)
 - **Alt bilgi**: Son mesaj tarihi
 - **Renk**: Şikayet ID'sine göre otomatik renk ataması
 
 ### 🔍 Detay Görüntüleme
+
 Kart tıklandığında:
+
 - `ChatHistoryDetailScreen`'e yönlendirilir
 - Tam sohbet geçmişi gösterilir
 - Mesajlar kronolojik sırada listelenir
 
 ### 📊 Boş Durum
+
 - Henüz şikayet yoksa özel mesaj gösterilir
 - "Henüz Mesaj Yok" ikonu ve metni
 
@@ -331,6 +452,7 @@ Kart tıklandığında:
 ## 10. PDF Analizi (PdfAnalysisScreen)
 
 ### 📄 PDF Seçimi
+
 - `FilePicker` ile cihazdan PDF seçimi
 - Sadece `.pdf` uzantılı dosyalar kabul edilir
 - Dosya boyutu ve format kontrolü
@@ -338,44 +460,51 @@ Kart tıklandığında:
 ### 🔍 Analiz Akışı
 
 1. **Metin Çıkarma**
+
    ```dart
    final fullText = await extractTextFromPdf(file);
    ```
 
 2. **Metin Parçalama**
+
    ```dart
    final chunks = chunkText(fullText, chunkSize: 1000);
    ```
 
 3. **AI Analizi**
+
    - Her parça GPT-4o'ya gönderilir
    - Tıbbi analiz isteği yapılır
    - Bölüm başlıkları `##` ile ayrılır
 
 4. **Sonuç Yapısı**
+
    ```
    ## Genel Değerlendirme
    [AI analizi]
-   
+
    ## Risk Faktörleri
    [Risk değerlendirmesi]
-   
+
    ## Öneriler
    [Tıbbi öneriler]
    ```
 
 ### 💾 Analiz Saklama
+
 - `PdfAnalysisService` ile analizler kaydedilir
 - Dosya adı ve analiz sonucu saklanır
 - Geçmiş analizler listelenebilir
 
 ### 📱 UI Özellikleri
+
 - **Analiz Geçmişi** butonu → `SavedAnalysesScreen`
 - **PDF Seç** butonu
 - Loading indicator'ları
 - Hata durumu yönetimi
 
 ### 🎯 Tutorial Sistemi
+
 - İlk kullanımda otomatik tutorial
 - Analiz geçmişi ve PDF seçimi butonlarına odaklanır
 
@@ -384,6 +513,7 @@ Kart tıklandığında:
 ## 11. Teknik Detaylar
 
 ### 🔧 Firebase Yapılandırması
+
 ```dart
 // main.dart
 await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -391,22 +521,26 @@ await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
 ```
 
 ### 🔑 API Key Yönetimi
+
 - `.env` dosyası ile API key'ler saklanır
 - `flutter_dotenv` paketi kullanılır
 - OpenAI API key güvenli şekilde yönetilir
 
 ### 📱 State Management
+
 - **GetX** kullanılır (navigasyon için)
 - **StreamBuilder** ile real-time veri dinleme
 - **SharedPreferences** ile local storage
 
 ### 🎨 UI Kütüphaneleri
+
 - **TutorialCoachMark**: Tutorial sistemi
 - **DashChat2**: Sohbet arayüzü
 - **FilePicker**: Dosya seçimi
 - **Syncfusion PDF**: PDF işleme
 
 ### 🔄 Error Handling
+
 - Try-catch blokları ile hata yönetimi
 - SnackBar ile kullanıcı bilgilendirmesi
 - Loading state'leri ile UX iyileştirmesi
@@ -456,11 +590,13 @@ users/{uid}/
 ```
 
 ### 📊 Legacy Veri Uyumluluğu
+
 - Eski kullanıcılar için `boy`, `yas`, `kilo` alanları korunur
 - Yeni profil sistemi ile uyumlu çalışır
 - Geçiş sürecinde her iki yapı desteklenir
 
 ### 🔄 Veri Senkronizasyonu
+
 - Real-time listener'lar ile anlık güncelleme
 - Offline desteği Firebase ile sağlanır
 - Conflict resolution otomatik yönetilir
