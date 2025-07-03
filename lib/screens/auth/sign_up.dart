@@ -41,7 +41,10 @@ class _SignUpState extends State<SignUp> {
         await user.sendEmailVerification();
 
         // Doğrulama ekranına yönlendir
-        Get.offAll(() => const VerifyAccount());
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const VerifyAccount()),
+        );
       }
     } catch (e) {
       print("🔥 Firebase Hatası: $e");
