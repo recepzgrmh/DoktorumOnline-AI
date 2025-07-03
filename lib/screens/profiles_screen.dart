@@ -6,6 +6,7 @@ import 'package:login_page/widgets/profile_form.dart';
 import 'package:login_page/widgets/empty_state_widget.dart';
 import 'package:login_page/widgets/loading_widget.dart';
 import 'package:login_page/services/profile_service.dart';
+import 'package:login_page/services/tutorial_service.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -100,7 +101,7 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
             builder: (context, controller) {
               return CoachmarkDesc(
                 text:
-                    'İhtiyacın olduğunda bilgileri tekrar buradan ulaşbilirsin',
+                    'Uygulama Yönergelerine tekrar bakmak için bu butona basabilirsin',
                 next: 'İleri',
                 skip: 'Geç',
                 onNext: controller.next,
@@ -458,11 +459,13 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
             key: keyButton3,
             icon: const Icon(Icons.help_outline),
             onPressed: () async {
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.setBool('hasSeenProfilesTutorial', false);
+              // Tüm tutorial'ları sıfırla
+              await TutorialService.resetAllTutorials();
+
+              // Mevcut sayfanın tutorial'ını göster
               _showTutorialCoachmar();
             },
-            tooltip: 'Tutorial\'ı Tekrar Göster',
+            tooltip: 'Tüm Tutorial\'ları Sıfırla',
           ),
         ],
       ),

@@ -6,6 +6,7 @@ import 'package:login_page/screens/overview_screen.dart';
 import 'package:login_page/services/form_service.dart';
 import 'package:login_page/services/openai_service.dart';
 import 'package:login_page/services/profile_service.dart';
+import 'package:login_page/services/tutorial_service.dart';
 import 'package:login_page/widgets/complaint_form.dart';
 import 'package:login_page/widgets/custom_button.dart';
 import 'package:login_page/widgets/loading_widget.dart';
@@ -246,11 +247,26 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
             IconButton(
               icon: const Icon(Icons.help_outline),
               onPressed: () async {
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.setBool('hasSeenComplaintTutorial', false);
+                // Tüm tutorial'ları sıfırla
+                await TutorialService.resetAllTutorials();
+
+                // Kullanıcıya bilgi ver
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Tüm tutorial\'lar sıfırlandı. Uygulamayı yeniden başlatın veya diğer sayfalara gidip gelin.',
+                      ),
+                      backgroundColor: Colors.blue,
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
+                }
+
+                // Mevcut sayfanın tutorial'ını göster
                 _showTutorialCoachmar();
               },
-              tooltip: 'Tutorial\'ı Tekrar Göster',
+              tooltip: 'Tüm Tutorial\'ları Sıfırla',
             ),
           ],
         ),
@@ -277,11 +293,26 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
           IconButton(
             icon: const Icon(Icons.help_outline),
             onPressed: () async {
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.setBool('hasSeenComplaintTutorial', false);
+              // Tüm tutorial'ları sıfırla
+              await TutorialService.resetAllTutorials();
+
+              // Kullanıcıya bilgi ver
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Tüm tutorial\'lar sıfırlandı. Uygulamayı yeniden başlatın veya diğer sayfalara gidip gelin.',
+                    ),
+                    backgroundColor: Colors.blue,
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+              }
+
+              // Mevcut sayfanın tutorial'ını göster
               _showTutorialCoachmar();
             },
-            tooltip: 'Tutorial\'ı Tekrar Göster',
+            tooltip: 'Tüm Tutorial\'ları Sıfırla',
           ),
         ],
       ),

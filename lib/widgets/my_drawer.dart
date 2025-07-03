@@ -86,7 +86,7 @@ class _MyDrawerState extends State<MyDrawer> {
         keyTarget: _homeButton,
         title: 'Şikayet Başlat',
         body:
-            'Yeni bir muayeneye başlamak için bu butona dokun. Kısa bir özet yaz, AI sana ek sorular yöneltsin.',
+            'Yeni bir muayeneye başlamak için bu butona dokun. İlgili bilgileri doldur, DoktorumOnline sana ek sorular yöneltsin.',
         focusAnim: Duration.zero,
         unFocusAnim: Duration.zero,
       ),
@@ -105,7 +105,7 @@ class _MyDrawerState extends State<MyDrawer> {
         keyTarget: _uploadButton,
         title: 'PDF Analiz',
         body:
-            'Lab sonucu, epikriz veya reçeteni PDF olarak yükle; AI saniyeler içinde özetleyip kritik bulguları vurgular.',
+            'Lab sonucu, kan tahlili veya reçeteni PDF olarak yükle; DoktorumOnline saniyeler içinde özetleyip kritik bulguları vurgular.',
         focusAnim: Duration.zero,
         unFocusAnim: Duration.zero,
       ),
@@ -114,7 +114,7 @@ class _MyDrawerState extends State<MyDrawer> {
         keyTarget: _profilesButton,
         title: 'Profil Yönetimi',
         body:
-            'Ailenin her üyesi için ayrı profil oluşturabilir, sağlık bilgilerini güncelleyebilirsin.',
+            'Farklı kullanıcılar için ayrı profil oluşturabilir, sağlık bilgilerini güncelleyebilirsin.',
         focusAnim: Duration.zero,
         unFocusAnim: Duration.zero,
       ),
