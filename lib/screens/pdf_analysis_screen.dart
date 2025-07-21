@@ -33,17 +33,9 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
 
   // ───────────────────────── Lifecycle ─────────────────────────
   @override
-  void initState() {
-    super.initState();
-    // EĞİTİM TETİKLEMESİ BURADAN KALDIRILDI.
-  }
-
-  // ═════════════ Tutorial Helpers ═════════════
-  Future<void> checkAndShowTutorialIfNeeded() async {
-    final hasSeen = await TutorialService.hasSeenTutorial('pdfAnalysis');
-    if (!hasSeen && mounted) {
-      showTutorial();
-    }
+  void dispose() {
+    tutorialCoachMark?.finish();
+    super.dispose();
   }
 
   void showTutorial() {
@@ -257,7 +249,6 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: 24),
-            // --------- Kart: PDF seçimi ----------
             Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
@@ -310,9 +301,7 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
                 ),
               ),
             ),
-
             const SizedBox(height: 20),
-            // --------- Seçilen dosya kartı ----------
             if (_selectedFile != null)
               Card(
                 elevation: 2,
@@ -346,9 +335,7 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
                   ),
                 ),
               ),
-
             const SizedBox(height: 20),
-            // --------- Analiz butonu ----------
             if (_selectedFile != null)
               CustomButton(
                 label:
@@ -374,7 +361,6 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
                 borderRadius: BorderRadius.circular(12),
                 elevation: 2,
               ),
-
             const SizedBox(height: 16),
             if (_status.isNotEmpty)
               Container(

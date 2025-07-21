@@ -53,25 +53,9 @@ class OldChatScreenState extends State<OldChatScreen> {
   final GlobalKey _firstChatItemKey = GlobalKey();
 
   @override
-  void initState() {
-    super.initState();
-    // EĞİTİM TETİKLEMESİ BURADAN KALDIRILDI.
-  }
-
-  Future<void> checkAndShowTutorialIfNeeded() async {
-    final hasSeen = await TutorialService.hasSeenTutorial('oldChats');
-    if (!hasSeen && mounted) {
-      final chatDocs =
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(widget.userId)
-              .collection('complaints')
-              .limit(1)
-              .get();
-      if (chatDocs.docs.isNotEmpty) {
-        showTutorial();
-      }
-    }
+  void dispose() {
+    tutorialCoachMark?.finish();
+    super.dispose();
   }
 
   void showTutorial() {

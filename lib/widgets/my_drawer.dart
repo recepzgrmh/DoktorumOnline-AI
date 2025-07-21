@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-
 import 'package:login_page/screens/opening.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:login_page/services/tutorial_service.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'coachmark_desc.dart' as coachmark;
 
@@ -18,48 +16,43 @@ class MyDrawer extends StatefulWidget {
   });
 
   @override
-  State<MyDrawer> createState() => _MyDrawerState();
+  State<MyDrawer> createState() => MyDrawerState();
 }
 
-class _MyDrawerState extends State<MyDrawer> {
+class MyDrawerState extends State<MyDrawer> {
   final currentUser = FirebaseAuth.instance.currentUser;
-  // ───────────────────────── Tutorial değişkenleri ──────────────────────────
   TutorialCoachMark? tutorialCoachMark;
   List<TargetFocus> targets = [];
   final GlobalKey _homeButton = GlobalKey();
   final GlobalKey _chatButton = GlobalKey();
   final GlobalKey _uploadButton = GlobalKey();
   final GlobalKey _profilesButton = GlobalKey();
-  final GlobalKey _logoutButton =
-      GlobalKey(); // Bu key hala logout için kullanılacak
-  // ───────────────────────────────────────────────────────────────────────────
+  final GlobalKey _logoutButton = GlobalKey();
 
+  // GÜNCELLENDİ: Kod tutarlılığı için initState kullanıldı.
   @override
   void initState() {
     super.initState();
+    // Widget ağacı çizildikten sonra eğitimin kontrol edilip gösterilmesini sağlar.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndShowTutorial();
+    });
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _checkAndShowTutorial(),
-    );
-  }
+  // didChangeDependencies metodu bu senaryo için artık gerekli değil.
 
   Future<void> _checkAndShowTutorial() async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = 'hasSeenDrawerTutorial_${currentUser?.uid ?? 'anon'}';
-    final hasSeenTutorial = prefs.getBool(key) ?? false;
+    // Drawer eğitiminin daha önce görülüp görülmediğini kontrol eder.
+    final hasSeenTutorial = await TutorialService.hasSeenTutorial('drawer');
 
     if (!hasSeenTutorial && mounted) {
       showTutorialCoachmark();
-      await prefs.setBool(key, true);
     }
   }
 
   void showTutorialCoachmark() {
     if (!mounted) return;
+    // Drawer animasyonunun bitmesi için küçük bir gecikme.
     const drawerAnimationDelay = Duration(milliseconds: 300);
     Future.delayed(drawerAnimationDelay, () {
       if (!mounted) return;
@@ -77,7 +70,14 @@ class _MyDrawerState extends State<MyDrawer> {
         colorShadow: Colors.black.withOpacity(.75),
         alignSkip: Alignment.bottomRight,
         textSkip: 'Geç',
-        onFinish: () => debugPrint('Drawer tutorial bitti'),
+        onFinish: () {
+          TutorialService.markTutorialAsSeen('drawer');
+          debugPrint('Drawer tutorial bitti');
+        },
+        onSkip: () {
+          TutorialService.markTutorialAsSeen('drawer');
+          return true;
+        },
       )..show(context: context, rootOverlay: true);
     });
   }
@@ -108,7 +108,6 @@ class _MyDrawerState extends State<MyDrawer> {
         body:
             'Farklı kullanıcılar için ayrı profil oluşturabilir, sağlık bilgilerini güncelleyebilirsin.',
       ),
-      // Logout butonu için ayrı bir hedef tanımlıyoruz
       _buildTarget(
         identify: "Logout Button",
         keyTarget: _logoutButton,
@@ -168,6 +167,7 @@ class _MyDrawerState extends State<MyDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    // Bu kısımdaki UI kodlarında değişiklik yapılmadı.
     return Drawer(
       child: Container(
         decoration: BoxDecoration(
@@ -211,7 +211,6 @@ class _MyDrawerState extends State<MyDrawer> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                // Drawer butonları
                 _buildDrawerItem(
                   key: _homeButton,
                   icon: Icons.home_rounded,
@@ -254,15 +253,13 @@ class _MyDrawerState extends State<MyDrawer> {
                 ),
               ],
             ),
-            // Çıkış butonu için ayrı bir ListTile kullanıyoruz
             Container(
-              key:
-                  _logoutButton, // Tutorial için GlobalKey hala burada kullanılabilir
+              key: _logoutButton,
               margin: EdgeInsets.only(
                 bottom: MediaQuery.of(context).padding.bottom,
                 left: 15,
                 right: 15,
-              ), // Paddingi buraya taşıdık
+              ),
               child: ListTile(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -286,12 +283,7 @@ class _MyDrawerState extends State<MyDrawer> {
                   signOut(); // Firebase çıkış işlemi
                 },
                 hoverColor: Colors.red.shade50,
-                selectedTileColor: Colors.red.shade50.withOpacity(
-                  0.5,
-                ), // Logout için farklı renk
-                // Logout genellikle selected olmaz, o yüzden selected: false bırakabiliriz.
-                // Veya aktif olmasını istersen buraya widget.selectedIndex == 'logout_index' gibi bir şey ekleyebilirsin
-                // ama genelde logout'un highlight olmasına gerek duyulmaz.
+                selectedTileColor: Colors.red.shade50.withOpacity(0.5),
               ),
             ),
           ],
@@ -300,7 +292,6 @@ class _MyDrawerState extends State<MyDrawer> {
     );
   }
 
-  // Drawer buton şablonu (artık sadece navigasyon öğeleri için)
   Widget _buildDrawerItem({
     Key? key,
     required IconData icon,

@@ -1,6 +1,7 @@
 // lib/screens/home_screen.dart
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:async'; // StreamSubscription için eklendi
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,6 +11,7 @@ import 'package:login_page/screens/overview_screen.dart';
 import 'package:login_page/services/form_service.dart';
 import 'package:login_page/services/openai_service.dart';
 import 'package:login_page/services/profile_service.dart';
+import 'package:login_page/widgets/coachmark_desc.dart';
 import 'package:login_page/widgets/custom_button.dart';
 import 'package:login_page/widgets/loading_widget.dart';
 import 'package:login_page/widgets/medical_form.dart';
@@ -64,15 +66,21 @@ class HomeScreenState extends State<HomeScreen> {
   bool _hasProfileData = false;
   final _uid = FirebaseAuth.instance.currentUser!.uid;
 
+  // Firestore dinleyicisi için eklendi
+  StreamSubscription<DocumentSnapshot>? _profileSubscription;
+
   // ───────────────────────── Lifecycle ─────────────────────────
   @override
   void initState() {
     super.initState();
-    _loadUserProfile();
+    // Eski yöntem yerine stream dinleyicisi başlatılıyor
+    _listenToProfileUpdates();
   }
 
   @override
   void dispose() {
+    // Kaynak sızıntısını önlemek için stream dinleyicisi iptal ediliyor
+    _profileSubscription?.cancel();
     boyController.dispose();
     yasController.dispose();
     kiloController.dispose();
@@ -85,6 +93,22 @@ class HomeScreenState extends State<HomeScreen> {
     complaintIlacController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  // Yeni metod: Widget güncellendiğinde çağrılır
+  @override
+  void didUpdateWidget(HomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Profil verisi değiştiğinde formu sıfırla
+    if (_hasProfileData) {
+      sikayetController.clear();
+      sureController.clear();
+      ilacController.clear();
+      complaintSikayetController.clear();
+      complaintSureController.clear();
+      complaintIlacController.clear();
+      setState(() => _formData = null);
+    }
   }
 
   // ═════════════ Helpers ═════════════
@@ -108,16 +132,7 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   // ═════════════ Tutorial Setup ═════════════
-  /// Checks if the user has seen the tutorial and shows it if not.
-  /// Uses TutorialService to check against Firestore.
-  Future<void> checkAndShowTutorialIfNeeded() async {
-    final hasSeen = await TutorialService.hasSeenTutorial('home');
-    if (!hasSeen && mounted) {
-      showTutorial();
-    }
-  }
 
-  /// Initializes the targets for the tutorial.
   void _initTargets() {
     targets.clear();
     if (_startButton.currentContext != null) {
@@ -152,7 +167,6 @@ class HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  /// Displays the tutorial coach mark.
   void showTutorial() {
     _scrollToWidget(_startButton).then((_) {
       _initTargets();
@@ -174,40 +188,81 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   // ═════════════ Data Handling ═════════════
-  Future<void> _loadUserProfile() async {
-    try {
-      final profileData = await _formService.getUserProfileData();
-      if (!mounted) return;
-      setState(() {
-        _userProfileData = profileData;
-        _isLoadingProfile = false;
-        _hasProfileData =
-            profileData['Boy']?.isNotEmpty == true &&
-            profileData['Yaş']?.isNotEmpty == true &&
-            profileData['Kilo']?.isNotEmpty == true &&
-            profileData['Cinsiyet']?.isNotEmpty == true &&
-            profileData['Kan Grubu']?.isNotEmpty == true;
-      });
-    } catch (e) {
-      debugPrint('Profil yükleme hatası: $e');
-      if (!mounted) return;
-      setState(() {
-        _isLoadingProfile = false;
-        _hasProfileData = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Profil bilgileri yüklenemedi: $e')),
-      );
-    } finally {
-      if (mounted) {
-        // Delay to ensure the UI is settled before showing the tutorial
-        Future.delayed(
-          const Duration(milliseconds: 400),
-          checkAndShowTutorialIfNeeded,
+
+  /// YENİ METOD: Firestore'daki profil verisi değişikliklerini anlık olarak dinler.
+  void _listenToProfileUpdates() {
+    final userDoc = FirebaseFirestore.instance.collection('users').doc(_uid);
+
+    _profileSubscription = userDoc.snapshots().listen(
+      (snapshot) {
+        if (!mounted) return;
+
+        Map<String, String> profileData = {};
+        bool hasData = false;
+
+        if (snapshot.exists && snapshot.data() != null) {
+          final data = snapshot.data() as Map<String, dynamic>;
+
+          // Önce aktif profil var mı diye kontrol et
+          final profiles = data['profiles'] as List<dynamic>? ?? [];
+          final activeProfile = profiles.firstWhere(
+            (profile) => profile['isActive'] == true,
+            orElse: () => {},
+          );
+
+          if (activeProfile.isNotEmpty) {
+            // Aktif profil varsa onun bilgilerini kullan
+            profileData = {
+              'Boy': activeProfile['height']?.toString() ?? '',
+              'Yaş': activeProfile['age']?.toString() ?? '',
+              'Kilo': activeProfile['weight']?.toString() ?? '',
+              'Cinsiyet': activeProfile['gender']?.toString() ?? '',
+              'Kan Grubu': activeProfile['bloodType']?.toString() ?? '',
+              'Kronik Rahatsızlık':
+                  activeProfile['chronicIllness']?.toString() ?? '',
+            };
+          } else {
+            // Eski yapıyı kullan (geriye uyumluluk için)
+            profileData = {
+              'Boy': data['boy']?.toString() ?? '',
+              'Yaş': data['yas']?.toString() ?? '',
+              'Kilo': data['kilo']?.toString() ?? '',
+              'Cinsiyet': data['cinsiyet']?.toString() ?? '',
+              'Kan Grubu': data['kan_grubu']?.toString() ?? '',
+              'Kronik Rahatsızlık':
+                  data['kronik_rahatsizlik']?.toString() ?? '',
+            };
+          }
+
+          hasData =
+              profileData['Boy']?.isNotEmpty == true &&
+              profileData['Yaş']?.isNotEmpty == true &&
+              profileData['Kilo']?.isNotEmpty == true &&
+              profileData['Cinsiyet']?.isNotEmpty == true &&
+              profileData['Kan Grubu']?.isNotEmpty == true;
+        }
+
+        setState(() {
+          _userProfileData = profileData;
+          _hasProfileData = hasData;
+          _isLoadingProfile = false;
+        });
+      },
+      onError: (e) {
+        debugPrint('Profil dinleme hatası: $e');
+        if (!mounted) return;
+        setState(() {
+          _isLoadingProfile = false;
+          _hasProfileData = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Profil bilgileri alınamadı: $e')),
         );
-      }
-    }
+      },
+    );
   }
+
+  // ESKİ _loadUserProfile metodu silindi.
 
   Future<void> _startFollowUp() async {
     if (!_formKey2.currentState!.validate() || _formData == null) return;
@@ -344,104 +399,6 @@ class HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-    );
-  }
-}
-
-// ───────────────────── Coachmark Description Widget ─────────────────────
-class CoachmarkDesc extends StatelessWidget {
-  final String text, skip, next;
-  final VoidCallback? onSkip, onNext;
-
-  const CoachmarkDesc({
-    super.key,
-    required this.text,
-    required this.skip,
-    required this.next,
-    this.onSkip,
-    this.onNext,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.1),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2196F3).withOpacity(.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.lightbulb_outline,
-                  color: Color(0xFF2196F3),
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  text,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF424242),
-                    height: 1.4,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                onPressed: onSkip,
-                child: Text(
-                  skip,
-                  style: const TextStyle(
-                    color: Color(0xFF757575),
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              ElevatedButton(
-                onPressed: onNext,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2196F3),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: Text(next, style: const TextStyle(fontSize: 14)),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }

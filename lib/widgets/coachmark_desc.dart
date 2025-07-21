@@ -31,7 +31,7 @@ class _CoachmarkDescState extends State<CoachmarkDesc> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.blue,
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),

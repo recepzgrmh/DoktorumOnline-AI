@@ -73,8 +73,11 @@ class _VerifyAccountState extends State<VerifyAccount> {
                 "verifiedAt": DateTime.now(),
               });
         }
-        // Doğrulama başarılı, anasayfaya yönlendir
-        Get.offAll(() => MainScreen());
+        // Doğrulama başarılı, anasayfaya yönlendir// Login işleminden sonra ana ekrana git ve geri dönülemesin.
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => MainScreen()),
+          (Route<dynamic> route) => false,
+        );
       }
     }
   }

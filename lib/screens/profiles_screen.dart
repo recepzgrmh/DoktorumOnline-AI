@@ -17,11 +17,12 @@ class ProfilesScreen extends StatefulWidget {
 }
 
 class ProfilesScreenState extends State<ProfilesScreen> {
+  // --- EĞİTİM İÇİN EKLENEN KOD BAŞLANGICI ---
   TutorialCoachMark? tutorialCoachMark;
-  List<TargetFocus> targets = [];
-
+  final List<TargetFocus> targets = [];
   final GlobalKey _newUser = GlobalKey();
   final GlobalKey _firstProfileCard = GlobalKey();
+  // --- EĞİTİM İÇİN EKLENEN KOD SONU ---
 
   final _profileService = ProfileService();
   final _formKey = GlobalKey<FormState>();
@@ -33,15 +34,19 @@ class ProfilesScreenState extends State<ProfilesScreen> {
 
   String? _cinsiyet;
   String? _kanGrubu;
-  bool _isLoading = false;
+  bool _isFormLoading = false;
   bool _isEditing = false;
   String? _editingProfileId;
+
+  bool _isLoading = true;
   List<Map<String, dynamic>> _profiles = [];
 
   @override
   void initState() {
     super.initState();
-    _loadProfiles();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadProfiles();
+    });
   }
 
   @override
@@ -50,16 +55,29 @@ class ProfilesScreenState extends State<ProfilesScreen> {
     _boyController.dispose();
     _yasController.dispose();
     _kiloController.dispose();
+    tutorialCoachMark?.finish(); // Eğitimi temizle
     super.dispose();
   }
 
-  Future<void> checkAndShowTutorialIfNeeded() async {
-    final hasSeen = await TutorialService.hasSeenTutorial('profiles');
-    if (!hasSeen && mounted) {
-      showTutorial();
+  Future<void> _loadProfiles() async {
+    try {
+      final profiles = await _profileService.getUserProfiles();
+      if (!mounted) return;
+      setState(() {
+        _profiles = profiles;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Profil yükleme hatası: $e')));
+        setState(() => _isLoading = false);
+      }
     }
   }
 
+  // --- EĞİTİM İÇİN EKLENEN KOD BAŞLANGICI ---
   void showTutorial() {
     _initTargets();
     if (targets.isEmpty || !mounted) return;
@@ -76,6 +94,7 @@ class ProfilesScreenState extends State<ProfilesScreen> {
   void _initTargets() {
     targets.clear();
 
+    // 1. Hedef: Yardım Butonu
     if (widget.helpButtonKey?.currentContext != null) {
       targets.add(
         TargetFocus(
@@ -84,22 +103,22 @@ class ProfilesScreenState extends State<ProfilesScreen> {
           contents: [
             TargetContent(
               align: ContentAlign.bottom,
-              builder: (context, controller) {
-                return CoachmarkDesc(
-                  text:
-                      'Uygulama yönergelerini tekrar görmek için bu butona basabilirsin',
-                  next: 'İleri',
-                  skip: 'Geç',
-                  onNext: controller.next,
-                  onSkip: controller.skip,
-                );
-              },
+              builder:
+                  (context, controller) => CoachmarkDesc(
+                    text:
+                        'Uygulama yönergelerini tekrar görmek için bu butona basabilirsin',
+                    next: 'İleri',
+                    skip: 'Geç',
+                    onNext: controller.next,
+                    onSkip: controller.skip,
+                  ),
             ),
           ],
         ),
       );
     }
 
+    // 2. Hedef: İlk Profil Kartı
     if (_profiles.isNotEmpty && _firstProfileCard.currentContext != null) {
       targets.add(
         TargetFocus(
@@ -109,22 +128,22 @@ class ProfilesScreenState extends State<ProfilesScreen> {
           contents: [
             TargetContent(
               align: ContentAlign.bottom,
-              builder: (context, controller) {
-                return CoachmarkDesc(
-                  text:
-                      'Profil kartına tıklayarak düzenleyebilir veya aktif yapabilirsin',
-                  next: 'İleri',
-                  skip: 'Geç',
-                  onNext: controller.next,
-                  onSkip: controller.skip,
-                );
-              },
+              builder:
+                  (context, controller) => CoachmarkDesc(
+                    text:
+                        'Profil kartına tıklayarak düzenleyebilir veya aktif yapabilirsin',
+                    next: 'İleri',
+                    skip: 'Geç',
+                    onNext: controller.next,
+                    onSkip: controller.skip,
+                  ),
             ),
           ],
         ),
       );
     }
 
+    // 3. Hedef: Yeni Profil Ekle Butonu
     if (_newUser.currentContext != null) {
       targets.add(
         TargetFocus(
@@ -134,40 +153,21 @@ class ProfilesScreenState extends State<ProfilesScreen> {
           contents: [
             TargetContent(
               align: ContentAlign.top,
-              builder: (context, controller) {
-                return CoachmarkDesc(
-                  text: 'Buradan yeni profil ekleyebilirsin',
-                  next: 'Bitir',
-                  skip: 'Geç',
-                  onNext: controller.skip,
-                  onSkip: controller.skip,
-                );
-              },
+              builder:
+                  (context, controller) => CoachmarkDesc(
+                    text: 'Buradan yeni profil ekleyebilirsin',
+                    next: 'Bitir',
+                    skip: 'Geç',
+                    onNext: controller.skip,
+                    onSkip: controller.skip,
+                  ),
             ),
           ],
         ),
       );
     }
   }
-
-  Future<void> _loadProfiles() async {
-    setState(() => _isLoading = true);
-    try {
-      final profiles = await _profileService.getUserProfiles();
-      if (!mounted) return;
-      setState(() {
-        _profiles = profiles;
-        _isLoading = false;
-      });
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Profil yükleme hatası: $e')));
-      }
-      setState(() => _isLoading = false);
-    }
-  }
+  // --- EĞİTİM İÇİN EKLENEN KOD SONU ---
 
   @override
   Widget build(BuildContext context) {
@@ -215,6 +215,7 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                                       padding: const EdgeInsets.only(
                                         bottom: 16.0,
                                       ),
+                                      // Sadece ilk karta key ata
                                       child: _buildProfileCard(
                                         profile,
                                         index == 0 ? _firstProfileCard : null,
@@ -225,20 +226,13 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                       ),
                       const SizedBox(height: 16),
                       CustomButton(
-                        key: _newUser,
+                        key: _newUser, // Eğitim için key
                         label: 'Yeni Profil Ekle',
                         onPressed: () => _showProfileForm(),
                         icon: const Icon(Icons.add),
                         backgroundColor: const Color(0xFF2196F3),
                         foregroundColor: Colors.white,
                         isFullWidth: true,
-                        verticalPadding: 16.0,
-                        horizontalPadding: 24.0,
-                        minHeight: 48.0,
-                        elevation: 2.0,
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(12),
-                        ),
                       ),
                     ],
                   ),
@@ -247,9 +241,10 @@ class ProfilesScreenState extends State<ProfilesScreen> {
     );
   }
 
+  // Profil kartını oluşturan widget
   Widget _buildProfileCard(Map<String, dynamic> profile, Key? cardKey) {
-    final isActive = profile['isActive'] as bool;
-    final profileId = profile['id'] as String;
+    final bool isActive = profile['isActive'] ?? false;
+    final String profileId = profile['id'] as String;
 
     return Card(
       key: cardKey,
@@ -308,7 +303,6 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 12,
-                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -338,21 +332,15 @@ class ProfilesScreenState extends State<ProfilesScreen> {
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert, color: Color(0xFF757575)),
               onSelected: (value) {
-                switch (value) {
-                  case 'edit':
-                    _showProfileForm(profile: profile);
-                    break;
-                  case 'activate':
-                    if (!isActive) {
-                      _setActiveProfile(profileId);
-                    }
-                    break;
-                  case 'delete':
-                    _showDeleteConfirmation(
-                      profileId,
-                      profile['name'] ?? 'Profil',
-                    );
-                    break;
+                if (value == 'edit') _showProfileForm(profile: profile);
+                if (value == 'activate' && !isActive) {
+                  _setActiveProfile(profileId);
+                }
+                if (value == 'delete') {
+                  _showDeleteConfirmation(
+                    profileId,
+                    profile['name'] ?? 'Profil',
+                  );
                 }
               },
               itemBuilder:
@@ -396,6 +384,7 @@ class ProfilesScreenState extends State<ProfilesScreen> {
     );
   }
 
+  // Profil ekleme/düzenleme formunu gösteren metot
   void _showProfileForm({Map<String, dynamic>? profile}) {
     _isEditing = profile != null;
     _editingProfileId = profile?['id'];
@@ -420,11 +409,17 @@ class ProfilesScreenState extends State<ProfilesScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _buildProfileForm(),
+      builder:
+          (context) => StatefulBuilder(
+            builder: (BuildContext context, StateSetter setModalState) {
+              return _buildProfileForm(setModalState);
+            },
+          ),
     );
   }
 
-  Widget _buildProfileForm() {
+  // Formun kendisini oluşturan widget
+  Widget _buildProfileForm(StateSetter setModalState) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.9,
       decoration: const BoxDecoration(
@@ -468,27 +463,20 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                       kiloController: _kiloController,
                       cinsiyet: _cinsiyet,
                       kanGrubu: _kanGrubu,
-                      onCinsiyetChanged: (value) {
-                        setState(() => _cinsiyet = value);
-                      },
-                      onKanGrubuChanged: (value) {
-                        setState(() => _kanGrubu = value);
-                      },
+                      onCinsiyetChanged:
+                          (value) => setModalState(() => _cinsiyet = value),
+                      onKanGrubuChanged:
+                          (value) => setModalState(() => _kanGrubu = value),
                     ),
                   ),
                 ),
                 CustomButton(
-                  label: _isEditing ? 'Profili Güncelle' : 'Profili Kaydet',
-                  onPressed: _saveProfile,
-                  isLoading: _isLoading,
-                  backgroundColor: const Color(0xFF2196F3),
+                  backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
+                  label: _isEditing ? 'Profili Güncelle' : 'Profili Kaydet',
+                  onPressed: () => _saveProfile(context),
+                  isLoading: _isFormLoading,
                   isFullWidth: true,
-                  verticalPadding: 16.0,
-                  horizontalPadding: 24.0,
-                  minHeight: 48.0,
-                  elevation: 2.0,
-                  borderRadius: const BorderRadius.all(Radius.circular(12)),
                 ),
                 SizedBox(height: 16 + MediaQuery.of(context).padding.bottom),
               ],
@@ -499,9 +487,14 @@ class ProfilesScreenState extends State<ProfilesScreen> {
     );
   }
 
-  Future<void> _saveProfile() async {
+  // Profil kaydetme/güncelleme mantığı
+  Future<void> _saveProfile(BuildContext modalContext) async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
+
+    // Formun kendi state'i için setState kullanmak yerine StateSetter'ı kullanmak daha doğru olurdu,
+    // ancak mevcut yapıda bu da çalışır.
+    setState(() => _isFormLoading = true);
+
     try {
       if (_isEditing && _editingProfileId != null) {
         await _profileService.updateProfile(
@@ -523,50 +516,57 @@ class ProfilesScreenState extends State<ProfilesScreen> {
           bloodType: _kanGrubu!,
         );
       }
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _isEditing ? 'Profil güncellendi' : 'Profil kaydedildi',
-            ),
-            backgroundColor: Colors.green,
+
+      if (!mounted) return;
+      Navigator.pop(modalContext); // Formu kapat
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _isEditing ? 'Profil güncellendi' : 'Profil kaydedildi',
           ),
-        );
-        _loadProfiles();
-      }
+          backgroundColor: Colors.green,
+        ),
+      );
+      setState(
+        () => _isLoading = true,
+      ); // Yeniden yükleme için loading state'i aktif et
+      _loadProfiles(); // Listeyi yenile
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hata: $e'), backgroundColor: Colors.red),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Hata: $e'), backgroundColor: Colors.red),
+      );
     } finally {
+      // Formun state'ini güncelleyen setState
+      if (mounted) {
+        setState(() => _isFormLoading = false);
+      }
+    }
+  }
+
+  // Aktif profili ayarlama mantığı
+  Future<void> _setActiveProfile(String profileId) async {
+    setState(() => _isLoading = true);
+    try {
+      await _profileService.setActiveProfile(profileId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Aktif profil değiştirildi'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      _loadProfiles();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Hata: $e'), backgroundColor: Colors.red),
+      );
       setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _setActiveProfile(String profileId) async {
-    try {
-      await _profileService.setActiveProfile(profileId);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Aktif profil değiştirildi'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        _loadProfiles();
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hata: $e'), backgroundColor: Colors.red),
-        );
-      }
-    }
-  }
-
+  // Profil silme onayı gösterme
   void _showDeleteConfirmation(String profileId, String profileName) {
     showDialog(
       context: context,
@@ -594,24 +594,25 @@ class ProfilesScreenState extends State<ProfilesScreen> {
     );
   }
 
+  // Profil silme mantığı
   Future<void> _deleteProfile(String profileId) async {
+    setState(() => _isLoading = true);
     try {
       await _profileService.deleteProfile(profileId);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profil silindi'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        _loadProfiles();
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Profil silindi'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      _loadProfiles();
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hata: $e'), backgroundColor: Colors.red),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Hata: $e'), backgroundColor: Colors.red),
+      );
+      setState(() => _isLoading = false);
     }
   }
 }
