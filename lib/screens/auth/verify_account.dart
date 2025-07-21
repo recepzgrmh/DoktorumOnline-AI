@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:login_page/screens/main_navigation_screen.dart';
 import 'package:login_page/screens/opening.dart';
-import 'package:login_page/screens/profiles_screen.dart';
+
 import 'package:login_page/widgets/custom_button.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -21,7 +22,7 @@ class _VerifyAccountState extends State<VerifyAccount> {
   void initState() {
     super.initState();
     // Start periodic verification check
-    _verificationTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+    _verificationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       checkVerification();
     });
   }
@@ -73,13 +74,7 @@ class _VerifyAccountState extends State<VerifyAccount> {
               });
         }
         // Doğrulama başarılı, anasayfaya yönlendir
-        Get.offAll(() => ProfilesScreen());
-      } else {
-        Get.snackbar(
-          "Hesap Doğrulanmadı",
-          "Lütfen e-posta kutunuzu kontrol edin ve doğrulama linkine tıklayın.",
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        Get.offAll(() => MainScreen());
       }
     }
   }
@@ -94,6 +89,7 @@ class _VerifyAccountState extends State<VerifyAccount> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
+            // ignore: deprecated_member_use
             colors: [theme.primaryColor.withOpacity(0.1), Colors.white],
           ),
         ),

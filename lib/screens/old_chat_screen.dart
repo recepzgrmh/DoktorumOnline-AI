@@ -2,8 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:login_page/screens/chat_history_detail_screen.dart';
-import 'package:login_page/widgets/custom_appBar.dart';
-import 'package:login_page/widgets/my_drawer.dart';
 
 class OldChatScreen extends StatefulWidget {
   final String userId;
@@ -67,8 +65,7 @@ class _OldChatScreenState extends State<OldChatScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: CustomAppBar(title: 'DoktorumOnline AI'),
-      drawer: MyDrawer(),
+
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream:
             complaintsRef.orderBy('lastAnalyzed', descending: true).snapshots(),

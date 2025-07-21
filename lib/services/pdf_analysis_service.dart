@@ -10,28 +10,40 @@ class PdfAnalysisService {
     required String fileName,
     required Map<String, String> analysis,
   }) async {
-    final uid = _auth.currentUser!.uid;
-    final docRef =
-        _firestore
-            .collection('users')
-            .doc(uid)
-            .collection('pdf_analyses')
-            .doc();
+    try {
+      final uid = _auth.currentUser!.uid;
+      final docRef =
+          _firestore
+              .collection('users')
+              .doc(uid)
+              .collection('pdf_analyses')
+              .doc();
 
-    final pdfAnalysis = PdfAnalysis(
-      id: docRef.id,
-      fileName: fileName,
-      analysis: analysis,
-      createdAt: DateTime.now(),
-      userId: uid,
-    );
+      final pdfAnalysis = PdfAnalysis(
+        id: docRef.id,
+        fileName: fileName,
+        analysis: analysis,
+        createdAt: DateTime.now(),
+        userId: uid,
+      );
 
-    await docRef.set(pdfAnalysis.toMap());
-    return docRef.id;
+      await docRef.set(pdfAnalysis.toMap());
+
+      return docRef.id;
+    } catch (e) {
+      rethrow; // Hatayı yukarıya tekrar fırlat
+    }
   }
 
   Stream<List<PdfAnalysis>> getAnalyses() {
-    final uid = _auth.currentUser!.uid;
+    final user = _auth.currentUser;
+    if (user == null) {
+      // Kullanıcı giriş yapmamışsa boş bir stream döndür.
+
+      return Stream.value([]);
+    }
+
+    final uid = user.uid;
     return _firestore
         .collection('users')
         .doc(uid)

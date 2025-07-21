@@ -10,12 +10,11 @@ import 'package:login_page/services/tutorial_service.dart';
 import 'package:login_page/widgets/complaint_form.dart';
 import 'package:login_page/widgets/custom_button.dart';
 import 'package:login_page/widgets/loading_widget.dart';
-import 'package:login_page/widgets/my_drawer.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ComplaintScreen extends StatefulWidget {
-  const ComplaintScreen({Key? key}) : super(key: key);
+  const ComplaintScreen({super.key});
   @override
   State<ComplaintScreen> createState() => _ComplaintScreenState();
 }
@@ -39,9 +38,9 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
 
   TutorialCoachMark? tutorialCoachMark;
   List<TargetFocus> targets = [];
-  GlobalKey _menuDrawer = GlobalKey();
-  GlobalKey _formKeyMark = GlobalKey();
-  GlobalKey _startButton = GlobalKey();
+  final GlobalKey _menuDrawer = GlobalKey();
+  final GlobalKey _formKeyMark = GlobalKey();
+  final GlobalKey _startButton = GlobalKey();
 
   @override
   void initState() {
@@ -270,7 +269,7 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
             ),
           ],
         ),
-        drawer: const MyDrawer(),
+
         body: const LoadingWidget(message: "Profil bilgileri yükleniyor..."),
       );
     }
@@ -316,7 +315,7 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
           ),
         ],
       ),
-      drawer: const MyDrawer(),
+
       body:
           _loading
               ? const LoadingWidget(message: "Şikayetiniz işleniyor...")

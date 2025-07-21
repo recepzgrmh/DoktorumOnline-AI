@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:login_page/theme/app_theme.dart';
 import 'firebase_options.dart';
 import 'package:login_page/wrapper.dart';
-import 'package:login_page/screens/opening.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 
 // GetX için navigator anahtarını tanımla
@@ -13,38 +13,33 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  print("[DEBUG] main başladı");
   try {
     await dotenv.load(fileName: "assets/.env");
-    print("📌 `.env` dosyası başarıyla yüklendi!");
-    print("📌 FIREBASE_API_KEY: ${dotenv.env['FIREBASE_API_KEY'] ?? 'YOK!'}");
-  } catch (e) {
-    print("🚨 `.env` dosyası yüklenemedi! Hata: $e");
-  }
+    print("[DEBUG] .env yüklendi");
 
-  try {
     if (Firebase.apps.isEmpty) {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
+      print("[DEBUG] Firebase başlatıldı");
 
       // Firebase Auth ayarlarını yapılandır
       await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
+      print("[DEBUG] Firebase Auth persistence ayarlandı");
 
       // Mevcut oturumu kontrol et
       User? currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser != null) {
         // Token'ı yenile
         await currentUser.getIdToken(true);
-        print("🔥 Mevcut kullanıcı oturumu bulundu: ${currentUser.email}");
+        print("[DEBUG] Kullanıcı token yenilendi");
       }
-
-      print("🔥 Firebase Başlatıldı!");
-    } else {
-      print("Firebase zaten başlatılmış.");
     }
-  } catch (e) {
-    print("🚨 Firebase Başlatma Hatası: $e");
+  } catch (e, s) {
+    print('[ERROR] main() içinde hata:');
+    print(e);
+    print(s);
   }
 
   runApp(const MyApp());
@@ -56,11 +51,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      navigatorKey: navigatorKey, // GetX navigator anahtarını kullan
+      navigatorKey: navigatorKey,
       title: 'DoktorumOnline AI',
       theme: AppTheme.lightTheme,
       debugShowCheckedModeBanner: false,
-      home: const Wrapper(), // Opening yerine Wrapper'ı kullan
+      home: const Wrapper(),
     );
   }
 }

@@ -1,7 +1,10 @@
 // lib/screens/home_screen.dart
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:login_page/models/medical_form_data.dart';
@@ -9,19 +12,16 @@ import 'package:login_page/screens/overview_screen.dart';
 import 'package:login_page/services/form_service.dart';
 import 'package:login_page/services/openai_service.dart';
 import 'package:login_page/services/profile_service.dart';
-import 'package:login_page/services/tutorial_service.dart';
 
-import 'package:login_page/widgets/custom_appBar.dart';
 import 'package:login_page/widgets/custom_button.dart';
 import 'package:login_page/widgets/loading_widget.dart';
 import 'package:login_page/widgets/medical_form.dart';
 import 'package:login_page/widgets/complaint_form.dart';
-import 'package:login_page/widgets/my_drawer.dart';
 
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -144,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   /// Sayfayı önce butona kaydırır, sonra tutorial'ı gösterir.
-  Future<void> _showTutorial() async {
+  Future<void> showTutorial() async {
     await _scrollToWidget(_startButton);
     _initTargets();
     tutorialCoachMark = TutorialCoachMark(
@@ -161,11 +161,11 @@ class _HomeScreenState extends State<HomeScreen> {
       final hasSeen = prefs.getBool(_tutorialKey) ?? false;
 
       if (!hasSeen && mounted) {
-        await _showTutorial();
+        await showTutorial();
         await prefs.setBool(_tutorialKey, true);
       }
     } catch (_) {
-      if (mounted) await _showTutorial(); // prefs erişilemezse bile göster
+      if (mounted) await showTutorial(); // prefs erişilemezse bile göster
     }
   }
 
@@ -271,8 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_isLoadingProfile) {
       return Scaffold(
         backgroundColor: Colors.white,
-        appBar: CustomAppBar(title: 'DoktorumOnline AI'),
-        drawer: const MyDrawer(),
+
         body: const LoadingWidget(
           message: 'Profil bilgileri kontrol ediliyor...',
         ),
@@ -281,8 +280,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(title: 'DoktorumOnline AI'),
-      drawer: const MyDrawer(),
+
       body:
           _loading
               ? const LoadingWidget(message: 'Şikayetiniz işleniyor...')

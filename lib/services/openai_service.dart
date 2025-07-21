@@ -214,12 +214,12 @@ class OpenAIService {
             messages: [
               ChatCompletionMessage.system(
                 content:
-                    "Bir doktor titizliğiyle gelen metni detaylıca incele. Lütfen aşağıdaki başlıklar altında kapsamlı bir analiz yap, Kullanıcının Anlayabileceği Yalın bir dil kullan. Her başlığı '##' işareti ile başlat ve içeriğini altına yaz:\n\n" +
-                    "## Genel Değerlendirme\n" +
-                    "## Tespit Edilen Durumlar\n" +
-                    "## Risk Faktörleri\n" +
-                    "## Öneriler\n" +
-                    "## Takip Önerileri\n\n" +
+                    "Bir doktor titizliğiyle gelen metni detaylıca incele. Lütfen aşağıdaki başlıklar altında kapsamlı bir analiz yap, Kullanıcının Anlayabileceği Yalın bir dil kullan. Her başlığı '##' işareti ile başlat ve içeriğini altına yaz:\n\n"
+                    "## Genel Değerlendirme\n"
+                    "## Tespit Edilen Durumlar\n"
+                    "## Risk Faktörleri\n"
+                    "## Öneriler\n"
+                    "## Takip Önerileri\n\n"
                     "Kullanıcının anlayabileceği sade bir dil kullan, ancak gerekli tıbbi terimleri de açıklayarak kullan. Her bölüm için detaylı ve kapsamlı bilgi ver.",
               ),
               ChatCompletionMessage.user(

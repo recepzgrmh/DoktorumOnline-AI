@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:login_page/screens/home_screen.dart';
-import 'package:login_page/screens/old_chat_screen.dart';
+
 import 'package:login_page/screens/opening.dart';
-import 'package:login_page/screens/pdf_analysis_screen.dart';
-import 'package:login_page/screens/profiles_screen.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'coachmark_desc.dart' as coachmark;
 
 class MyDrawer extends StatefulWidget {
-  const MyDrawer({super.key});
+  final Function(int) onMenuItemTap;
+  final int selectedIndex;
+
+  const MyDrawer({
+    super.key,
+    required this.onMenuItemTap,
+    required this.selectedIndex,
+  });
+
   @override
   State<MyDrawer> createState() => _MyDrawerState();
 }
@@ -24,8 +30,10 @@ class _MyDrawerState extends State<MyDrawer> {
   final GlobalKey _chatButton = GlobalKey();
   final GlobalKey _uploadButton = GlobalKey();
   final GlobalKey _profilesButton = GlobalKey();
-  final GlobalKey _logoutButton = GlobalKey();
+  final GlobalKey _logoutButton =
+      GlobalKey(); // Bu key hala logout için kullanılacak
   // ───────────────────────────────────────────────────────────────────────────
+
   @override
   void initState() {
     super.initState();
@@ -34,7 +42,6 @@ class _MyDrawerState extends State<MyDrawer> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Widget build edildikten hemen sonra (ama Drawer animasyonunu bekleyerek)
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _checkAndShowTutorial(),
     );
@@ -42,31 +49,27 @@ class _MyDrawerState extends State<MyDrawer> {
 
   Future<void> _checkAndShowTutorial() async {
     final prefs = await SharedPreferences.getInstance();
-
-    // Her kullanıcının kendi kaydını tutmak için e-posta ya da UID ekleyin
     final key = 'hasSeenDrawerTutorial_${currentUser?.uid ?? 'anon'}';
-
     final hasSeenTutorial = prefs.getBool(key) ?? false;
 
     if (!hasSeenTutorial && mounted) {
-      _showTutorialCoachmark();
-
-      tutorialCoachMark?.finish();
+      showTutorialCoachmark();
       await prefs.setBool(key, true);
     }
   }
 
-  // Drawer kayar animasyonu tamamlandıktan sonra Coach Mark başlat
-  void _showTutorialCoachmark() {
+  void showTutorialCoachmark() {
     if (!mounted) return;
-    // Drawer'ın 300 ms'lik slide animasyonu için geciktir
     const drawerAnimationDelay = Duration(milliseconds: 300);
     Future.delayed(drawerAnimationDelay, () {
       if (!mounted) return;
       _initTargets();
+      if (targets.isEmpty) {
+        debugPrint('Drawer tutorial için hedef bulunamadı.');
+        return;
+      }
       tutorialCoachMark = TutorialCoachMark(
         targets: targets,
-        // Genel animasyon süreleri (tüm hedefler için geçerli)
         focusAnimationDuration: Duration.zero,
         unFocusAnimationDuration: Duration.zero,
         pulseAnimationDuration: const Duration(milliseconds: 350),
@@ -84,70 +87,49 @@ class _MyDrawerState extends State<MyDrawer> {
       _buildTarget(
         identify: "Home Button",
         keyTarget: _homeButton,
-        title: 'Şikayet Başlat',
         body:
             'Yeni bir muayeneye başlamak için bu butona dokun. İlgili bilgileri doldur, DoktorumOnline sana ek sorular yöneltsin.',
-        focusAnim: Duration.zero,
-        unFocusAnim: Duration.zero,
       ),
       _buildTarget(
         identify: "Chat Button",
         keyTarget: _chatButton,
-        title: 'Analiz Geçmişi',
         body:
-            'Daha önce başlattığın tüm şikâyet ve konuşmaları burada görebilirsin. '
-            'Herhangi birine dokunarak detayları aç.',
-        focusAnim: Duration.zero,
-        unFocusAnim: Duration.zero,
+            'Daha önce başlattığın tüm şikâyet ve konuşmaları burada görebilirsin. Herhangi birine dokunarak detayları aç.',
       ),
       _buildTarget(
         identify: "Upload Button",
         keyTarget: _uploadButton,
-        title: 'PDF Analiz',
         body:
             'Lab sonucu, kan tahlili veya reçeteni PDF olarak yükle; DoktorumOnline saniyeler içinde özetleyip kritik bulguları vurgular.',
-        focusAnim: Duration.zero,
-        unFocusAnim: Duration.zero,
       ),
       _buildTarget(
         identify: "Profiles Button",
         keyTarget: _profilesButton,
-        title: 'Profil Yönetimi',
         body:
             'Farklı kullanıcılar için ayrı profil oluşturabilir, sağlık bilgilerini güncelleyebilirsin.',
-        focusAnim: Duration.zero,
-        unFocusAnim: Duration.zero,
       ),
+      // Logout butonu için ayrı bir hedef tanımlıyoruz
       _buildTarget(
         identify: "Logout Button",
         keyTarget: _logoutButton,
-        title: 'Güvenli Çıkış',
         body:
             'Hesabından çıkış yaparak kişisel verilerini koru. Tekrar giriş yapmak sadece birkaç saniye sürer.',
         isLast: true,
-        focusAnim: Duration.zero,
-        unFocusAnim: Duration.zero,
       ),
     ];
   }
 
-  // Tek bir TargetFocus'u oluşturur
   TargetFocus _buildTarget({
     required String identify,
     required GlobalKey keyTarget,
-    required String title,
     required String body,
     bool isLast = false,
-    Duration focusAnim = const Duration(milliseconds: 300),
-    Duration unFocusAnim = const Duration(milliseconds: 200),
   }) {
     return TargetFocus(
       identify: identify,
       keyTarget: keyTarget,
       shape: ShapeLightFocus.RRect,
       radius: 10,
-      focusAnimationDuration: focusAnim,
-      unFocusAnimationDuration: unFocusAnim,
       contents: [
         TargetContent(
           align: isLast ? ContentAlign.top : ContentAlign.bottom,
@@ -164,7 +146,6 @@ class _MyDrawerState extends State<MyDrawer> {
     );
   }
 
-  // ─────────────────────────── Firebase sign-out ─────────────────────────────
   Future<void> signOut() async {
     try {
       await FirebaseAuth.instance.signOut();
@@ -177,10 +158,14 @@ class _MyDrawerState extends State<MyDrawer> {
       }
     } catch (e) {
       debugPrint('Çıkış hatası: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Çıkış yaparken bir hata oluştu: $e')),
+        );
+      }
     }
   }
 
-  // ───────────────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -197,7 +182,6 @@ class _MyDrawerState extends State<MyDrawer> {
           children: [
             Column(
               children: [
-                // Kullanıcı başlığı
                 UserAccountsDrawerHeader(
                   accountName: Text(
                     currentUser?.displayName ?? 'User',
@@ -232,69 +216,82 @@ class _MyDrawerState extends State<MyDrawer> {
                   key: _homeButton,
                   icon: Icons.home_rounded,
                   title: 'ŞİKAYET BAŞLAT',
+                  index: 0,
                   onTap: () {
                     Navigator.of(context).pop();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const HomeScreen()),
-                    );
+                    widget.onMenuItemTap(0);
                   },
                 ),
                 _buildDrawerItem(
                   key: _chatButton,
                   icon: Icons.chat_bubble_rounded,
                   title: 'ANALİZ GEÇMİŞİ',
+                  index: 1,
                   onTap: () {
-                    if (currentUser != null) {
-                      Navigator.of(context).pop();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder:
-                              (_) => OldChatScreen(userId: currentUser!.uid),
-                        ),
-                      );
-                    }
+                    Navigator.of(context).pop();
+                    widget.onMenuItemTap(1);
                   },
                 ),
                 _buildDrawerItem(
                   key: _uploadButton,
                   icon: Icons.upload_file_rounded,
                   title: 'TAHLİL YÜKLEME',
+                  index: 2,
                   onTap: () {
                     Navigator.of(context).pop();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const PdfAnalysisScreen(),
-                      ),
-                    );
+                    widget.onMenuItemTap(2);
                   },
                 ),
                 _buildDrawerItem(
                   key: _profilesButton,
                   icon: Icons.person,
                   title: 'PROFİLLER',
+                  index: 3,
                   onTap: () {
                     Navigator.of(context).pop();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const ProfilesScreen()),
-                    );
+                    widget.onMenuItemTap(3);
                   },
                 ),
               ],
             ),
-            // Çıkış
+            // Çıkış butonu için ayrı bir ListTile kullanıyoruz
             Container(
-              key: _logoutButton,
-              margin: const EdgeInsets.only(bottom: 20),
-              child: _buildDrawerItem(
-                icon: Icons.logout_rounded,
-                title: 'LOGOUT',
-                textColor: Colors.red.shade700,
-                iconColor: Colors.red.shade700,
-                onTap: signOut,
+              key:
+                  _logoutButton, // Tutorial için GlobalKey hala burada kullanılabilir
+              margin: EdgeInsets.only(
+                bottom: MediaQuery.of(context).padding.bottom,
+                left: 15,
+                right: 15,
+              ), // Paddingi buraya taşıdık
+              child: ListTile(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                leading: Icon(
+                  Icons.logout_rounded,
+                  color: Colors.red.shade700,
+                  size: 26,
+                ),
+                title: Text(
+                  'ÇIKIŞ YAP',
+                  style: TextStyle(
+                    letterSpacing: 2,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red.shade700,
+                    fontSize: 14,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.of(context).pop(); // Drawer'ı kapat
+                  signOut(); // Firebase çıkış işlemi
+                },
+                hoverColor: Colors.red.shade50,
+                selectedTileColor: Colors.red.shade50.withOpacity(
+                  0.5,
+                ), // Logout için farklı renk
+                // Logout genellikle selected olmaz, o yüzden selected: false bırakabiliriz.
+                // Veya aktif olmasını istersen buraya widget.selectedIndex == 'logout_index' gibi bir şey ekleyebilirsin
+                // ama genelde logout'un highlight olmasına gerek duyulmaz.
               ),
             ),
           ],
@@ -303,33 +300,47 @@ class _MyDrawerState extends State<MyDrawer> {
     );
   }
 
-  // Drawer buton şablonu
+  // Drawer buton şablonu (artık sadece navigasyon öğeleri için)
   Widget _buildDrawerItem({
     Key? key,
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    required int index,
     Color? textColor,
     Color? iconColor,
   }) {
+    final isSelected = widget.selectedIndex == index;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
       child: ListTile(
         key: key,
+        selected: isSelected,
+        selectedTileColor: Colors.blue.shade100.withOpacity(0.5),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        leading: Icon(icon, color: iconColor ?? Colors.blue.shade600, size: 26),
+        leading: Icon(
+          icon,
+          color:
+              isSelected
+                  ? Colors.blue.shade700
+                  : (iconColor ?? Colors.blue.shade600),
+          size: 26,
+        ),
         title: Text(
           title,
           style: TextStyle(
             letterSpacing: 2,
-            fontWeight: FontWeight.bold,
-            color: textColor ?? Colors.blue.shade600,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            color:
+                isSelected
+                    ? Colors.blue.shade700
+                    : (textColor ?? Colors.blue.shade600),
             fontSize: 14,
           ),
         ),
         onTap: onTap,
         hoverColor: Colors.blue.shade50,
-        selectedTileColor: Colors.blue.shade50,
       ),
     );
   }

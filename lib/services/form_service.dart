@@ -93,8 +93,6 @@ class FormService {
     required Map<String, String> formData,
     required String complaintId,
   }) async {
-    final uid = _auth.currentUser!.uid;
-
     // Önce kullanıcı profil bilgilerini kaydet
     await saveUserProfile(
       profileData: {
@@ -205,7 +203,7 @@ class FormService {
 
     // Kullanıcı profil bilgilerini al
     final userDoc = await _firestore.collection('users').doc(uid).get();
-    final userData = userDoc.data() as Map<String, dynamic>? ?? {};
+    final userData = userDoc.data() ?? {};
 
     // Şikayet bilgilerini al
     final complaintDoc =
@@ -215,7 +213,7 @@ class FormService {
             .collection('complaints')
             .doc(complaintId)
             .get();
-    final complaintData = complaintDoc.data() as Map<String, dynamic>? ?? {};
+    final complaintData = complaintDoc.data() ?? {};
 
     // Birleştir
     return {...userData, ...complaintData};

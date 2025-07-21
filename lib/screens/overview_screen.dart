@@ -11,8 +11,7 @@ import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:login_page/services/openai_service.dart';
 import 'package:login_page/services/form_service.dart';
 import 'package:login_page/widgets/error_widget.dart';
-import 'package:login_page/widgets/custom_appBar.dart';
-import 'package:login_page/widgets/my_drawer.dart';
+import 'package:login_page/widgets/custom_appbar.dart';
 
 class OverviewScreen extends StatefulWidget {
   final String uid;
@@ -353,7 +352,7 @@ class _OverviewScreenState extends State<OverviewScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${_currentQIndex}/${widget.questions.length} soru tamamlandı',
+                '$_currentQIndex/${widget.questions.length} soru tamamlandı',
                 style: TextStyle(
                   fontSize: 13,
                   color: Colors.grey.shade600,
@@ -487,8 +486,7 @@ class _OverviewScreenState extends State<OverviewScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const MyDrawer(),
-      appBar: CustomAppBar(title: 'DoktorumOnline AI'),
+      appBar: CustomAppbar(title: 'DoktorumOnline AI'),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(

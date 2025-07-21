@@ -3,15 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
-
 import 'package:login_page/widgets/custom_button.dart';
-import 'package:login_page/widgets/my_drawer.dart';
-import 'package:login_page/widgets/custom_appBar.dart';
+import 'package:login_page/widgets/custom_appbar.dart';
 import 'package:login_page/widgets/coachmark_desc.dart';
-
 import '../services/openai_service.dart';
 import '../services/pdf_analysis_service.dart';
-import 'saved_analyses_screen.dart';
 
 class PdfAnalysisScreen extends StatefulWidget {
   const PdfAnalysisScreen({super.key});
@@ -27,7 +23,6 @@ class _PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
 
   PlatformFile? _selectedFile;
   String _status = 'Lütfen bir PDF dosyası seçin';
-  Map<String, String>? _analysis;
   bool _isLoading = false;
 
   // ═════════════ TutorialCoachMark ═════════════
@@ -62,15 +57,15 @@ class _PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
       final hasSeen = prefs.getBool(_tutorialKey) ?? false;
 
       if (!hasSeen && mounted) {
-        _showTutorial();
+        showTutorial();
         await prefs.setBool(_tutorialKey, true);
       }
     } catch (_) {
-      if (mounted) _showTutorial(); // prefs erişilemezse bile göster
+      if (mounted) showTutorial(); // prefs erişilemezse bile göster
     }
   }
 
-  void _showTutorial() {
+  void showTutorial() {
     _initTargets();
     tutorialCoachMark = TutorialCoachMark(targets: targets)
       ..show(context: context, rootOverlay: true);
@@ -132,7 +127,6 @@ class _PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
     setState(() {
       _selectedFile = result.files.first;
       _status = 'Seçilen dosya: ${_selectedFile!.name}';
-      _analysis = null;
     });
   }
 
@@ -150,7 +144,6 @@ class _PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
     try {
       final result = await _service.analyzePdf(_selectedFile!.path!);
       setState(() {
-        _analysis = result;
         _status = 'Analiz tamamlandı.';
       });
 
@@ -173,7 +166,7 @@ class _PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
       MaterialPageRoute(
         builder:
             (_) => Scaffold(
-              appBar: CustomAppBar(title: 'PDF Analiz Sonucu'),
+              appBar: CustomAppbar(title: 'PDF Analiz Sonucu'),
               body: Container(
                 color: Colors.white,
                 padding: const EdgeInsets.all(20),
@@ -257,23 +250,6 @@ class _PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      drawer: const MyDrawer(),
-      appBar: AppBar(
-        foregroundColor: Colors.blue,
-        title: const Text('PDF Analiz', style: TextStyle(color: Colors.blue)),
-        actions: [
-          IconButton(
-            key: _historyButton,
-            icon: const Icon(Icons.history),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => SavedAnalysesScreen()),
-              );
-            },
-          ),
-        ],
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(

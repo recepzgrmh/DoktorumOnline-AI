@@ -2,9 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:login_page/screens/auth/verify_account.dart';
-import 'package:login_page/screens/profiles_screen.dart';
+import 'package:login_page/screens/main_navigation_screen.dart';
+
 import 'package:login_page/widgets/text_inputs.dart';
-import 'package:get/get.dart';
+
 import 'package:login_page/widgets/custom_button.dart';
 import 'package:login_page/screens/auth/sign_in.dart';
 
@@ -42,13 +43,14 @@ class _SignUpState extends State<SignUp> {
 
         // Doğrulama ekranına yönlendir
         Navigator.pushReplacement(
+          // ignore: use_build_context_synchronously
           context,
           MaterialPageRoute(builder: (context) => const VerifyAccount()),
         );
       }
     } catch (e) {
-      print("🔥 Firebase Hatası: $e");
       ScaffoldMessenger.of(
+        // ignore: use_build_context_synchronously
         context,
       ).showSnackBar(SnackBar(content: Text("Hesap oluşturulamadı: $e")));
     }
@@ -65,6 +67,7 @@ class _SignUpState extends State<SignUp> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
+            // ignore: deprecated_member_use
             colors: [theme.primaryColor.withOpacity(0.1), Colors.white],
           ),
         ),
@@ -227,7 +230,7 @@ class _SignUpState extends State<SignUp> {
                               if (userCredential != null) {
                                 navigator.pushAndRemoveUntil(
                                   MaterialPageRoute(
-                                    builder: (_) => ProfilesScreen(),
+                                    builder: (_) => MainScreen(),
                                   ),
                                   (route) => false,
                                 );
@@ -307,37 +310,28 @@ class _SignUpState extends State<SignUp> {
 
 Future<UserCredential?> signInWithGoogle(BuildContext context) async {
   try {
-    print("🔍 Google Sign-In başlatılıyor...");
-
     // Basit Google Sign-In konfigürasyonu
     final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
     if (gUser == null) {
-      print("❌ Kullanıcı Google Sign-In'i iptal etti");
       return null;
     }
 
-    print("✅ Google hesabı seçildi: ${gUser.email}");
-
     // Token'ları al
-    print("🔑 Token'lar alınıyor...");
+
     final gAuth = await gUser.authentication;
     final credential = GoogleAuthProvider.credential(
       idToken: gAuth.idToken,
       accessToken: gAuth.accessToken,
     );
 
-    print("✅ Token'lar başarıyla alındı");
-
     // Firebase'e ilet
-    print("🔥 Firebase'e kimlik doğrulama yapılıyor...");
+
     final userCred = await FirebaseAuth.instance.signInWithCredential(
       credential,
     );
 
-    print("✅ Firebase kimlik doğrulama başarılı");
     return userCred;
   } on FirebaseAuthException catch (e) {
-    print("🔥 Firebase Auth Hatası: ${e.code} - ${e.message}");
     if (!context.mounted) return null;
 
     switch (e.code) {
@@ -409,7 +403,6 @@ Future<UserCredential?> signInWithGoogle(BuildContext context) async {
     }
     return null;
   } catch (e) {
-    print("❌ Genel hata: $e");
     if (!context.mounted) return null;
 
     // PlatformException için özel hata yönetimi

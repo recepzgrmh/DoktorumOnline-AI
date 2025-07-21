@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:login_page/widgets/custom_appBar.dart';
+import 'package:login_page/widgets/custom_appbar.dart';
 import '../models/pdf_analysis.dart';
 import '../services/pdf_analysis_service.dart';
 
@@ -20,7 +20,7 @@ class SavedAnalysesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: 'Kaydedilmiş Analizler', actions: const []),
+      appBar: CustomAppbar(title: 'Kaydedilmiş Analizler', actions: const []),
       body: StreamBuilder<List<PdfAnalysis>>(
         stream: _service.getAnalyses(),
         builder: (context, snapshot) {
@@ -141,7 +141,7 @@ class AnalysisDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: 'Analiz Detayı', actions: const []),
+      appBar: CustomAppbar(title: 'Analiz Detayı', actions: const []),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(

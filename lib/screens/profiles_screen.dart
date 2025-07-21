@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:login_page/widgets/coachmark_desc.dart';
 import 'package:login_page/widgets/custom_button.dart';
-import 'package:login_page/widgets/my_drawer.dart';
 import 'package:login_page/widgets/profile_form.dart';
 import 'package:login_page/widgets/empty_state_widget.dart';
 import 'package:login_page/widgets/loading_widget.dart';
 import 'package:login_page/services/profile_service.dart';
-import 'package:login_page/services/tutorial_service.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -54,17 +52,17 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
       final hasSeenTutorial = prefs.getBool('hasSeenProfilesTutorial') ?? false;
 
       if (!hasSeenTutorial) {
-        _showTutorialCoachmar();
+        showTutorialCoachmar();
         // Tutorial'ı gördüğünü kaydet
         await prefs.setBool('hasSeenProfilesTutorial', true);
       }
     } catch (e) {
       // SharedPreferences hatası durumunda tutorial'ı göster
-      _showTutorialCoachmar();
+      showTutorialCoachmar();
     }
   }
 
-  void _showTutorialCoachmar() {
+  void showTutorialCoachmar() {
     _iniTarget();
     tutorialCoachMark = TutorialCoachMark(targets: targets)
       ..show(context: context, rootOverlay: true);
@@ -231,71 +229,76 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      child: Padding(
-        padding: EdgeInsets.only(
+      child: SafeArea(
+        minimum: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 24,
-          right: 24,
-          top: 24,
         ),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    _isEditing ? 'Profili Düzenle' : 'Yeni Profil Ekle',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2196F3),
+
+        child: Padding(
+          padding: const EdgeInsets.only(
+            // Sabit padding'ler
+            left: 24,
+            right: 24,
+            top: 24,
+          ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      _isEditing ? 'Profili Düzenle' : 'Yeni Profil Ekle',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2196F3),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close, color: Color(0xFF757575)),
+                    ),
+                  ],
+                ),
+
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: ProfileForm(
+                      nameController: _nameController,
+                      boyController: _boyController,
+                      yasController: _yasController,
+                      kiloController: _kiloController,
+                      cinsiyet: _cinsiyet,
+                      kanGrubu: _kanGrubu,
+                      onCinsiyetChanged: (value) {
+                        setState(() => _cinsiyet = value);
+                      },
+                      onKanGrubuChanged: (value) {
+                        setState(() => _kanGrubu = value);
+                      },
                     ),
                   ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close, color: Color(0xFF757575)),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              Expanded(
-                child: SingleChildScrollView(
-                  child: ProfileForm(
-                    nameController: _nameController,
-                    boyController: _boyController,
-                    yasController: _yasController,
-                    kiloController: _kiloController,
-                    cinsiyet: _cinsiyet,
-                    kanGrubu: _kanGrubu,
-                    onCinsiyetChanged: (value) {
-                      setState(() => _cinsiyet = value);
-                    },
-                    onKanGrubuChanged: (value) {
-                      setState(() => _kanGrubu = value);
-                    },
-                  ),
                 ),
-              ),
 
-              CustomButton(
-                label: _isEditing ? 'Profili Güncelle' : 'Profili Kaydet',
-                onPressed: _saveProfile,
-                isLoading: _isLoading,
-                backgroundColor: const Color(0xFF2196F3),
-                foregroundColor: Colors.white,
-                isFullWidth: true,
-                verticalPadding: 16.0,
-                horizontalPadding: 24.0,
-                minHeight: 48.0,
-                elevation: 2.0,
-                borderRadius: const BorderRadius.all(Radius.circular(12)),
-              ),
-              const SizedBox(height: 16),
-            ],
+                CustomButton(
+                  label: _isEditing ? 'Profili Güncelle' : 'Profili Kaydet',
+                  onPressed: _saveProfile,
+                  isLoading: _isLoading,
+                  backgroundColor: const Color(0xFF2196F3),
+                  foregroundColor: Colors.white,
+                  isFullWidth: true,
+                  verticalPadding: 16.0,
+                  horizontalPadding: 24.0,
+                  minHeight: 48.0,
+                  elevation: 2.0,
+                  borderRadius: const BorderRadius.all(Radius.circular(12)),
+                ),
+                SizedBox(height: 16 + MediaQuery.of(context).padding.bottom),
+              ],
+            ),
           ),
         ),
       ),
@@ -430,7 +433,9 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      drawer: MyDrawer(),
+
+      /*
+
       appBar: AppBar(
         backgroundColor: Colors.white,
         foregroundColor: const Color(0xFF2196F3),
@@ -463,12 +468,14 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
               await TutorialService.resetAllTutorials();
 
               // Mevcut sayfanın tutorial'ını göster
-              _showTutorialCoachmar();
+              showTutorialCoachmar();
             },
             tooltip: 'Tüm Tutorial\'ları Sıfırla',
           ),
         ],
       ),
+      
+      */
       body:
           _isLoading
               ? const LoadingWidget(message: "Profiller yükleniyor...")

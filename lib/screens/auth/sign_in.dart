@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:login_page/screens/auth/reset_password.dart';
 import 'package:login_page/screens/auth/sign_up.dart';
-import 'package:login_page/screens/profiles_screen.dart';
+import 'package:login_page/screens/main_navigation_screen.dart';
 import 'package:login_page/widgets/text_inputs.dart';
 import 'package:login_page/wrapper.dart';
 import 'package:login_page/widgets/custom_button.dart';
@@ -21,19 +21,21 @@ class _SignInState extends State<SignIn> {
 
   // Giriş yapma fonksiyonu
   Future<void> signInUser() async {
+    print('[DEBUG] signInUser başladı');
     try {
+      print(
+        '[DEBUG] FirebaseAuth.instance.signInWithEmailAndPassword çağrılıyor',
+      );
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(
             email: email.text.trim(),
             password: password.text.trim(),
           );
-
+      print('[DEBUG] signInWithEmailAndPassword başarılı');
       User? user = userCredential.user;
 
       if (user != null) {
-        print("🔥 Kullanıcı giriş yaptı: ${user.email}");
-        print("📌 Kullanıcı UID: ${user.uid}");
-
+        print('[DEBUG] Kullanıcı var, Wrapper ekranına yönlendiriliyor');
         // Ana ekrana yönlendir
         if (mounted) {
           Navigator.pushReplacement(
@@ -41,9 +43,13 @@ class _SignInState extends State<SignIn> {
             MaterialPageRoute(builder: (context) => const Wrapper()),
           );
         }
+      } else {
+        print('[DEBUG] Kullanıcı null');
       }
-    } catch (e) {
-      print("🚨 Firebase Giriş Hatası: $e");
+    } catch (e, s) {
+      print('[ERROR] signInUser içinde hata:');
+      print(e);
+      print(s);
       if (mounted) {
         ScaffoldMessenger.of(
           context,
@@ -54,6 +60,7 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
+    print('[DEBUG] SignIn build başladı');
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -63,6 +70,7 @@ class _SignInState extends State<SignIn> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
+            // ignore: deprecated_member_use
             colors: [theme.primaryColor.withOpacity(0.1), Colors.white],
           ),
         ),
@@ -244,7 +252,7 @@ class _SignInState extends State<SignIn> {
                               if (userCredential != null) {
                                 navigator.pushAndRemoveUntil(
                                   MaterialPageRoute(
-                                    builder: (_) => ProfilesScreen(),
+                                    builder: (_) => MainScreen(),
                                   ),
                                   (route) => false,
                                 );
@@ -324,37 +332,28 @@ class _SignInState extends State<SignIn> {
 
 Future<UserCredential?> signInWithGoogle(BuildContext context) async {
   try {
-    print("🔍 Google Sign-In başlatılıyor...");
-
     // Basit Google Sign-In konfigürasyonu
     final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
     if (gUser == null) {
-      print("❌ Kullanıcı Google Sign-In'i iptal etti");
       return null;
     }
 
-    print("✅ Google hesabı seçildi: ${gUser.email}");
-
     // Token'ları al
-    print("🔑 Token'lar alınıyor...");
+
     final gAuth = await gUser.authentication;
     final credential = GoogleAuthProvider.credential(
       idToken: gAuth.idToken,
       accessToken: gAuth.accessToken,
     );
 
-    print("✅ Token'lar başarıyla alındı");
-
     // Firebase'e ilet
-    print("🔥 Firebase'e kimlik doğrulama yapılıyor...");
+
     final userCred = await FirebaseAuth.instance.signInWithCredential(
       credential,
     );
 
-    print("✅ Firebase kimlik doğrulama başarılı");
     return userCred;
   } on FirebaseAuthException catch (e) {
-    print("🔥 Firebase Auth Hatası: ${e.code} - ${e.message}");
     if (!context.mounted) return null;
 
     switch (e.code) {
@@ -426,7 +425,6 @@ Future<UserCredential?> signInWithGoogle(BuildContext context) async {
     }
     return null;
   } catch (e) {
-    print("❌ Genel hata: $e");
     if (!context.mounted) return null;
 
     // PlatformException için özel hata yönetimi

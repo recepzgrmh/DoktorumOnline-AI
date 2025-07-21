@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:login_page/widgets/my_drawer.dart';
-import 'package:login_page/widgets/custom_appBar.dart';
+
+import 'package:login_page/widgets/custom_appbar.dart';
 import 'package:intl/intl.dart';
 import 'package:login_page/widgets/empty_state_widget.dart';
 
@@ -18,8 +18,8 @@ class ChatHistoryDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: 'DoktorumOnline AI'),
-      drawer: const MyDrawer(),
+      appBar: CustomAppbar(title: 'DoktorumOnline AI'),
+
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
