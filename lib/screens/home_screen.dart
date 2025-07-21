@@ -4,30 +4,26 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:login_page/services/tutorial_service.dart';
 import 'package:login_page/models/medical_form_data.dart';
 import 'package:login_page/screens/overview_screen.dart';
 import 'package:login_page/services/form_service.dart';
 import 'package:login_page/services/openai_service.dart';
 import 'package:login_page/services/profile_service.dart';
-
 import 'package:login_page/widgets/custom_button.dart';
 import 'package:login_page/widgets/loading_widget.dart';
 import 'package:login_page/widgets/medical_form.dart';
 import 'package:login_page/widgets/complaint_form.dart';
-
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends State<HomeScreen> {
   // ═════════════ TutorialCoachMark ═════════════
   TutorialCoachMark? tutorialCoachMark;
   final List<TargetFocus> targets = [];
@@ -35,7 +31,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey _topAreaKey = GlobalKey();
 
   static const _scrollDuration = Duration(milliseconds: 500);
-  static const _tutorialKey = 'hasSeenHomeTutorial'; // 👈 sadece cihaza özel
 
   // ═════════════ Services & Form ═════════════
   final _service = OpenAIService();
@@ -78,7 +73,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    // dispose controllers
     boyController.dispose();
     yasController.dispose();
     kiloController.dispose();
@@ -113,11 +107,21 @@ class _HomeScreenState extends State<HomeScreen> {
     return true;
   }
 
-  // ═════════════ Tutorial setup ═════════════
+  // ═════════════ Tutorial Setup ═════════════
+  /// Checks if the user has seen the tutorial and shows it if not.
+  /// Uses TutorialService to check against Firestore.
+  Future<void> checkAndShowTutorialIfNeeded() async {
+    final hasSeen = await TutorialService.hasSeenTutorial('home');
+    if (!hasSeen && mounted) {
+      showTutorial();
+    }
+  }
+
+  /// Initializes the targets for the tutorial.
   void _initTargets() {
-    targets
-      ..clear()
-      ..add(
+    targets.clear();
+    if (_startButton.currentContext != null) {
+      targets.add(
         TargetFocus(
           identify: 'Start Button',
           keyTarget: _startButton,
@@ -134,44 +138,46 @@ class _HomeScreenState extends State<HomeScreen> {
                             : 'Tüm bilgileri doldurduktan sonra şikayetinizi başlatın',
                     next: 'Bitir',
                     skip: 'Geç',
-                    onNext: controller.skip,
-                    onSkip: controller.skip,
+                    onNext: () {
+                      controller.skip();
+                    },
+                    onSkip: () {
+                      controller.skip();
+                    },
                   ),
             ),
           ],
         ),
       );
-  }
-
-  /// Sayfayı önce butona kaydırır, sonra tutorial'ı gösterir.
-  Future<void> showTutorial() async {
-    await _scrollToWidget(_startButton);
-    _initTargets();
-    tutorialCoachMark = TutorialCoachMark(
-      targets: targets,
-      onFinish: _scrollToTop,
-      onSkip: _scrollToTop,
-    )..show(context: context, rootOverlay: true);
-  }
-
-  /// Drawer’daki gibi: “gördü mü?” kontrolü + gösterim
-  Future<void> _checkAndShowTutorial() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final hasSeen = prefs.getBool(_tutorialKey) ?? false;
-
-      if (!hasSeen && mounted) {
-        await showTutorial();
-        await prefs.setBool(_tutorialKey, true);
-      }
-    } catch (_) {
-      if (mounted) await showTutorial(); // prefs erişilemezse bile göster
     }
   }
 
+  /// Displays the tutorial coach mark.
+  void showTutorial() {
+    _scrollToWidget(_startButton).then((_) {
+      _initTargets();
+      if (targets.isEmpty || !mounted) return;
+
+      tutorialCoachMark = TutorialCoachMark(
+        targets: targets,
+        onFinish: () {
+          TutorialService.markTutorialAsSeen('home');
+          _scrollToTop();
+        },
+        onSkip: () {
+          TutorialService.markTutorialAsSeen('home');
+          _scrollToTop();
+          return true;
+        },
+      )..show(context: context, rootOverlay: true);
+    });
+  }
+
+  // ═════════════ Data Handling ═════════════
   Future<void> _loadUserProfile() async {
     try {
       final profileData = await _formService.getUserProfileData();
+      if (!mounted) return;
       setState(() {
         _userProfileData = profileData;
         _isLoadingProfile = false;
@@ -194,10 +200,10 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     } finally {
       if (mounted) {
-        // Form tam otursun diye ufak gecikme
+        // Delay to ensure the UI is settled before showing the tutorial
         Future.delayed(
           const Duration(milliseconds: 400),
-          _checkAndShowTutorial,
+          checkAndShowTutorialIfNeeded,
         );
       }
     }
@@ -269,18 +275,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final theme = Theme.of(context);
 
     if (_isLoadingProfile) {
-      return Scaffold(
+      return const Scaffold(
         backgroundColor: Colors.white,
-
-        body: const LoadingWidget(
-          message: 'Profil bilgileri kontrol ediliyor...',
-        ),
+        body: LoadingWidget(message: 'Profil bilgileri kontrol ediliyor...'),
       );
     }
 
     return Scaffold(
       backgroundColor: Colors.white,
-
       body:
           _loading
               ? const LoadingWidget(message: 'Şikayetiniz işleniyor...')
@@ -293,7 +295,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(key: _topAreaKey, height: 1), // anchor
+                        Container(
+                          key: _topAreaKey,
+                          height: 1,
+                        ), // Anchor for scroll
+                        const SizedBox(height: 24),
                         _hasProfileData
                             ? ComplaintForm(
                               sikayetController: complaintSikayetController,
@@ -342,7 +348,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// ───────────────────── Coachmark açıklama widget'ı ─────────────────────
+// ───────────────────── Coachmark Description Widget ─────────────────────
 class CoachmarkDesc extends StatelessWidget {
   final String text, skip, next;
   final VoidCallback? onSkip, onNext;

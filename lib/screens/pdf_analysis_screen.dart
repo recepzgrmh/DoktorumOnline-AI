@@ -1,7 +1,7 @@
 // lib/screens/pdf_analysis_screen.dart
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:login_page/services/tutorial_service.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:login_page/widgets/custom_button.dart';
 import 'package:login_page/widgets/custom_appbar.dart';
@@ -10,13 +10,14 @@ import '../services/openai_service.dart';
 import '../services/pdf_analysis_service.dart';
 
 class PdfAnalysisScreen extends StatefulWidget {
-  const PdfAnalysisScreen({super.key});
+  final GlobalKey? historyButtonKey;
+  const PdfAnalysisScreen({super.key, this.historyButtonKey});
 
   @override
-  State<PdfAnalysisScreen> createState() => _PdfAnalysisScreenState();
+  State<PdfAnalysisScreen> createState() => PdfAnalysisScreenState();
 }
 
-class _PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
+class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
   // ═════════════ Services & State ═════════════
   final _service = OpenAIService();
   final _analysisService = PdfAnalysisService();
@@ -28,63 +29,51 @@ class _PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
   // ═════════════ TutorialCoachMark ═════════════
   TutorialCoachMark? tutorialCoachMark;
   final List<TargetFocus> targets = [];
-  final GlobalKey _historyButton = GlobalKey();
   final GlobalKey _pdfPicker = GlobalKey();
-  static const _tutorialKey = 'hasSeenPdfAnalysisTutorial';
 
   // ───────────────────────── Lifecycle ─────────────────────────
   @override
   void initState() {
     super.initState();
-
-    // DEBUG sırasında anahtarı silmek için:
-    assert(() {
-      // SharedPreferences.getInstance()
-      //     .then((p) => p.remove(_tutorialKey));
-      return true;
-    }());
-
-    // Widget ağaçta oluştuktan sonra hafif gecikmeyle kontrol et
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(milliseconds: 400), _checkAndShowTutorial);
-    });
+    // EĞİTİM TETİKLEMESİ BURADAN KALDIRILDI.
   }
 
   // ═════════════ Tutorial Helpers ═════════════
-  Future<void> _checkAndShowTutorial() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final hasSeen = prefs.getBool(_tutorialKey) ?? false;
-
-      if (!hasSeen && mounted) {
-        showTutorial();
-        await prefs.setBool(_tutorialKey, true);
-      }
-    } catch (_) {
-      if (mounted) showTutorial(); // prefs erişilemezse bile göster
+  Future<void> checkAndShowTutorialIfNeeded() async {
+    final hasSeen = await TutorialService.hasSeenTutorial('pdfAnalysis');
+    if (!hasSeen && mounted) {
+      showTutorial();
     }
   }
 
   void showTutorial() {
     _initTargets();
-    tutorialCoachMark = TutorialCoachMark(targets: targets)
-      ..show(context: context, rootOverlay: true);
+    if (targets.isEmpty || !mounted) return;
+    tutorialCoachMark = TutorialCoachMark(
+      targets: targets,
+      onFinish: () => TutorialService.markTutorialAsSeen('pdfAnalysis'),
+      onSkip: () {
+        TutorialService.markTutorialAsSeen('pdfAnalysis');
+        return true;
+      },
+    )..show(context: context, rootOverlay: true);
   }
 
   void _initTargets() {
-    targets
-      ..clear()
-      ..addAll([
+    targets.clear();
+
+    if (widget.historyButtonKey?.currentContext != null) {
+      targets.add(
         TargetFocus(
           identify: 'History Button',
-          keyTarget: _historyButton,
+          keyTarget: widget.historyButtonKey,
           contents: [
             TargetContent(
               align: ContentAlign.bottom,
               builder:
                   (context, controller) => CoachmarkDesc(
                     text:
-                        'Daha önce yaptığınız analizleri buradan görüntüleyebilir ve tekrar inceleyebilirsiniz.',
+                        'Daha önce yaptığınız analizleri buradan görüntüleyebilirsiniz.',
                     next: 'İleri',
                     skip: 'Geç',
                     onNext: controller.next,
@@ -93,26 +82,33 @@ class _PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
             ),
           ],
         ),
+      );
+    }
+
+    if (_pdfPicker.currentContext != null) {
+      targets.add(
         TargetFocus(
           identify: 'PDF Picker',
           keyTarget: _pdfPicker,
           shape: ShapeLightFocus.RRect,
+          radius: 12,
           contents: [
             TargetContent(
-              align: ContentAlign.bottom,
+              align: ContentAlign.top,
               builder:
                   (context, controller) => CoachmarkDesc(
                     text:
                         'PDF dosyanızı seçmek için bu butona tıklayın. Analiz etmek istediğiniz tıbbi raporu buradan yükleyebilirsiniz.',
                     next: 'Bitir',
                     skip: 'Geç',
-                    onNext: controller.next,
+                    onNext: controller.skip,
                     onSkip: controller.skip,
                   ),
             ),
           ],
         ),
-      ]);
+      );
+    }
   }
 
   // ═════════════ File & Analysis ═════════════
@@ -152,11 +148,15 @@ class _PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
         analysis: result,
       );
 
-      _showAnalysisResult(result);
+      if (mounted) {
+        _showAnalysisResult(result);
+      }
     } catch (e) {
       setState(() => _status = 'Analiz sırasında hata: $e');
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -166,7 +166,7 @@ class _PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
       MaterialPageRoute(
         builder:
             (_) => Scaffold(
-              appBar: CustomAppbar(title: 'PDF Analiz Sonucu'),
+              appBar: const CustomAppbar(title: 'PDF Analiz Sonucu'),
               body: Container(
                 color: Colors.white,
                 padding: const EdgeInsets.all(20),
@@ -250,11 +250,13 @@ class _PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const SizedBox(height: 24),
             // --------- Kart: PDF seçimi ----------
             Card(
               elevation: 4,
@@ -355,9 +357,19 @@ class _PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
                   if (_isLoading) return;
                   _analyzePdf();
                 },
-                backgroundColor: theme.primaryColor,
+                backgroundColor: _isLoading ? Colors.grey : theme.primaryColor,
                 foregroundColor: Colors.white,
-                icon: const Icon(Icons.analytics),
+                icon:
+                    _isLoading
+                        ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                        : const Icon(Icons.analytics),
                 isFullWidth: true,
                 borderRadius: BorderRadius.circular(12),
                 elevation: 2,
@@ -371,6 +383,8 @@ class _PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
                   color:
                       _status.contains('hata')
                           ? Colors.red.shade50
+                          : _status.contains('yapılıyor')
+                          ? Colors.blue.shade50
                           : Colors.green.shade50,
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -381,6 +395,8 @@ class _PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
                     color:
                         _status.contains('hata')
                             ? Colors.red.shade700
+                            : _status.contains('yapılıyor')
+                            ? Colors.blue.shade700
                             : Colors.green.shade700,
                   ),
                 ),

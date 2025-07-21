@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:login_page/services/tutorial_service.dart';
 import 'package:login_page/widgets/coachmark_desc.dart';
 import 'package:login_page/widgets/custom_button.dart';
 import 'package:login_page/widgets/profile_form.dart';
@@ -6,28 +7,25 @@ import 'package:login_page/widgets/empty_state_widget.dart';
 import 'package:login_page/widgets/loading_widget.dart';
 import 'package:login_page/services/profile_service.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilesScreen extends StatefulWidget {
-  const ProfilesScreen({super.key});
+  final GlobalKey? helpButtonKey;
+  const ProfilesScreen({super.key, this.helpButtonKey});
 
   @override
-  State<ProfilesScreen> createState() => _ProfilesScreenState();
+  ProfilesScreenState createState() => ProfilesScreenState();
 }
 
-class _ProfilesScreenState extends State<ProfilesScreen> {
+class ProfilesScreenState extends State<ProfilesScreen> {
   TutorialCoachMark? tutorialCoachMark;
   List<TargetFocus> targets = [];
 
-  final GlobalKey _menuDrawer = GlobalKey();
   final GlobalKey _newUser = GlobalKey();
-  GlobalKey keyButton2 = GlobalKey();
-  GlobalKey keyButton3 = GlobalKey();
+  final GlobalKey _firstProfileCard = GlobalKey();
 
   final _profileService = ProfileService();
   final _formKey = GlobalKey<FormState>();
 
-  // ProfileForm için controller'lar
   final _nameController = TextEditingController();
   final _boyController = TextEditingController();
   final _yasController = TextEditingController();
@@ -46,78 +44,68 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
     _loadProfiles();
   }
 
-  Future<void> _checkAndShowTutorial() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final hasSeenTutorial = prefs.getBool('hasSeenProfilesTutorial') ?? false;
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _boyController.dispose();
+    _yasController.dispose();
+    _kiloController.dispose();
+    super.dispose();
+  }
 
-      if (!hasSeenTutorial) {
-        showTutorialCoachmar();
-        // Tutorial'ı gördüğünü kaydet
-        await prefs.setBool('hasSeenProfilesTutorial', true);
-      }
-    } catch (e) {
-      // SharedPreferences hatası durumunda tutorial'ı göster
-      showTutorialCoachmar();
+  Future<void> checkAndShowTutorialIfNeeded() async {
+    final hasSeen = await TutorialService.hasSeenTutorial('profiles');
+    if (!hasSeen && mounted) {
+      showTutorial();
     }
   }
 
-  void showTutorialCoachmar() {
-    _iniTarget();
-    tutorialCoachMark = TutorialCoachMark(targets: targets)
-      ..show(context: context, rootOverlay: true);
+  void showTutorial() {
+    _initTargets();
+    if (targets.isEmpty || !mounted) return;
+    tutorialCoachMark = TutorialCoachMark(
+      targets: targets,
+      onFinish: () => TutorialService.markTutorialAsSeen('profiles'),
+      onSkip: () {
+        TutorialService.markTutorialAsSeen('profiles');
+        return true;
+      },
+    )..show(context: context, rootOverlay: true);
   }
 
-  void _iniTarget() {
-    targets = [
-      TargetFocus(
-        identify: "Drawer Key",
-        keyTarget: _menuDrawer,
-        contents: [
-          TargetContent(
-            align: ContentAlign.bottom,
-            builder: (context, controller) {
-              return CoachmarkDesc(
-                text: 'Menüye buradan ulaşabilirsin',
-                next: 'İleri',
-                skip: 'Geç',
-                onNext: controller.next,
-                onSkip: controller.skip,
-              );
-            },
-          ),
-        ],
-      ),
+  void _initTargets() {
+    targets.clear();
 
-      TargetFocus(
-        identify: "Help Button",
-        keyTarget: keyButton3,
+    if (widget.helpButtonKey?.currentContext != null) {
+      targets.add(
+        TargetFocus(
+          identify: "Help Button",
+          keyTarget: widget.helpButtonKey,
+          contents: [
+            TargetContent(
+              align: ContentAlign.bottom,
+              builder: (context, controller) {
+                return CoachmarkDesc(
+                  text:
+                      'Uygulama yönergelerini tekrar görmek için bu butona basabilirsin',
+                  next: 'İleri',
+                  skip: 'Geç',
+                  onNext: controller.next,
+                  onSkip: controller.skip,
+                );
+              },
+            ),
+          ],
+        ),
+      );
+    }
 
-        contents: [
-          TargetContent(
-            align: ContentAlign.bottom,
-            builder: (context, controller) {
-              return CoachmarkDesc(
-                text:
-                    'Uygulama Yönergelerine tekrar bakmak için bu butona basabilirsin',
-                next: 'İleri',
-                skip: 'Geç',
-                onNext: controller.next,
-                onSkip: controller.skip,
-              );
-            },
-          ),
-        ],
-      ),
-    ];
-
-    // Eğer profil varsa profil kartı tutorial'ını ekle
-    if (_profiles.isNotEmpty) {
+    if (_profiles.isNotEmpty && _firstProfileCard.currentContext != null) {
       targets.add(
         TargetFocus(
           shape: ShapeLightFocus.RRect,
           identify: "Profile Card Key",
-          keyTarget: keyButton2,
+          keyTarget: _firstProfileCard,
           contents: [
             TargetContent(
               align: ContentAlign.bottom,
@@ -137,53 +125,40 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
       );
     }
 
-    targets.add(
-      TargetFocus(
-        identify: "Button Key",
-        keyTarget: _newUser,
-        shape: ShapeLightFocus.RRect,
-        contents: [
-          TargetContent(
-            align: ContentAlign.top,
-            builder: (context, controller) {
-              return CoachmarkDesc(
-                text: 'Buradan yeni profil ekleyebilirsin',
-                next: 'İleri',
-                skip: 'Geç',
-                onNext: controller.next,
-                onSkip: controller.skip,
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _boyController.dispose();
-    _yasController.dispose();
-    _kiloController.dispose();
-    super.dispose();
+    if (_newUser.currentContext != null) {
+      targets.add(
+        TargetFocus(
+          identify: "Button Key",
+          keyTarget: _newUser,
+          shape: ShapeLightFocus.RRect,
+          contents: [
+            TargetContent(
+              align: ContentAlign.top,
+              builder: (context, controller) {
+                return CoachmarkDesc(
+                  text: 'Buradan yeni profil ekleyebilirsin',
+                  next: 'Bitir',
+                  skip: 'Geç',
+                  onNext: controller.skip,
+                  onSkip: controller.skip,
+                );
+              },
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   Future<void> _loadProfiles() async {
     setState(() => _isLoading = true);
     try {
       final profiles = await _profileService.getUserProfiles();
+      if (!mounted) return;
       setState(() {
         _profiles = profiles;
         _isLoading = false;
       });
-
-      // Profiller yüklendikten sonra tutorial'ı kontrol et
-      if (mounted) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _checkAndShowTutorial();
-        });
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -194,288 +169,10 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
     }
   }
 
-  void _showProfileForm({Map<String, dynamic>? profile}) {
-    _isEditing = profile != null;
-    _editingProfileId = profile?['id'];
-
-    if (profile != null) {
-      _nameController.text = profile['name'] ?? '';
-      _boyController.text = profile['height']?.toString() ?? '';
-      _yasController.text = profile['age']?.toString() ?? '';
-      _kiloController.text = profile['weight']?.toString() ?? '';
-      _cinsiyet = profile['gender'];
-      _kanGrubu = profile['bloodType'];
-    } else {
-      _nameController.clear();
-      _boyController.clear();
-      _yasController.clear();
-      _kiloController.clear();
-      _cinsiyet = null;
-      _kanGrubu = null;
-    }
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _buildProfileForm(),
-    );
-  }
-
-  Widget _buildProfileForm() {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.9,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: SafeArea(
-        minimum: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-
-        child: Padding(
-          padding: const EdgeInsets.only(
-            // Sabit padding'ler
-            left: 24,
-            right: 24,
-            top: 24,
-          ),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _isEditing ? 'Profili Düzenle' : 'Yeni Profil Ekle',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2196F3),
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close, color: Color(0xFF757575)),
-                    ),
-                  ],
-                ),
-
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: ProfileForm(
-                      nameController: _nameController,
-                      boyController: _boyController,
-                      yasController: _yasController,
-                      kiloController: _kiloController,
-                      cinsiyet: _cinsiyet,
-                      kanGrubu: _kanGrubu,
-                      onCinsiyetChanged: (value) {
-                        setState(() => _cinsiyet = value);
-                      },
-                      onKanGrubuChanged: (value) {
-                        setState(() => _kanGrubu = value);
-                      },
-                    ),
-                  ),
-                ),
-
-                CustomButton(
-                  label: _isEditing ? 'Profili Güncelle' : 'Profili Kaydet',
-                  onPressed: _saveProfile,
-                  isLoading: _isLoading,
-                  backgroundColor: const Color(0xFF2196F3),
-                  foregroundColor: Colors.white,
-                  isFullWidth: true,
-                  verticalPadding: 16.0,
-                  horizontalPadding: 24.0,
-                  minHeight: 48.0,
-                  elevation: 2.0,
-                  borderRadius: const BorderRadius.all(Radius.circular(12)),
-                ),
-                SizedBox(height: 16 + MediaQuery.of(context).padding.bottom),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _saveProfile() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
-
-    try {
-      if (_isEditing && _editingProfileId != null) {
-        // Profil güncelle
-        await _profileService.updateProfile(
-          profileId: _editingProfileId!,
-          name: _nameController.text,
-          age: int.parse(_yasController.text),
-          height: int.parse(_boyController.text),
-          weight: double.parse(_kiloController.text),
-          gender: _cinsiyet!,
-          bloodType: _kanGrubu!,
-        );
-      } else {
-        // Yeni profil ekle
-        await _profileService.addProfile(
-          name: _nameController.text,
-          age: int.parse(_yasController.text),
-          height: int.parse(_boyController.text),
-          weight: double.parse(_kiloController.text),
-          gender: _cinsiyet!,
-          bloodType: _kanGrubu!,
-        );
-      }
-
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _isEditing ? 'Profil güncellendi' : 'Profil kaydedildi',
-            ),
-            backgroundColor: Colors.green,
-          ),
-        );
-        _loadProfiles(); // Profilleri yeniden yükle
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hata: $e'), backgroundColor: Colors.red),
-        );
-      }
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  // Aktif profili değiştir
-  Future<void> _setActiveProfile(String profileId) async {
-    try {
-      await _profileService.setActiveProfile(profileId);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Aktif profil değiştirildi'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        _loadProfiles(); // Profilleri yeniden yükle
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hata: $e'), backgroundColor: Colors.red),
-        );
-      }
-    }
-  }
-
-  // Profil silme onayı göster
-  void _showDeleteConfirmation(String profileId, String profileName) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Profili Sil'),
-            content: Text(
-              '$profileName profilini silmek istediğinizden emin misiniz?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('İptal'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  Navigator.pop(context);
-                  await _deleteProfile(profileId);
-                },
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: const Text('Sil'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  // Profili sil
-  Future<void> _deleteProfile(String profileId) async {
-    try {
-      await _profileService.deleteProfile(profileId);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profil silindi'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        _loadProfiles(); // Profilleri yeniden yükle
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hata: $e'), backgroundColor: Colors.red),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
-      /*
-
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF2196F3),
-        elevation: 0,
-        centerTitle: true,
-        title: const Text(
-          'Profiller',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-            color: Color(0xFF2196F3),
-          ),
-        ),
-        leading: Builder(
-          builder:
-              (context) => IconButton(
-                key: _menuDrawer,
-                icon: const Icon(Icons.menu),
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-              ),
-        ),
-        actions: [
-          IconButton(
-            key: keyButton3,
-            icon: const Icon(Icons.help_outline),
-            onPressed: () async {
-              // Tüm tutorial'ları sıfırla
-              await TutorialService.resetAllTutorials();
-
-              // Mevcut sayfanın tutorial'ını göster
-              showTutorialCoachmar();
-            },
-            tooltip: 'Tüm Tutorial\'ları Sıfırla',
-          ),
-        ],
-      ),
-      
-      */
       body:
           _isLoading
               ? const LoadingWidget(message: "Profiller yükleniyor...")
@@ -502,12 +199,10 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
                         ),
                       ),
                       const SizedBox(height: 32),
-
-                      // Profil kartları
                       Expanded(
                         child:
                             _profiles.isEmpty
-                                ? EmptyStateWidget(
+                                ? const EmptyStateWidget(
                                   message:
                                       'Henüz profil eklenmemiş\nİlk profilinizi ekleyerek başlayın',
                                   icon: Icons.person_add,
@@ -520,12 +215,14 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
                                       padding: const EdgeInsets.only(
                                         bottom: 16.0,
                                       ),
-                                      child: _buildProfileCard(profile, index),
+                                      child: _buildProfileCard(
+                                        profile,
+                                        index == 0 ? _firstProfileCard : null,
+                                      ),
                                     );
                                   },
                                 ),
                       ),
-
                       const SizedBox(height: 16),
                       CustomButton(
                         key: _newUser,
@@ -550,12 +247,9 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
     );
   }
 
-  Widget _buildProfileCard(Map<String, dynamic> profile, int index) {
+  Widget _buildProfileCard(Map<String, dynamic> profile, Key? cardKey) {
     final isActive = profile['isActive'] as bool;
     final profileId = profile['id'] as String;
-
-    // İlk profil kartı için GlobalKey kullan
-    final GlobalKey cardKey = index == 0 ? keyButton2 : GlobalKey();
 
     return Card(
       key: cardKey,
@@ -565,7 +259,6 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            // Profil avatarı
             GestureDetector(
               onTap: () => _setActiveProfile(profileId),
               child: Container(
@@ -583,8 +276,6 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
               ),
             ),
             const SizedBox(width: 16),
-
-            // Profil bilgileri
             Expanded(
               child: GestureDetector(
                 onTap: () => _showProfileForm(profile: profile),
@@ -644,8 +335,6 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
                 ),
               ),
             ),
-
-            // Aksiyon butonları
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert, color: Color(0xFF757575)),
               onSelected: (value) {
@@ -705,5 +394,224 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
         ),
       ),
     );
+  }
+
+  void _showProfileForm({Map<String, dynamic>? profile}) {
+    _isEditing = profile != null;
+    _editingProfileId = profile?['id'];
+
+    if (profile != null) {
+      _nameController.text = profile['name'] ?? '';
+      _boyController.text = profile['height']?.toString() ?? '';
+      _yasController.text = profile['age']?.toString() ?? '';
+      _kiloController.text = profile['weight']?.toString() ?? '';
+      _cinsiyet = profile['gender'];
+      _kanGrubu = profile['bloodType'];
+    } else {
+      _nameController.clear();
+      _boyController.clear();
+      _yasController.clear();
+      _kiloController.clear();
+      _cinsiyet = null;
+      _kanGrubu = null;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _buildProfileForm(),
+    );
+  }
+
+  Widget _buildProfileForm() {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.9,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: SafeArea(
+        minimum: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.only(left: 24, right: 24, top: 24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      _isEditing ? 'Profili Düzenle' : 'Yeni Profil Ekle',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2196F3),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close, color: Color(0xFF757575)),
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: ProfileForm(
+                      nameController: _nameController,
+                      boyController: _boyController,
+                      yasController: _yasController,
+                      kiloController: _kiloController,
+                      cinsiyet: _cinsiyet,
+                      kanGrubu: _kanGrubu,
+                      onCinsiyetChanged: (value) {
+                        setState(() => _cinsiyet = value);
+                      },
+                      onKanGrubuChanged: (value) {
+                        setState(() => _kanGrubu = value);
+                      },
+                    ),
+                  ),
+                ),
+                CustomButton(
+                  label: _isEditing ? 'Profili Güncelle' : 'Profili Kaydet',
+                  onPressed: _saveProfile,
+                  isLoading: _isLoading,
+                  backgroundColor: const Color(0xFF2196F3),
+                  foregroundColor: Colors.white,
+                  isFullWidth: true,
+                  verticalPadding: 16.0,
+                  horizontalPadding: 24.0,
+                  minHeight: 48.0,
+                  elevation: 2.0,
+                  borderRadius: const BorderRadius.all(Radius.circular(12)),
+                ),
+                SizedBox(height: 16 + MediaQuery.of(context).padding.bottom),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _saveProfile() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isLoading = true);
+    try {
+      if (_isEditing && _editingProfileId != null) {
+        await _profileService.updateProfile(
+          profileId: _editingProfileId!,
+          name: _nameController.text,
+          age: int.parse(_yasController.text),
+          height: int.parse(_boyController.text),
+          weight: double.parse(_kiloController.text),
+          gender: _cinsiyet!,
+          bloodType: _kanGrubu!,
+        );
+      } else {
+        await _profileService.addProfile(
+          name: _nameController.text,
+          age: int.parse(_yasController.text),
+          height: int.parse(_boyController.text),
+          weight: double.parse(_kiloController.text),
+          gender: _cinsiyet!,
+          bloodType: _kanGrubu!,
+        );
+      }
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _isEditing ? 'Profil güncellendi' : 'Profil kaydedildi',
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _loadProfiles();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Hata: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _setActiveProfile(String profileId) async {
+    try {
+      await _profileService.setActiveProfile(profileId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Aktif profil değiştirildi'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _loadProfiles();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Hata: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  void _showDeleteConfirmation(String profileId, String profileName) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Profili Sil'),
+            content: Text(
+              '$profileName profilini silmek istediğinizden emin misiniz?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('İptal'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await _deleteProfile(profileId);
+                },
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Sil'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  Future<void> _deleteProfile(String profileId) async {
+    try {
+      await _profileService.deleteProfile(profileId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profil silindi'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _loadProfiles();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Hata: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
   }
 }

@@ -272,7 +272,16 @@ class _SignUpState extends State<SignUp> {
                           child: InkWell(
                             borderRadius: BorderRadius.circular(12),
                             onTap: () {
-                              // Facebook sign-in functionality
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text(
+                                    'Facebook ile giriş yakında eklenecek',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  // SnackBar'ın 2 saniye görünmesini sağlar
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
                             },
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,

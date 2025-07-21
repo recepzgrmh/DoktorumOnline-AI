@@ -2,59 +2,119 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:login_page/screens/chat_history_detail_screen.dart';
+import 'package:login_page/services/tutorial_service.dart';
+import 'package:login_page/widgets/coachmark_desc.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 class OldChatScreen extends StatefulWidget {
   final String userId;
-
   const OldChatScreen({super.key, required this.userId});
 
   @override
-  State<OldChatScreen> createState() => _OldChatScreenState();
+  OldChatScreenState createState() => OldChatScreenState();
 }
 
-class _OldChatScreenState extends State<OldChatScreen> {
+class OldChatScreenState extends State<OldChatScreen> {
   final List<Color> _avatarPalette = [
-    // Reds
     Colors.red,
     Colors.redAccent,
-    // Pinks
     Colors.pink,
     Colors.pinkAccent,
-    // Purples
     Colors.purple,
     Colors.deepPurple,
     Colors.deepPurpleAccent,
-    // Indigos
     Colors.indigo,
     Colors.indigoAccent,
-    // Blues
     Colors.blue,
     Colors.lightBlue,
     Colors.lightBlueAccent,
     Colors.blueAccent,
-    // Cyans & Teals
     Colors.cyan,
     Colors.cyanAccent,
     Colors.teal,
     Colors.tealAccent,
-    // Greens
     Colors.green,
     Colors.lightGreen,
     Colors.greenAccent,
-    // Yellows & Ambers
     Colors.lime,
     Colors.yellow,
     Colors.amber,
     Colors.amberAccent,
-    // Oranges
     Colors.orange,
     Colors.deepOrange,
     Colors.deepOrangeAccent,
-    // Neutrals
     Colors.brown,
     Colors.grey,
     Colors.blueGrey,
   ];
+
+  TutorialCoachMark? tutorialCoachMark;
+  List<TargetFocus> targets = [];
+  final GlobalKey _firstChatItemKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    // EĞİTİM TETİKLEMESİ BURADAN KALDIRILDI.
+  }
+
+  Future<void> checkAndShowTutorialIfNeeded() async {
+    final hasSeen = await TutorialService.hasSeenTutorial('oldChats');
+    if (!hasSeen && mounted) {
+      final chatDocs =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(widget.userId)
+              .collection('complaints')
+              .limit(1)
+              .get();
+      if (chatDocs.docs.isNotEmpty) {
+        showTutorial();
+      }
+    }
+  }
+
+  void showTutorial() {
+    _initTargets();
+    if (targets.isEmpty || !mounted) return;
+    tutorialCoachMark = TutorialCoachMark(
+      targets: targets,
+      onFinish: () => TutorialService.markTutorialAsSeen('oldChats'),
+      onSkip: () {
+        TutorialService.markTutorialAsSeen('oldChats');
+        return true;
+      },
+    )..show(context: context, rootOverlay: true);
+  }
+
+  void _initTargets() {
+    targets.clear();
+    if (_firstChatItemKey.currentContext != null) {
+      targets.add(
+        TargetFocus(
+          identify: "First Chat Item",
+          keyTarget: _firstChatItemKey,
+          shape: ShapeLightFocus.RRect,
+          radius: 16,
+          contents: [
+            TargetContent(
+              align: ContentAlign.bottom,
+              builder: (context, controller) {
+                return CoachmarkDesc(
+                  text:
+                      'Geçmiş bir görüşmenizi görüntülemek için buraya dokunun.',
+                  next: 'Anladım',
+                  skip: 'Geç',
+                  onNext: controller.skip,
+                  onSkip: controller.skip,
+                );
+              },
+            ),
+          ],
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +125,6 @@ class _OldChatScreenState extends State<OldChatScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream:
             complaintsRef.orderBy('lastAnalyzed', descending: true).snapshots(),
@@ -122,6 +181,7 @@ class _OldChatScreenState extends State<OldChatScreen> {
                       _avatarPalette.length];
 
               return Padding(
+                key: index == 0 ? _firstChatItemKey : null,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 6,
