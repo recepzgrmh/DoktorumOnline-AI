@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/screens/main_navigation_screen.dart';
 import 'package:login_page/screens/opening.dart';
+import 'package:login_page/services/auth_service.dart';
 
 import 'package:login_page/widgets/custom_button.dart';
 import 'package:get/get.dart';
@@ -17,13 +18,14 @@ class VerifyAccount extends StatefulWidget {
 
 class _VerifyAccountState extends State<VerifyAccount> {
   Timer? _verificationTimer;
+  final AuthService _authService = AuthService();
 
   @override
   void initState() {
     super.initState();
     // Start periodic verification check
     _verificationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      checkVerification();
+      _authService.checkVerification(context);
     });
   }
 
@@ -31,55 +33,6 @@ class _VerifyAccountState extends State<VerifyAccount> {
   void dispose() {
     _verificationTimer?.cancel();
     super.dispose();
-  }
-
-  // Mevcut kullanıcıya doğrulama emaili gönderir
-  Future<void> verifyAccount() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null && !user.emailVerified) {
-      await user.sendEmailVerification();
-      Get.snackbar(
-        "Email Gönderildi",
-        "Lütfen e-posta kutunuzu kontrol edin.",
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } else {
-      Get.snackbar(
-        "Hata",
-        "Kullanıcı bulunamadı veya email zaten doğrulanmış.",
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
-  }
-
-  // Kullanıcının e-posta doğrulama durumunu kontrol eder
-  Future<void> checkVerification() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      await user.reload(); // Kullanıcı verilerini güncelleyin
-      if (user.emailVerified) {
-        final docSnapshot =
-            await FirebaseFirestore.instance
-                .collection("users")
-                .doc(user.uid)
-                .get();
-        if (!docSnapshot.exists) {
-          await FirebaseFirestore.instance
-              .collection("users")
-              .doc(user.uid)
-              .set({
-                "displayName": user.displayName,
-                "email": user.email,
-                "verifiedAt": DateTime.now(),
-              });
-        }
-        // Doğrulama başarılı, anasayfaya yönlendir// Login işleminden sonra ana ekrana git ve geri dönülemesin.
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => MainScreen()),
-          (Route<dynamic> route) => false,
-        );
-      }
-    }
   }
 
   @override
@@ -155,7 +108,9 @@ class _VerifyAccountState extends State<VerifyAccount> {
                 // Continue button
                 CustomButton(
                   label: "Devam Et",
-                  onPressed: checkVerification,
+                  onPressed: () {
+                    _authService.checkVerification(context);
+                  },
                   backgroundColor: theme.primaryColor,
                   foregroundColor: Colors.white,
                   verticalPadding: 16,
@@ -172,7 +127,9 @@ class _VerifyAccountState extends State<VerifyAccount> {
                 // Resend button
                 CustomButton(
                   label: "Tekrar Gönder",
-                  onPressed: verifyAccount,
+                  onPressed: () {
+                    _authService.verifyAccount();
+                  },
                   backgroundColor: Colors.white,
                   foregroundColor: theme.primaryColor,
                   verticalPadding: 16,

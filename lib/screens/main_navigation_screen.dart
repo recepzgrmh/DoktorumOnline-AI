@@ -9,6 +9,30 @@ import 'package:login_page/screens/saved_analyses_screen.dart';
 import 'package:login_page/services/tutorial_service.dart';
 import 'package:login_page/widgets/bottom_navbar.dart';
 import 'package:login_page/widgets/my_drawer.dart';
+import 'package:upgrader/upgrader.dart';
+
+/// Upgrader widget'ı için özel Türkçe mesajları içeren sınıf.
+/// Bu sınıf dosyanın üst seviyesinde (herhangi bir sınıfın dışında) olmalıdır.
+class TurkishUpgraderMessages extends UpgraderMessages {
+  @override
+  String get buttonTitleIgnore => 'Yoksay';
+
+  @override
+  String get buttonTitleLater => 'Daha Sonra';
+
+  @override
+  String get buttonTitleUpdate => 'Şimdi Güncelle';
+
+  @override
+  String get prompt => 'Uygulamanın yeni bir sürümü mevcut!';
+
+  @override
+  String get title => 'Uygulama Güncellemesi';
+
+  @override
+  String get body =>
+      'Uygulamanın {{appName}} {{currentAppStoreVersion}} sürümü hazır! Siz şu an {{currentInstalledVersion}} sürümünü kullanıyorsunuz.';
+}
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -47,7 +71,7 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  /// DÜZELTİLDİ: Uygulama başlangıcında kullanıcı durumunu Firestore'dan kontrol eder.
+  /// Uygulama başlangıcında kullanıcı durumunu Firestore'dan kontrol eder.
   Future<void> _initializeUserAndTutorials() async {
     // Varsayılan olarak kullanıcıyı yeni ve başlangıç sayfasını profiller olarak kabul et.
     bool isNewUser = true;
@@ -57,7 +81,6 @@ class _MainScreenState extends State<MainScreen> {
     if (user != null) {
       try {
         // Kullanıcının profil dökümanı var mı diye kontrol et.
-        // Bu, kullanıcının en az bir profil oluşturup oluşturmadığını anlamanın en güvenilir yoludur.
         final userDoc =
             await FirebaseFirestore.instance
                 .collection('users')
@@ -105,10 +128,8 @@ class _MainScreenState extends State<MainScreen> {
       _selectedIndex = index;
     });
 
-    // Yeni seçilen sayfa için eğitimi göster (gerekirse).
     _showTutorialForPage(index);
 
-    // Eğer menü açıksa kapat.
     if (Scaffold.of(context).isDrawerOpen) {
       Navigator.of(context).pop();
     }
@@ -121,7 +142,6 @@ class _MainScreenState extends State<MainScreen> {
     String tutorialKey;
     VoidCallback? showFunction;
 
-    // Hangi sayfanın eğitim anahtarının ve tetikleme fonksiyonunun kullanılacağını belirle.
     switch (index) {
       case 0:
         tutorialKey = 'home';
@@ -144,9 +164,7 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     final hasSeen = await TutorialService.hasSeenTutorial(tutorialKey);
-    // Eğer eğitim görülmediyse, ilgili sayfanın showTutorial fonksiyonunu çağır.
     if (!hasSeen && showFunction != null) {
-      // UI'ın hazır olduğundan emin olmak için küçük bir gecikme.
       Future.delayed(const Duration(milliseconds: 200), showFunction);
     }
   }
@@ -189,67 +207,91 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          _selectedIndex == 0
-              ? 'DoktorumOnline'
-              : _selectedIndex == 1
-              ? 'Geçmiş Sohbetler'
-              : _selectedIndex == 2
-              ? 'PDF Analizi'
-              : 'Profilim',
-          style: const TextStyle(color: Colors.blue),
+    return UpgradeAlert(
+      upgrader: Upgrader(
+        //
+        //debugLogging: true, // Konsolda detaylı bilgi gösterir.
+        // debugDisplayOnce: true,
+        // Türkçe mesajları kullanmak için kendi sınıfımızı çağırıyoruz.
+        messages: TurkishUpgraderMessages(),
+        countryCode: 'TR',
+        languageCode: 'tr',
+
+        // playStoreId veya appStoreId GİRİLMEMELİDİR.
+        // Paket bu kimlikleri uygulamanın kendi dosyalarından
+        // otomatik olarak okur.
+      ),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            _selectedIndex == 0
+                ? 'DoktorumOnline'
+                : _selectedIndex == 1
+                ? 'Geçmiş Sohbetler'
+                : _selectedIndex == 2
+                ? 'PDF Analizi'
+                : 'Profilim',
+            style: const TextStyle(color: Colors.blue),
+          ),
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.blue,
+          actions: [
+            // Sadece Profil sayfasındayken yardım/sıfırlama butonunu göster.
+            if (_selectedIndex == 3)
+              IconButton(
+                key: _helpButtonKey,
+                icon: const Icon(Icons.help_outline),
+                onPressed: () async {
+                  await TutorialService.resetAllTutorials();
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Tüm eğitimler sıfırlandı.'),
+                        backgroundColor: Colors.blue,
+                      ),
+                    );
+                  }
+                  _showTutorialForPage(_selectedIndex);
+                },
+                tooltip: 'Eğitimleri Sıfırla',
+              ),
+            // Sadece PDF Analizi sayfasındayken geçmiş butonunu göster.
+            if (_selectedIndex == 2)
+              IconButton(
+                key: _pdfHistoryButtonKey,
+                icon: const Icon(Icons.history),
+                onPressed: _onPdfHistoryTapped,
+                tooltip: 'PDF Analizi Geçmişi',
+              ),
+
+            // Sadece Anasayfadayken profil simgesi çıksın
+            if (_selectedIndex == 0)
+              IconButton(
+                icon: const Icon(Icons.person),
+                onPressed: () {},
+                tooltip: 'Profilim',
+              ),
+          ],
         ),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.blue,
-        actions: [
-          // Sadece Profil sayfasındayken yardım/sıfırlama butonunu göster.
-          if (_selectedIndex == 3)
-            IconButton(
-              key: _helpButtonKey,
-              icon: const Icon(Icons.help_outline),
-              // Butona basıldığında tüm eğitimleri sıfırlar ve mevcut eğitimi tekrar gösterir.
-              onPressed: () async {
-                await TutorialService.resetAllTutorials();
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Tüm eğitimler sıfırlandı.'),
-                      backgroundColor: Colors.blue,
-                    ),
-                  );
-                }
-                // Mevcut sayfanın eğitimini yeniden tetikle.
-                _showTutorialForPage(_selectedIndex);
-              },
-              tooltip: 'Eğitimleri Sıfırla',
-            ),
-          // Sadece PDF Analizi sayfasındayken geçmiş butonunu göster.
-          if (_selectedIndex == 2)
-            IconButton(
-              key: _pdfHistoryButtonKey,
-              icon: const Icon(Icons.history),
-              onPressed: _onPdfHistoryTapped,
-              tooltip: 'PDF Analizi Geçmişi',
-            ),
-        ],
-      ),
-      // IndexedStack, sayfalar arasında geçiş yaparken state'lerini korur.
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: List.generate(4, (index) => _buildPage(index)),
-      ),
-      drawer: MyDrawer(
-        onMenuItemTap: _onItemTapped,
-        selectedIndex: _selectedIndex,
-      ),
-      bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
+        // IndexedStack, sayfalar arasında geçiş yaparken state'lerini korur.
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: List.generate(4, (index) => _buildPage(index)),
         ),
-        child: BottomNavbar(currentIndex: _selectedIndex, onTap: _onItemTapped),
+        drawer: MyDrawer(
+          onMenuItemTap: _onItemTapped,
+          selectedIndex: _selectedIndex,
+        ),
+        bottomNavigationBar: Theme(
+          data: Theme.of(context).copyWith(
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+          ),
+          child: BottomNavbar(
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+          ),
+        ),
       ),
     );
   }

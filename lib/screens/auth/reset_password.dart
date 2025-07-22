@@ -31,6 +31,7 @@ class _ResetPasswordState extends State<ResetPassword> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      appBar: AppBar(),
       resizeToAvoidBottomInset: true,
       body: Container(
         decoration: BoxDecoration(
@@ -47,23 +48,6 @@ class _ResetPasswordState extends State<ResetPassword> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Back button and title
-                Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.arrow_back, color: theme.primaryColor),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      "Şifre Sıfırlama",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: theme.primaryColor,
-                      ),
-                    ),
-                  ],
-                ),
                 const SizedBox(height: 40),
                 // Welcome text
                 Text(
