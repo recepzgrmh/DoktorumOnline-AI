@@ -10,6 +10,7 @@ import 'package:login_page/services/auth_service.dart';
 import 'package:login_page/services/tutorial_service.dart';
 import 'package:login_page/widgets/bottom_navbar.dart';
 import 'package:login_page/widgets/my_drawer.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Gerekli paket import edildi
 import 'package:upgrader/upgrader.dart';
 
 /// Upgrader widget'ı için özel Türkçe mesajları içeren sınıf.
@@ -72,11 +73,21 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  /// Uygulama başlangıcında kullanıcı durumunu Firestore'dan kontrol eder.
+  /// Uygulama başlangıcında kullanıcı durumunu ve eğitimleri ayarlar.
   Future<void> _initializeUserAndTutorials() async {
-    // Varsayılan olarak kullanıcıyı yeni ve başlangıç sayfasını profiller olarak kabul et.
-    bool isNewUser = true;
-    int initialIndex = 3; // ProfilesScreen
+    // 1. Sadece ilk açılışta eğitimleri sıfırla
+    final prefs = await SharedPreferences.getInstance();
+    final bool isFirstLaunch = prefs.getBool('hasCompletedFirstLaunch') ?? true;
+
+    if (isFirstLaunch) {
+      // Eğer bu ilk açılışsa, tüm eğitimleri sıfırla.
+      await TutorialService.resetAllTutorials();
+      // Bayrağı (flag) false olarak ayarla ki bu blok bir daha çalışmasın.
+      await prefs.setBool('hasCompletedFirstLaunch', false);
+    }
+
+    // 2. Başlangıç sayfasını belirle
+    int initialIndex = 3; // Varsayılan olarak ProfilesScreen
 
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -93,23 +104,18 @@ class _MainScreenState extends State<MainScreen> {
             (userDoc.data()?.containsKey('profiles') ?? false)) {
           final profiles = userDoc.data()!['profiles'] as List<dynamic>?;
           if (profiles != null && profiles.isNotEmpty) {
-            isNewUser = false;
-            initialIndex = 0; // Eğer eski kullanıcıysa ana sayfadan başla.
+            // Profili olan kullanıcı ana sayfadan başlar.
+            initialIndex = 0;
           }
         }
       } catch (e) {
         debugPrint("Firestore profil kontrolü sırasında hata: $e");
         // Hata durumunda, en güvenli varsayım olarak kullanıcıyı profil ekranına yönlendir.
-        isNewUser = true;
         initialIndex = 3;
       }
     }
 
-    // Eğer kullanıcı sistem için yeniyse, tüm eğitimleri sıfırla.
-    if (isNewUser) {
-      await TutorialService.resetAllTutorials();
-    }
-
+    // 3. Arayüzü güncelle ve eğitimi göster
     if (mounted) {
       // Başlangıç sayfasını ayarla.
       setState(() {

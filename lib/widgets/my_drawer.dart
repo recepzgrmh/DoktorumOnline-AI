@@ -208,8 +208,8 @@ class MyDrawerState extends State<MyDrawer> {
                 // ----------------------------------------------------------------
                 _buildDrawerItem(
                   key: _homeButton,
-                  icon: Icons.home_rounded,
-                  title: 'ŞİKAYET BAŞLAT',
+                  icon: Icons.analytics_outlined,
+                  title: 'Yeni Analiz',
                   index: 0,
                   onTap: () {
                     Navigator.of(context).pop();
@@ -218,8 +218,8 @@ class MyDrawerState extends State<MyDrawer> {
                 ),
                 _buildDrawerItem(
                   key: _chatButton,
-                  icon: Icons.chat_bubble_rounded,
-                  title: 'ANALİZ GEÇMİŞİ',
+                  icon: Icons.history,
+                  title: 'Raporlarım',
                   index: 1,
                   onTap: () {
                     Navigator.of(context).pop();
@@ -228,8 +228,8 @@ class MyDrawerState extends State<MyDrawer> {
                 ),
                 _buildDrawerItem(
                   key: _uploadButton,
-                  icon: Icons.upload_file_rounded,
-                  title: 'TAHLİL YÜKLEME',
+                  icon: Icons.file_copy_outlined,
+                  title: 'Belgelerim',
                   index: 2,
                   onTap: () {
                     Navigator.of(context).pop();
@@ -238,8 +238,8 @@ class MyDrawerState extends State<MyDrawer> {
                 ),
                 _buildDrawerItem(
                   key: _profilesButton,
-                  icon: Icons.person,
-                  title: 'PROFİLLER',
+                  icon: Icons.person_outline,
+                  title: 'Profiller',
                   index: 3,
                   onTap: () {
                     Navigator.of(context).pop();
@@ -323,7 +323,7 @@ class MyDrawerState extends State<MyDrawer> {
                 isSelected
                     ? Colors.blue.shade800
                     : (textColor ?? Colors.blue.shade700),
-            fontSize: 14,
+            fontSize: 16,
           ),
         ),
         onTap: onTap,

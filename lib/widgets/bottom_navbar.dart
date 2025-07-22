@@ -23,15 +23,19 @@ class BottomNavbar extends StatelessWidget {
 
       items: const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.question_mark),
-          label: 'Soru Sor',
+          icon: Icon(Icons.analytics_outlined),
+          label: 'Yeni Analiz',
         ),
-        BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Geçmiş'),
+        BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Raporlarım'),
         BottomNavigationBarItem(
-          icon: Icon(Icons.picture_as_pdf),
-          label: 'Tahlil',
+          icon: Icon(Icons.file_copy_outlined),
+          label: 'Belgelerim',
         ),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
+
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person_outline),
+          label: 'Profiller',
+        ),
       ],
     );
   }

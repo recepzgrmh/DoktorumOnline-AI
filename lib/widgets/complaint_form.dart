@@ -3,7 +3,7 @@ import 'package:login_page/models/medical_form_data.dart';
 import 'package:login_page/services/validation_service.dart';
 import 'package:login_page/widgets/custom_text_widget.dart';
 
-class ComplaintForm extends StatelessWidget {
+class ComplaintForm extends StatefulWidget {
   final TextEditingController sikayetController;
   final TextEditingController sureController;
   final TextEditingController ilacController;
@@ -19,19 +19,27 @@ class ComplaintForm extends StatelessWidget {
     required this.userProfileData,
   });
 
+  @override
+  State<ComplaintForm> createState() => _ComplaintFormState();
+}
+
+class _ComplaintFormState extends State<ComplaintForm> {
+  bool _isInfoVisible = true;
+  double borderRadius = 15.0;
   void _notifyFormChanged() {
     final formData = MedicalFormData(
-      height: userProfileData['Boy'] ?? '',
-      age: userProfileData['Yaş'] ?? '',
-      weight: userProfileData['Kilo'] ?? '',
-      gender: userProfileData['Cinsiyet'] ?? '',
-      bloodType: userProfileData['Kan Grubu'] ?? '',
-      complaint: sikayetController.text,
-      duration: sureController.text,
-      medication: ilacController.text,
-      chronicDisease: userProfileData['Kronik Rahatsızlık'] ?? '',
+      height: widget.userProfileData['Boy'] ?? '',
+      age: widget.userProfileData['Yaş'] ?? '',
+      weight: widget.userProfileData['Kilo'] ?? '',
+      gender: widget.userProfileData['Cinsiyet'] ?? '',
+      bloodType: widget.userProfileData['Kan Grubu'] ?? '',
+      complaint: widget.sikayetController.text,
+      duration: widget.sureController.text,
+      medication: widget.ilacController.text,
+      chronicDisease: widget.userProfileData['Kronik Rahatsızlık'] ?? '',
     );
-    onFormChanged(formData);
+
+    widget.onFormChanged(formData);
   }
 
   @override
@@ -42,105 +50,121 @@ class ComplaintForm extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 20),
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primary.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(borderRadius),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
+        //
+        if (_isInfoVisible)
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 20, 8, 20),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(borderRadius),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.info_outline,
+                    color: theme.colorScheme.primary,
+                    size: theme.iconTheme.size,
+                  ),
                 ),
-                child: Icon(
-                  Icons.info_outline,
-                  color: theme.colorScheme.primary,
-                  size: theme.iconTheme.size,
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Mevcut sağlık bilgileriniz kullanılarak şikayetiniz analiz edilecektir. Lütfen sadece şikayetinizi ve süresini belirtiniz.',
+                    style: TextStyle(fontSize: 13),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Mevcut sağlık bilgileriniz kullanılarak şikayetiniz analiz edilecektir. Lütfen sadece şikayetinizi ve süresini belirtiniz.',
-                  style: theme.textTheme.bodyMedium,
+                // Kapatma butonu .
+                IconButton(
+                  icon: Icon(Icons.close, color: theme.colorScheme.primary),
+                  onPressed: () {
+                    setState(() {
+                      _isInfoVisible = false;
+                    });
+                  },
                 ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 24),
-
-        // Kullanıcı profil bilgilerini gösteren kart
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.secondary.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(borderRadius),
-            border: Border.all(
-              color: theme.colorScheme.secondary.withOpacity(0.3),
+              ],
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.person,
-                    color: theme.colorScheme.secondary,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Mevcut Sağlık Bilgileriniz',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.secondary,
-                    ),
-                  ),
-                ],
+        const SizedBox(height: 12),
+
+        Card(
+          elevation: 3,
+          shadowColor: Colors.teal.withOpacity(0.3),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadius),
+          ),
+          margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+
+          clipBehavior: Clip.antiAlias,
+          child: ExpansionTile(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(borderRadius),
+              side: BorderSide(color: Colors.teal.withOpacity(0.2), width: 1.5),
+            ),
+            collapsedShape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(borderRadius),
+              side: BorderSide(color: Colors.teal.withOpacity(0.2), width: 1.5),
+            ),
+
+            backgroundColor: Colors.white,
+            collapsedBackgroundColor: Colors.white,
+
+            leading: Icon(Icons.person, color: Colors.teal, size: 20),
+            title: Text(
+              'Mevcut Sağlık Bilgileriniz',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.teal,
               ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 16,
-                runSpacing: 8,
-                children: [
-                  _buildInfoChip(
-                    'Boy: ${userProfileData['Boy'] ?? 'N/A'} cm',
-                    Icons.height,
-                  ),
-                  _buildInfoChip(
-                    'Yaş: ${userProfileData['Yaş'] ?? 'N/A'}',
-                    Icons.calendar_today,
-                  ),
-                  _buildInfoChip(
-                    'Kilo: ${userProfileData['Kilo'] ?? 'N/A'} kg',
-                    Icons.monitor_weight,
-                  ),
-                  _buildInfoChip(
-                    'Cinsiyet: ${userProfileData['Cinsiyet'] ?? 'N/A'}',
-                    Icons.person,
-                  ),
-                  _buildInfoChip(
-                    'Kan Grubu: ${userProfileData['Kan Grubu'] ?? 'N/A'}',
-                    Icons.bloodtype,
-                  ),
-                ],
+            ),
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Wrap(
+                  spacing: 16,
+                  runSpacing: 8,
+                  children: [
+                    _buildInfoChip(
+                      'Boy: ${widget.userProfileData['Boy'] ?? 'N/A'} cm',
+                      Icons.height,
+                    ),
+                    _buildInfoChip(
+                      'Yaş: ${widget.userProfileData['Yaş'] ?? 'N/A'}',
+                      Icons.calendar_today,
+                    ),
+                    _buildInfoChip(
+                      'Kilo: ${widget.userProfileData['Kilo'] ?? 'N/A'} kg',
+                      Icons.monitor_weight,
+                    ),
+                    _buildInfoChip(
+                      'Cinsiyet: ${widget.userProfileData['Cinsiyet'] ?? 'N/A'}',
+                      Icons.person,
+                    ),
+                    _buildInfoChip(
+                      'Kan Grubu: ${widget.userProfileData['Kan Grubu'] ?? 'N/A'}',
+                      Icons.bloodtype,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 24),
 
         CustomTextWidget(
           title: 'Şikayetiniz',
           icon: Icons.medical_services,
-          controller: sikayetController,
+
+          controller: widget.sikayetController,
           maxLines: 3,
           validator: ValidationService.validateComplaint,
           onChanged: (_) => _notifyFormChanged(),
@@ -148,14 +172,14 @@ class ComplaintForm extends StatelessWidget {
         CustomTextWidget(
           title: 'Şikayet Süresi',
           icon: Icons.timer,
-          controller: sureController,
+          controller: widget.sureController,
           validator: ValidationService.validateDuration,
           onChanged: (_) => _notifyFormChanged(),
         ),
         CustomTextWidget(
           title: 'Mevcut İlaçlar (Opsiyonel)',
           icon: Icons.medication,
-          controller: ilacController,
+          controller: widget.ilacController,
           maxLines: 2,
           validator: ValidationService.validateMedication,
           onChanged: (_) => _notifyFormChanged(),
@@ -165,27 +189,21 @@ class ComplaintForm extends StatelessWidget {
   }
 
   Widget _buildInfoChip(String text, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(20),
+    final theme = Theme.of(context);
+
+    return Chip(
+      backgroundColor: theme.colorScheme.surfaceVariant,
+
+      side: BorderSide(color: theme.colorScheme.outline.withOpacity(0.5)),
+
+      avatar: Icon(icon, size: 18, color: theme.colorScheme.primary),
+      label: Text(text),
+      labelStyle: TextStyle(
+        fontWeight: FontWeight.w600,
+        color: theme.colorScheme.onSurfaceVariant,
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: Colors.grey[600]),
-          const SizedBox(width: 4),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[700],
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
+
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
     );
   }
 }

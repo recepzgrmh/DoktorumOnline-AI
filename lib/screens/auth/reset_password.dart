@@ -31,7 +31,7 @@ class _ResetPasswordState extends State<ResetPassword> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(backgroundColor: theme.primaryColor.withOpacity(0.1)),
       resizeToAvoidBottomInset: true,
       body: Container(
         decoration: BoxDecoration(
@@ -50,18 +50,26 @@ class _ResetPasswordState extends State<ResetPassword> {
                 // Back button and title
                 const SizedBox(height: 40),
                 // Welcome text
-                Text(
-                  "Şifreni mi Unuttun?",
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade900,
+                SizedBox(
+                  width: double.infinity,
+                  child: Text(
+                    textAlign: TextAlign.center,
+                    "Şifreni mi Unuttun?",
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade900,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  "Hesabınızla ilişkili e-posta adresini girin, size şifrenizi sıfırlamanız için bir bağlantı gönderelim.",
-                  style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+                SizedBox(
+                  width: double.infinity,
+                  child: Text(
+                    textAlign: TextAlign.center,
+                    "Hesabınızla ilişkili e-posta adresini girin, size şifrenizi sıfırlamanız için bir bağlantı gönderelim.",
+                    style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+                  ),
                 ),
                 const SizedBox(height: 40),
                 TextInputs(

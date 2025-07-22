@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:login_page/screens/auth/sign_in.dart';
 import 'package:login_page/screens/auth/sign_up.dart';
 import 'package:login_page/widgets/custom_button.dart';
+import 'package:login_page/widgets/custom_page_route.dart';
 
 class Opening extends StatelessWidget {
   const Opening({super.key});
@@ -59,9 +60,9 @@ class Opening extends StatelessWidget {
                 CustomButton(
                   label: "Giriş Yap",
                   onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => const SignIn()),
-                    );
+                    Navigator.of(
+                      context,
+                    ).push(CustomPageRoute(child: SignIn()));
                   },
                   backgroundColor: Theme.of(context).primaryColor,
                   foregroundColor: Colors.white,
@@ -79,9 +80,9 @@ class Opening extends StatelessWidget {
                 CustomButton(
                   label: "Kayıt Ol",
                   onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => const SignUp()),
-                    );
+                    Navigator.of(
+                      context,
+                    ).push(CustomPageRoute(child: SignUp()));
                   },
                   backgroundColor: Colors.white,
                   foregroundColor: Theme.of(context).primaryColor,

@@ -1,16 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+
 import 'package:login_page/screens/auth/verify_account.dart';
 import 'package:login_page/screens/main_navigation_screen.dart';
 import 'package:login_page/services/auth_service.dart';
-import 'package:login_page/widgets/custom_text_widget.dart';
+import 'package:login_page/widgets/custom_page_route.dart';
+
 import 'package:login_page/widgets/socail_buttons.dart';
 
 import 'package:login_page/widgets/text_inputs.dart';
 
 import 'package:login_page/widgets/custom_button.dart';
 import 'package:login_page/screens/auth/sign_in.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -47,17 +50,28 @@ class _SignUpState extends State<SignUp> {
         await user.sendEmailVerification();
 
         // Doğrulama ekranına yönlendir
+        // ignore: use_build_context_synchronously
         Navigator.pushReplacement(
-          // ignore: use_build_context_synchronously
           context,
-          MaterialPageRoute(builder: (context) => const VerifyAccount()),
+          CustomPageRoute(child: const VerifyAccount()),
         );
       }
     } catch (e) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(
-        // ignore: use_build_context_synchronously
         context,
       ).showSnackBar(SnackBar(content: Text("Hesap oluşturulamadı: $e")));
+    }
+  }
+
+  // URL'yi açmak için yardımcı bir fonksiyon
+  Future<void> _launchUrl(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url)) {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('$urlString açılamadı')));
     }
   }
 
@@ -66,7 +80,7 @@ class _SignUpState extends State<SignUp> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(backgroundColor: theme.primaryColor.withOpacity(0.1)),
       resizeToAvoidBottomInset: true,
       body: Container(
         decoration: BoxDecoration(
@@ -101,6 +115,8 @@ class _SignUpState extends State<SignUp> {
                 const SizedBox(height: 40),
 
                 SocialAuthButtons(
+                  facebookText: 'Kayıt Ol',
+                  googleText: 'Kayıt Ol',
                   onGooglePressed: () async {
                     showDialog(
                       context: context,
@@ -142,7 +158,7 @@ class _SignUpState extends State<SignUp> {
                 // Divider with "veya" text
                 Row(
                   children: [
-                    Expanded(child: Divider(color: Colors.white)),
+                    const Expanded(child: Divider(color: Colors.white)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
@@ -154,7 +170,7 @@ class _SignUpState extends State<SignUp> {
                         ),
                       ),
                     ),
-                    Expanded(child: Divider(color: Colors.white)),
+                    const Expanded(child: Divider(color: Colors.white)),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -168,7 +184,7 @@ class _SignUpState extends State<SignUp> {
                       controller: fullName,
                       isFlexible: true,
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     TextInputs(
                       labelText: 'Soyisim',
                       controller: lastName,
@@ -189,9 +205,47 @@ class _SignUpState extends State<SignUp> {
                   isPassword: true,
                 ),
                 const SizedBox(height: 20),
-                Text(
-                  "Devam ederek Kullanım Şartları'nı kabul etmiş olursunuz.\nGizlilik Politikamızı okuyun.",
-                  style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    children: <TextSpan>[
+                      const TextSpan(text: 'Devam ederek '),
+                      TextSpan(
+                        text: 'Kullanım Şartları\'nı',
+                        style: const TextStyle(
+                          color: Colors.blue, // Tıklanabilir metin rengi
+                          decoration: TextDecoration.underline, // Altı çizili
+                        ),
+                        recognizer:
+                            TapGestureRecognizer()
+                              ..onTap = () {
+                                _launchUrl(
+                                  'https://www.doktorumonline.net/kullanici-sozlesmesi',
+                                );
+                              },
+                      ),
+                      const TextSpan(text: ' kabul etmiş olursunuz.\n'),
+                      TextSpan(
+                        text: 'Gizlilik Politikamızı',
+                        style: const TextStyle(
+                          color: Colors.blue, // Tıklanabilir metin rengi
+                          decoration: TextDecoration.underline, // Altı çizili
+                        ),
+                        recognizer:
+                            TapGestureRecognizer()
+                              ..onTap = () {
+                                _launchUrl(
+                                  'https://www.doktorumonline.net/gizlilik-politikasi',
+                                );
+                              },
+                      ),
+                      const TextSpan(text: ' okuyun.'),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 30),
 
@@ -218,7 +272,7 @@ class _SignUpState extends State<SignUp> {
                   onPressed:
                       () => Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => const SignIn()),
+                        CustomPageRoute(child: SignIn()),
                       ),
                   backgroundColor: Colors.white,
                   foregroundColor: theme.primaryColor,

@@ -7,11 +7,15 @@ import 'package:flutter/material.dart';
 class SocialAuthButtons extends StatelessWidget {
   final VoidCallback onGooglePressed;
   final VoidCallback onFacebookPressed;
+  final String googleText;
+  final String facebookText;
 
   const SocialAuthButtons({
     super.key,
     required this.onGooglePressed,
     required this.onFacebookPressed,
+    required this.facebookText,
+    required this.googleText,
   });
 
   @override
@@ -24,7 +28,7 @@ class SocialAuthButtons extends StatelessWidget {
           onPressed: onGooglePressed,
           iconUrl:
               'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png',
-          label: 'Google ile kayıt ol',
+          label: 'Google ile ' + googleText,
         ),
         const SizedBox(height: 12),
         // Facebook Button
@@ -32,7 +36,7 @@ class SocialAuthButtons extends StatelessWidget {
           onPressed: onFacebookPressed,
           iconUrl:
               'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Facebook_logo_%28square%29.png/960px-Facebook_logo_%28square%29.png',
-          label: 'Facebook ile kayıt ol',
+          label: 'Facebook ile ' + facebookText,
         ),
       ],
     );
