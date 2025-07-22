@@ -6,6 +6,7 @@ import 'package:login_page/screens/old_chat_screen.dart';
 import 'package:login_page/screens/pdf_analysis_screen.dart';
 import 'package:login_page/screens/profiles_screen.dart';
 import 'package:login_page/screens/saved_analyses_screen.dart';
+import 'package:login_page/services/auth_service.dart';
 import 'package:login_page/services/tutorial_service.dart';
 import 'package:login_page/widgets/bottom_navbar.dart';
 import 'package:login_page/widgets/my_drawer.dart';
@@ -240,7 +241,7 @@ class _MainScreenState extends State<MainScreen> {
             if (_selectedIndex == 3)
               IconButton(
                 key: _helpButtonKey,
-                icon: const Icon(Icons.help_outline),
+                icon: const Icon(Icons.help_outline, size: 30),
                 onPressed: () async {
                   await TutorialService.resetAllTutorials();
                   if (mounted) {
@@ -259,17 +260,16 @@ class _MainScreenState extends State<MainScreen> {
             if (_selectedIndex == 2)
               IconButton(
                 key: _pdfHistoryButtonKey,
-                icon: const Icon(Icons.history),
+                icon: const Icon(Icons.history, size: 30),
                 onPressed: _onPdfHistoryTapped,
                 tooltip: 'PDF Analizi Geçmişi',
               ),
 
             // Sadece Anasayfadayken profil simgesi çıksın
-            if (_selectedIndex == 0)
-              IconButton(
-                icon: const Icon(Icons.person),
-                onPressed: () {},
-                tooltip: 'Profilim',
+            if (_selectedIndex == 0 || _selectedIndex == 1)
+              Padding(
+                padding: const EdgeInsets.only(right: 12.0),
+                child: AuthService().getProfileAvatar(),
               ),
           ],
         ),

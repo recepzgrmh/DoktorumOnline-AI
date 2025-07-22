@@ -22,9 +22,15 @@ class BottomNavbar extends StatelessWidget {
       unselectedFontSize: 14, // Seçili olmayan öğenin yazı tipi boyutu
 
       items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Ana Sayfa'),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.question_mark),
+          label: 'Soru Sor',
+        ),
         BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Geçmiş'),
-        BottomNavigationBarItem(icon: Icon(Icons.picture_as_pdf), label: 'PDF'),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.picture_as_pdf),
+          label: 'Tahlil',
+        ),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
       ],
     );

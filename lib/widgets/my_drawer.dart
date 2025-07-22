@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:login_page/screens/opening.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:login_page/services/auth_service.dart';
 import 'package:login_page/services/tutorial_service.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'coachmark_desc.dart' as coachmark;
@@ -29,7 +30,6 @@ class MyDrawerState extends State<MyDrawer> {
   final GlobalKey _profilesButton = GlobalKey();
   final GlobalKey _logoutButton = GlobalKey();
 
-  // GÜNCELLENDİ: Kod tutarlılığı için initState kullanıldı.
   @override
   void initState() {
     super.initState();
@@ -38,8 +38,6 @@ class MyDrawerState extends State<MyDrawer> {
       _checkAndShowTutorial();
     });
   }
-
-  // didChangeDependencies metodu bu senaryo için artık gerekli değil.
 
   Future<void> _checkAndShowTutorial() async {
     // Drawer eğitiminin daha önce görülüp görülmediğini kontrol eder.
@@ -167,21 +165,17 @@ class MyDrawerState extends State<MyDrawer> {
 
   @override
   Widget build(BuildContext context) {
-    // Bu kısımdaki UI kodlarında değişiklik yapılmadı.
     return Drawer(
       child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.white, Colors.blue.shade100],
-          ),
-        ),
+        // Arka plan rengini tüm drawer'a uygulamak için
+        color: Colors.blue.shade50,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
+                // --- HEADER TEKRAR UserAccountsDrawerHeader OLARAK GÜNCELLENDİ ---
                 UserAccountsDrawerHeader(
                   accountName: Text(
                     currentUser?.displayName ?? 'User',
@@ -196,10 +190,11 @@ class MyDrawerState extends State<MyDrawer> {
                   ),
                   currentAccountPicture: CircleAvatar(
                     backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.person,
-                      size: 40,
-                      color: Colors.blue.shade600,
+                    child: ClipOval(
+                      child: AuthService().getProfileAvatar(
+                        // Bu metodun bir Image widget'ı döndürdüğü varsayılıyor.
+                        radius: 40,
+                      ),
                     ),
                   ),
                   decoration: BoxDecoration(
@@ -210,7 +205,7 @@ class MyDrawerState extends State<MyDrawer> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                // ----------------------------------------------------------------
                 _buildDrawerItem(
                   key: _homeButton,
                   icon: Icons.home_rounded,
@@ -253,14 +248,15 @@ class MyDrawerState extends State<MyDrawer> {
                 ),
               ],
             ),
-            Container(
-              key: _logoutButton,
-              margin: EdgeInsets.only(
-                bottom: MediaQuery.of(context).padding.bottom,
+            // Çıkış butonu
+            Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).padding.bottom + 10,
                 left: 15,
                 right: 15,
               ),
               child: ListTile(
+                key: _logoutButton,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -283,7 +279,7 @@ class MyDrawerState extends State<MyDrawer> {
                   signOut(); // Firebase çıkış işlemi
                 },
                 hoverColor: Colors.red.shade50,
-                selectedTileColor: Colors.red.shade50.withOpacity(0.5),
+                splashColor: Colors.red.shade100,
               ),
             ),
           ],
@@ -308,14 +304,14 @@ class MyDrawerState extends State<MyDrawer> {
       child: ListTile(
         key: key,
         selected: isSelected,
-        selectedTileColor: Colors.blue.shade100.withOpacity(0.5),
+        selectedTileColor: Colors.blue.shade200.withOpacity(0.5),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         leading: Icon(
           icon,
           color:
               isSelected
-                  ? Colors.blue.shade700
-                  : (iconColor ?? Colors.blue.shade600),
+                  ? Colors.blue.shade800
+                  : (iconColor ?? Colors.blue.shade700),
           size: 26,
         ),
         title: Text(
@@ -325,13 +321,14 @@ class MyDrawerState extends State<MyDrawer> {
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             color:
                 isSelected
-                    ? Colors.blue.shade700
-                    : (textColor ?? Colors.blue.shade600),
+                    ? Colors.blue.shade800
+                    : (textColor ?? Colors.blue.shade700),
             fontSize: 14,
           ),
         ),
         onTap: onTap,
-        hoverColor: Colors.blue.shade50,
+        hoverColor: Colors.blue.shade100,
+        splashColor: Colors.blue.shade200,
       ),
     );
   }

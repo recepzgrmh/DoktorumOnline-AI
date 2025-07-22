@@ -91,6 +91,24 @@ class AuthService {
     }
   }
 
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  Widget getProfileAvatar({double radius = 15.0}) {
+    final user = _firebaseAuth.currentUser;
+    final photoURL = user?.photoURL;
+
+    return CircleAvatar(
+      radius: radius,
+
+      backgroundImage: photoURL != null ? NetworkImage(photoURL) : null,
+      backgroundColor: Colors.grey.shade300,
+
+      child:
+          photoURL == null
+              ? Icon(Icons.account_circle, size: radius * 2)
+              : null,
+    );
+  }
+
   /// Kullanıcının e-posta doğrulama durumunu kontrol eder.
   /// HATA DÜZELTMESİ: Bu fonksiyon navigasyon için 'BuildContext'e ihtiyaç duyuyordu.
   /// HATA DÜZELTMESİ: user.reload() sonrası güncel kullanıcı bilgisi tekrar alınmalıydı.
