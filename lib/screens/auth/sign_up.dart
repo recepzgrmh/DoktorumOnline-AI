@@ -99,14 +99,40 @@ class _SignUpState extends State<SignUp> {
                   ),
                 ),
                 const SizedBox(height: 40),
-                // Bu Column widget'ı butonları alt alta dizecektir
+
                 SocialAuthButtons(
-                  onGooglePressed: () {
-                    _authService.signInWithGoogle(context);
+                  onGooglePressed: () async {
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext context) {
+                        return const Center(child: CircularProgressIndicator());
+                      },
+                    );
+
+                    // 2. Giriş işlemini yap
+                    final userCredential = await _authService.signInWithGoogle(
+                      context,
+                    );
+
+                    // 3. Dialog'u kapat
+                    if (mounted) {
+                      Navigator.of(context).pop();
+                    }
+
+                    // 4. Giriş başarılıysa yönlendir
+                    if (userCredential != null && mounted) {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => const MainScreen(),
+                        ),
+                        (Route<dynamic> route) => false,
+                      );
+                    }
                   },
                   onFacebookPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
+                      const SnackBar(
                         content: Text('Facebook ile giriş yakında eklenecek'),
                       ),
                     );

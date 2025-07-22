@@ -13,6 +13,7 @@ class AuthService {
   /// Google ile giriş yapma ve kullanıcı verisini Firestore'a kaydetme.
   Future<UserCredential?> signInWithGoogle(BuildContext context) async {
     try {
+      await _googleSignIn.signOut();
       final GoogleSignInAccount? gUser = await _googleSignIn.signIn();
       if (gUser == null) {
         // Kullanıcı giriş yapmaktan vazgeçti.

@@ -5,6 +5,7 @@ import 'package:login_page/screens/auth/reset_password.dart';
 import 'package:login_page/screens/auth/sign_up.dart';
 import 'package:login_page/screens/main_navigation_screen.dart';
 import 'package:login_page/services/auth_service.dart';
+import 'package:login_page/widgets/socail_buttons.dart';
 import 'package:login_page/widgets/text_inputs.dart';
 import 'package:login_page/wrapper.dart';
 import 'package:login_page/widgets/custom_button.dart';
@@ -107,113 +108,45 @@ class _SignInState extends State<SignIn> {
                   ),
                 ),
                 const SizedBox(height: 40),
+
                 // Social media buttons
-                Column(
-                  children: [
-                    Container(
-                      // Google Butonu
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(134, 255, 255, 255),
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(12),
-                          onTap: () async {
-                            final navigator = Navigator.of(context);
-                            showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder:
-                                  (_) => const Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                            );
+                SocialAuthButtons(
+                  onGooglePressed: () async {
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext context) {
+                        return const Center(child: CircularProgressIndicator());
+                      },
+                    );
 
-                            final userCredential = await _authService
-                                .signInWithGoogle(context);
-                            await navigator
-                                .maybePop(); // Yükleme ekranını kapat
+                    // 2. Giriş işlemini yap
+                    final userCredential = await _authService.signInWithGoogle(
+                      context,
+                    );
 
-                            if (userCredential != null) {
-                              navigator.pushAndRemoveUntil(
-                                MaterialPageRoute(builder: (_) => MainScreen()),
-                                (route) => false,
-                              );
-                            }
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.network(
-                                'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png',
-                                height: 20,
-                                width: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Google ile kayıt ol',
-                                style: TextStyle(
-                                  color: Colors.grey.shade700,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
+                    // 3. Dialog'u kapat
+                    if (mounted) {
+                      Navigator.of(context).pop();
+                    }
+
+                    // 4. Giriş başarılıysa yönlendir
+                    if (userCredential != null && mounted) {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => const MainScreen(),
                         ),
+                        (Route<dynamic> route) => false,
+                      );
+                    }
+                  },
+                  onFacebookPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Facebook ile giriş yakında eklenecek'),
                       ),
-                    ),
-                    const SizedBox(height: 12), // Dikey boşluk
-                    Container(
-                      // Facebook Butonu
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(96, 255, 255, 255),
-                        border: Border.all(color: Colors.white),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(12),
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: const Text(
-                                  'Facebook ile giriş yakında eklenecek',
-                                  textAlign: TextAlign.center,
-                                ),
-                                duration: const Duration(seconds: 2),
-                              ),
-                            );
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.network(
-                                'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Facebook_logo_%28square%29.png/960px-Facebook_logo_%28square%29.png',
-                                height: 20,
-                                width: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Facebook ile kayıt ol',
-                                style: TextStyle(
-                                  color: Colors.grey.shade700,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
                 const SizedBox(height: 20),
                 // Divider with "veya" text
