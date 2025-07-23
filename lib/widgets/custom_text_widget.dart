@@ -14,6 +14,7 @@ class CustomTextWidget extends StatelessWidget {
   final OutlineInputBorder? errorBorder;
   final OutlineInputBorder? focusedErrorBorder;
   final bool autofocus;
+  final FocusNode? focusNode;
 
   const CustomTextWidget({
     super.key,
@@ -28,6 +29,7 @@ class CustomTextWidget extends StatelessWidget {
     this.errorBorder,
     this.focusedErrorBorder,
     this.autofocus = false,
+    this.focusNode,
   });
 
   @override
@@ -38,6 +40,7 @@ class CustomTextWidget extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
       child: TextFormField(
+        focusNode: focusNode,
         autofocus: autofocus,
         keyboardType: keyboardType,
         maxLines: maxLines,

@@ -135,9 +135,16 @@ class _MainScreenState extends State<MainScreen> {
   /// Sayfa değiştirildiğinde çağrılır ve eğitim mantığını yönetir.
   void _onItemTapped(int index) {
     if (_selectedIndex == index) return;
-    setState(() {
-      _selectedIndex = index;
-    });
+
+    // YENİ: Eğer seçilen sayfa HomeScreen (index 0) ise,
+    // GlobalKey üzerinden public metodunu çağırarak odaklanmayı tetikle.
+    if (index == 0) {
+      // setState'in tamamlanıp widget'ın görünür hale gelmesi için çok kısa bir gecikme ekliyoruz.
+      // Bu, `currentState`'in null olmamasını garantiler.
+      Future.delayed(const Duration(milliseconds: 50), () {
+        _homeScreenKey.currentState?.onBecameVisible();
+      });
+    }
 
     _showTutorialForPage(index);
 

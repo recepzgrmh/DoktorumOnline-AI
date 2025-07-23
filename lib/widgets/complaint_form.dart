@@ -10,6 +10,8 @@ class ComplaintForm extends StatefulWidget {
   final Function(MedicalFormData) onFormChanged;
   final Map<String, String> userProfileData;
 
+  final FocusNode? complaintFocusNode;
+
   const ComplaintForm({
     super.key,
     required this.sikayetController,
@@ -17,6 +19,8 @@ class ComplaintForm extends StatefulWidget {
     required this.ilacController,
     required this.onFormChanged,
     required this.userProfileData,
+
+    this.complaintFocusNode,
   });
 
   @override
@@ -161,9 +165,10 @@ class _ComplaintFormState extends State<ComplaintForm> {
         ),
 
         CustomTextWidget(
+          autofocus: true,
           title: 'Şikayetiniz',
           icon: Icons.medical_services,
-          autofocus: true,
+          focusNode: widget.complaintFocusNode,
           controller: widget.sikayetController,
           maxLines: 3,
           validator: ValidationService.validateComplaint,

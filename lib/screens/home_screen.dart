@@ -35,6 +35,7 @@ class HomeScreenState extends State<HomeScreen> {
   final List<TargetFocus> targets = [];
   final GlobalKey _startButton = GlobalKey();
   final GlobalKey _topAreaKey = GlobalKey();
+  final FocusNode _complaintFocusNode = FocusNode();
 
   final _analysisService = PdfAnalysisScreen();
 
@@ -104,23 +105,37 @@ class HomeScreenState extends State<HomeScreen> {
     complaintSureController.dispose();
     complaintIlacController.dispose();
     _scrollController.dispose();
+    _complaintFocusNode.dispose();
     super.dispose();
   }
 
-  // Yeni metod: Widget güncellendiğinde çağrılır
-  @override
-  void didUpdateWidget(HomeScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Profil verisi değiştiğinde formu sıfırla
+  void onBecameVisible() {
+    // Sadece profil verisi varsa ve ilgili form ekrandaysa işlem yap
     if (_hasProfileData) {
-      sikayetController.clear();
-      sureController.clear();
-      ilacController.clear();
+      // Form alanlarını temizle
       complaintSikayetController.clear();
       complaintSureController.clear();
       complaintIlacController.clear();
-      setState(() => _formData = null);
+
+      // Form verisini sıfırla ve durumu güncelle
+      setState(() {
+        _formData = null;
+      });
+
+      // State güncellendikten ve widget çizildikten SONRA odaklanma isteği gönder.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _complaintFocusNode.requestFocus();
+        }
+      });
     }
+  }
+  // Yeni metod: Widget güncellendiğinde çağrılır
+  // lib/screens/home_screen.dart -> HomeScreenState sınıfının içinde
+
+  @override
+  void didUpdateWidget(HomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
   }
 
   // ═════════════ Helpers ═════════════
@@ -427,6 +442,7 @@ class HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 24),
                         _hasProfileData
                             ? ComplaintForm(
+                              complaintFocusNode: _complaintFocusNode,
                               sikayetController: complaintSikayetController,
                               sureController: complaintSureController,
                               ilacController: complaintIlacController,
