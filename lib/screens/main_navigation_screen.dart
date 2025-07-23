@@ -136,6 +136,11 @@ class _MainScreenState extends State<MainScreen> {
   void _onItemTapped(int index) {
     if (_selectedIndex == index) return;
 
+    setState(() {
+      _selectedIndex = index;
+      // setChanges = _selectedIndex == 0 ? true : false; // <-- BU SATIRI SİLİN.
+    });
+
     // YENİ: Eğer seçilen sayfa HomeScreen (index 0) ise,
     // GlobalKey üzerinden public metodunu çağırarak odaklanmayı tetikle.
     if (index == 0) {
