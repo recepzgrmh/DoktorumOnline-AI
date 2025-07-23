@@ -163,7 +163,7 @@ class _ComplaintFormState extends State<ComplaintForm> {
         CustomTextWidget(
           title: 'Şikayetiniz',
           icon: Icons.medical_services,
-
+          autofocus: true,
           controller: widget.sikayetController,
           maxLines: 3,
           validator: ValidationService.validateComplaint,
@@ -194,9 +194,9 @@ class _ComplaintFormState extends State<ComplaintForm> {
     return Chip(
       backgroundColor: theme.colorScheme.surfaceVariant,
 
-      side: BorderSide(color: theme.colorScheme.outline.withOpacity(0.5)),
+      side: BorderSide(color: Colors.teal.withOpacity(0.2), width: 1.5),
 
-      avatar: Icon(icon, size: 18, color: theme.colorScheme.primary),
+      avatar: Icon(icon, size: 18, color: Colors.teal),
       label: Text(text),
       labelStyle: TextStyle(
         fontWeight: FontWeight.w600,

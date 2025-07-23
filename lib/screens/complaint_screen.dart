@@ -260,12 +260,6 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
             onPressed: () async {
               await TutorialService.resetAllTutorials();
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Tüm eğitimler sıfırlandı.'),
-                    backgroundColor: Colors.blue,
-                  ),
-                );
                 // Mevcut sayfanın tutorial'ını göster
                 showTutorial();
               }

@@ -15,6 +15,7 @@ import 'package:upgrader/upgrader.dart';
 
 /// Upgrader widget'ı için özel Türkçe mesajları içeren sınıf.
 /// Bu sınıf dosyanın üst seviyesinde (herhangi bir sınıfın dışında) olmalıdır.
+/// Bu upgrader paketi hala çalışmıyor sebebini tam olarak anlayamadım
 class TurkishUpgraderMessages extends UpgraderMessages {
   @override
   String get buttonTitleIgnore => 'Yoksay';
@@ -44,7 +45,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  // Başlangıçta profiller sayfasını göstermek için index 3 olarak ayarlandı.
+  // Başlangıçta profiller sayfasını göstermek için index 3'te.
   int _selectedIndex = 3;
 
   // Her sayfanın state'ine erişmek için GlobalKey'ler.
@@ -58,6 +59,7 @@ class _MainScreenState extends State<MainScreen> {
       GlobalKey<ProfilesScreenState>();
 
   // AppBar'daki butonlar için GlobalKey'ler.
+  // Belki profil fotosu için de konulabilir
   final GlobalKey _helpButtonKey = GlobalKey();
   final GlobalKey _pdfHistoryButtonKey = GlobalKey();
 
@@ -75,57 +77,59 @@ class _MainScreenState extends State<MainScreen> {
 
   /// Uygulama başlangıcında kullanıcı durumunu ve eğitimleri ayarlar.
   Future<void> _initializeUserAndTutorials() async {
-    // 1. Sadece ilk açılışta eğitimleri sıfırla
-    final prefs = await SharedPreferences.getInstance();
-    final bool isFirstLaunch = prefs.getBool('hasCompletedFirstLaunch') ?? true;
-
-    if (isFirstLaunch) {
-      // Eğer bu ilk açılışsa, tüm eğitimleri sıfırla.
-      await TutorialService.resetAllTutorials();
-      // Bayrağı (flag) false olarak ayarla ki bu blok bir daha çalışmasın.
-      await prefs.setBool('hasCompletedFirstLaunch', false);
-    }
-
-    // 2. Başlangıç sayfasını belirle
-    int initialIndex = 3; // Varsayılan olarak ProfilesScreen
-
     final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        // Kullanıcının profil dökümanı var mı diye kontrol et.
-        final userDoc =
-            await FirebaseFirestore.instance
-                .collection('users')
-                .doc(user.uid)
-                .get();
+    if (user == null) return;
 
-        // Eğer döküman varsa ve içinde 'profiles' listesi doluysa, kullanıcı eski kabul edilir.
-        if (userDoc.exists &&
-            (userDoc.data()?.containsKey('profiles') ?? false)) {
-          final profiles = userDoc.data()!['profiles'] as List<dynamic>?;
-          if (profiles != null && profiles.isNotEmpty) {
-            // Profili olan kullanıcı ana sayfadan başlar.
-            initialIndex = 0;
-          }
-        }
-      } catch (e) {
-        debugPrint("Firestore profil kontrolü sırasında hata: $e");
-        // Hata durumunda, en güvenli varsayım olarak kullanıcıyı profil ekranına yönlendir.
-        initialIndex = 3;
+    try {
+      // Kullanıcının ilk defa giriş yapıp yapmadığını kontrol et
+      final prefs = await SharedPreferences.getInstance();
+      final String userInitKey = 'user_${user.uid}_initialized';
+      final bool userInitialized = prefs.getBool(userInitKey) ?? false;
+
+      if (!userInitialized) {
+        // İlk defa giriş yapan kullanıcı için tutorial durumlarını temizle
+        await TutorialService.resetAllTutorials();
+        await prefs.setBool(userInitKey, true);
       }
+
+      // Başlangıç sayfasını belirle
+      int initialIndex = await _determineInitialPage(user);
+
+      if (mounted) {
+        setState(() {
+          _selectedIndex = initialIndex;
+        });
+
+        // Widget tamamen yüklendikten sonra tutorial'ı göster
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _showTutorialForPage(_selectedIndex);
+        });
+      }
+    } catch (e) {
+      debugPrint("Tutorial ilklendirme hatası: $e");
+    }
+  }
+
+  Future<int> _determineInitialPage(User user) async {
+    try {
+      final userDoc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
+
+      if (userDoc.exists &&
+          (userDoc.data()?.containsKey('profiles') ?? false)) {
+        final profiles = userDoc.data()!['profiles'] as List<dynamic>?;
+        if (profiles != null && profiles.isNotEmpty) {
+          return 0; // Ana sayfa
+        }
+      }
+    } catch (e) {
+      debugPrint("Firestore profil kontrolü hatası: $e");
     }
 
-    // 3. Arayüzü güncelle ve eğitimi göster
-    if (mounted) {
-      // Başlangıç sayfasını ayarla.
-      setState(() {
-        _selectedIndex = initialIndex;
-      });
-      // Sayfanın tamamen yüklenmesi için küçük bir gecikme sonrası eğitimi göster.
-      Future.delayed(const Duration(milliseconds: 500), () {
-        _showTutorialForPage(_selectedIndex);
-      });
-    }
+    return 3;
   }
 
   /// Sayfa değiştirildiğinde çağrılır ve eğitim mantığını yönetir.
@@ -167,12 +171,21 @@ class _MainScreenState extends State<MainScreen> {
         showFunction = _profilesScreenKey.currentState?.showTutorial;
         break;
       default:
-        return; // Geçersiz index.
+        return;
     }
 
-    final hasSeen = await TutorialService.hasSeenTutorial(tutorialKey);
-    if (!hasSeen && showFunction != null) {
-      Future.delayed(const Duration(milliseconds: 200), showFunction);
+    try {
+      final hasSeen = await TutorialService.hasSeenTutorial(tutorialKey);
+      if (!hasSeen && showFunction != null && mounted) {
+        // Sayfa tamamen yüklendikten sonra tutorial'ı göster
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted && _selectedIndex == index) {
+            showFunction!();
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint("Tutorial gösterim hatası: $e");
     }
   }
 
@@ -250,14 +263,6 @@ class _MainScreenState extends State<MainScreen> {
                 icon: const Icon(Icons.help_outline, size: 30),
                 onPressed: () async {
                   await TutorialService.resetAllTutorials();
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Tüm eğitimler sıfırlandı.'),
-                        backgroundColor: Colors.blue,
-                      ),
-                    );
-                  }
                   _showTutorialForPage(_selectedIndex);
                 },
                 tooltip: 'Eğitimleri Sıfırla',
