@@ -24,12 +24,12 @@ class BottomNavbar extends StatelessWidget {
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.analytics_outlined),
-          label: 'Yeni Analiz',
+          label: 'Soru Sor',
         ),
         BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Raporlarım'),
         BottomNavigationBarItem(
           icon: Icon(Icons.file_copy_outlined),
-          label: 'Belgelerim',
+          label: 'Tahlillerim',
         ),
 
         BottomNavigationBarItem(

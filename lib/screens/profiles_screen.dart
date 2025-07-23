@@ -456,6 +456,7 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                 ),
                 Expanded(
                   child: SingleChildScrollView(
+                    padding: EdgeInsets.only(bottom: 500),
                     child: ProfileForm(
                       nameController: _nameController,
                       boyController: _boyController,

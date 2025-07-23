@@ -9,8 +9,10 @@ import 'package:openai_dart/openai_dart.dart';
 
 class OpenAIService {
   final String _apiKey = dotenv.env['OPENAI_API_KEY']!;
+  // YÖNTEM 1: HTTP Client ile (Eski Yöntem)
   final Uri _endpoint = Uri.parse('https://api.openai.com/v1/chat/completions');
 
+  // YÖNTEM 2: OpenAI Dart Client ile (Modern ve Tercih Edilen)
   late final OpenAIClient client;
   OpenAIService() {
     client = OpenAIClient(apiKey: _apiKey);
@@ -18,8 +20,8 @@ class OpenAIService {
 
   /// 1. Adım: Kullanıcı verilerindeki eksik/ belirsiz noktaları
   /// madde madde sorulara dönüştürür.
-  /// burası sorularla alakalı
   Future<List<String>> getFollowUpQuestions(
+    // ... Bu fonksiyonun içeriği aynı kalır ...
     Map<String, String> profileData,
     Map<String, String> complaintData,
     String userName,
@@ -96,8 +98,8 @@ class OpenAIService {
   }
 
   /// 2. Adım: kullanıcın mesajlarını değerlendirip tıbbi yanıt alma
-  /// burası son mesaj
   Future<String> getFinalEvaluation(
+    // ... Bu fonksiyonun içeriği aynı kalır ...
     Map<String, String> profileData,
     Map<String, String> complaintData,
     List<String> answers,
@@ -140,6 +142,7 @@ class OpenAIService {
 
   /// Ortak: Bir prompt'u ChatGPT'ye gönderir ve cevabını döner.
   Future<String> _postToChatGPT(String content) async {
+    // ... Bu fonksiyonun içeriği aynı kalır ...
     final response = await http.post(
       _endpoint,
       headers: {
@@ -169,11 +172,10 @@ class OpenAIService {
     return (data['choices'][0]['message']['content'] as String?)?.trim() ?? '';
   }
 
-  //
-  //
-  //
-  //
-  //
+  // ————————————————————————————————————————————————————————————
+  // PDF ve Resim Analizi Bölümü
+  // ————————————————————————————————————————————————————————————
+
   Future<String> extractTextFromPdf(File file) async {
     final bytes = await file.readAsBytes();
     final PdfDocument document = PdfDocument(inputBytes: bytes);
@@ -192,15 +194,37 @@ class OpenAIService {
     return chunks;
   }
 
+  /// **YENİ:** PDF ve Resim analizinden gelen yanıtları ayrıştıran ortak fonksiyon.
+  Map<String, String> _parseAnalysisResponse(String reply) {
+    final Map<String, String> analysisResults = {};
+    // Yanıtı "##" karakterine göre bölerek başlıkları ve içerikleri ayır
+    final sections = reply.split('##');
+
+    for (var section in sections) {
+      if (section.trim().isEmpty) continue;
+
+      final lines = section.split('\n');
+      if (lines.isEmpty) continue;
+
+      final title = lines[0].trim();
+      final content = lines.skip(1).join('\n').trim();
+
+      if (title.isNotEmpty && content.isNotEmpty) {
+        analysisResults[title] = content;
+      }
+    }
+    return analysisResults;
+  }
+
   Future<Map<String, String>> analyzePdf(String filePath) async {
     final file = File(filePath);
     final fullText = await extractTextFromPdf(file);
 
-    // Eğer metin boşsa erken dön
     if (fullText.trim().isEmpty) {
       return {'Hata': 'PDF içeriği okunamadı veya boş.'};
     }
 
+    // PDF metnini 3000 kelimelik parçalara ayır
     final chunks = chunkText(fullText, 3000);
     Map<String, String> analysisResults = {};
 
@@ -209,8 +233,8 @@ class OpenAIService {
         final res = await client.createChatCompletion(
           request: CreateChatCompletionRequest(
             model: ChatCompletionModel.model(
-              ChatCompletionModels.chatgpt4oLatest,
-            ),
+              ChatCompletionModels.gpt4o,
+            ), // Model güncellendi
             messages: [
               ChatCompletionMessage.system(
                 content:
@@ -235,26 +259,74 @@ class OpenAIService {
 
         final reply = res.choices.first.message.content?.trim() ?? '';
 
-        // Başlıkları ve içerikleri ayır
-        final sections = reply.split('##');
-        for (var section in sections) {
-          if (section.trim().isEmpty) continue;
-
-          final lines = section.split('\n');
-          if (lines.isEmpty) continue;
-
-          final title = lines[0].trim();
-          final content = lines.skip(1).join('\n').trim();
-
-          if (title.isNotEmpty && content.isNotEmpty) {
-            analysisResults[title] = content;
-          }
-        }
+        // **DEĞİŞİKLİK:** Artık ortak parser fonksiyonunu kullanıyoruz.
+        final parsedPart = _parseAnalysisResponse(reply);
+        analysisResults.addAll(parsedPart);
       } catch (e) {
-        analysisResults['Hata'] = 'Bu bölüm işlenirken bir hata oluştu: $e';
+        // Hata durumunda, mevcut sonuçlara hata bilgisini ekle
+        analysisResults['Hata (Bölüm İşlenemedi)'] =
+            'Bu bölüm işlenirken bir hata oluştu: $e';
       }
     }
 
     return analysisResults;
   }
+
+  /// **DEĞİŞİKLİK:** Bu fonksiyon `analyzePdf` gibi çalışacak şekilde tamamen yeniden yazıldı.
+  Future<Map<String, String>> analyzeImage(String imagePath) async {
+    try {
+      final file = File(imagePath);
+      final bytes = await file.readAsBytes();
+      final base64Image = base64Encode(bytes);
+
+      // `openai_dart` client'ını kullanarak API'ye istek gönder
+      final res = await client.createChatCompletion(
+        request: CreateChatCompletionRequest(
+          model: ChatCompletionModel.model(
+            ChatCompletionModels.chatgpt4oLatest,
+          ),
+          messages: [
+            ChatCompletionMessage.system(
+              content:
+                  // PDF analiziyle aynı sistem prompt'unu kullanıyoruz
+                  "Bir doktor titizliğiyle gelen tıbbi raporu (resim formatında) detaylıca incele. Lütfen aşağıdaki başlıklar altında kapsamlı bir analiz yap, Kullanıcının Anlayabileceği Yalın bir dil kullan. Her başlığı '##' işareti ile başlat ve içeriğini altına yaz:\n\n"
+                  "## Genel Değerlendirme\n"
+                  "## Tespit Edilen Durumlar\n"
+                  "## Risk Faktörleri\n"
+                  "## Öneriler\n"
+                  "## Takip Önerileri\n\n"
+                  "Kullanıcının anlayabileceği sade bir dil kullan, ancak gerekli tıbbi terimleri de açıklayarak kullan. Her bölüm için detaylı ve kapsamlı bilgi ver.",
+            ),
+            ChatCompletionMessage.user(
+              content: ChatCompletionUserMessageContent.parts([
+                ChatCompletionMessageContentPart.text(
+                  text: "Lütfen bu tıbbi rapor resmini analiz et.",
+                ),
+                ChatCompletionMessageContentPart.image(
+                  // Resmi base64 formatında gönderiyoruz
+                  imageUrl: ChatCompletionMessageImageUrl(
+                    url: 'data:image/jpeg;base64,$base64Image',
+                  ),
+                ),
+              ]),
+            ),
+          ],
+          temperature: 0.3,
+          maxTokens: 3000, // Token limitini PDF ile aynı tuttuk
+        ),
+      );
+
+      final reply = res.choices.first.message.content?.trim() ?? '';
+
+      // Yanıtı ayrıştırmak için ortak fonksiyonu kullan
+      return _parseAnalysisResponse(reply);
+    } catch (e) {
+      // Hata yönetimi
+      print('Resim analizi sırasında hata oluştu: $e');
+      return {'Hata': 'Resim analizi sırasında bir hata oluştu: $e'};
+    }
+  }
+
+  /// **KALDIRILDI:** Bu fonksiyonun yerine artık `_parseAnalysisResponse` kullanılıyor.
+  // Map<String, String> _parseImageAnalysisResponse(String content) { ... }
 }

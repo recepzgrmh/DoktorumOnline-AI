@@ -209,7 +209,7 @@ class MyDrawerState extends State<MyDrawer> {
                 _buildDrawerItem(
                   key: _homeButton,
                   icon: Icons.analytics_outlined,
-                  title: 'Yeni Analiz',
+                  title: 'Soru Sor',
                   index: 0,
                   onTap: () {
                     Navigator.of(context).pop();
@@ -229,7 +229,7 @@ class MyDrawerState extends State<MyDrawer> {
                 _buildDrawerItem(
                   key: _uploadButton,
                   icon: Icons.file_copy_outlined,
-                  title: 'Belgelerim',
+                  title: 'Tahlillerim',
                   index: 2,
                   onTap: () {
                     Navigator.of(context).pop();

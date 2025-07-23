@@ -2,9 +2,12 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:async'; // StreamSubscription için eklendi
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:login_page/screens/pdf_analysis_screen.dart';
 import 'package:login_page/services/tutorial_service.dart';
 import 'package:login_page/models/medical_form_data.dart';
 import 'package:login_page/screens/overview_screen.dart';
@@ -16,6 +19,7 @@ import 'package:login_page/widgets/custom_button.dart';
 import 'package:login_page/widgets/loading_widget.dart';
 import 'package:login_page/widgets/medical_form.dart';
 import 'package:login_page/widgets/complaint_form.dart';
+import 'package:login_page/widgets/selection_bottom_sheet.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -31,6 +35,14 @@ class HomeScreenState extends State<HomeScreen> {
   final List<TargetFocus> targets = [];
   final GlobalKey _startButton = GlobalKey();
   final GlobalKey _topAreaKey = GlobalKey();
+
+  final _analysisService = PdfAnalysisScreen();
+
+  PlatformFile? _selectedFile;
+  XFile? _selectedImage; // Resim için yeni state
+  String _status = 'Lütfen bir PDF dosyası veya resim seçin';
+  bool _isLoading = false;
+  String _selectedType = ''; // 'pdf' veya 'image'
 
   static const _scrollDuration = Duration(milliseconds: 500);
 
@@ -324,10 +336,68 @@ class HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // ═════════════ UI ═════════════
+  /// Kullanıcıya PDF mi yoksa Resim mi seçeceğini soran bir alt menü gösterir.
+  void _showSourceSelectionDialog() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder:
+          (context) => SelectionBottomSheet(
+            onSelectPdf: _pickFile, // PDF seçme fonksiyonunu ata
+            onSelectImage: _pickImage, // Resim seçme fonksiyonunu ata
+          ),
+    );
+  }
+
+  // ═════════════ File & Image Selection ═════════════
+  Future<void> _pickFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+      allowMultiple: false,
+      withData: true,
+    );
+    if (result == null) return;
+
+    setState(() {
+      _selectedFile = result.files.first;
+      _selectedImage = null; // Diğer seçimi temizle
+      _selectedType = 'pdf';
+      _status = 'Seçilen dosya: ${_selectedFile!.name}';
+    });
+  }
+
+  Future<void> _pickImage() async {
+    final imagePicker = ImagePicker();
+
+    try {
+      final pickedFile = await imagePicker.pickImage(
+        source: ImageSource.gallery,
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImage = pickedFile;
+          _selectedFile = null; // Diğer seçimi temizle
+          _selectedType = 'image';
+          _status = 'Seçilen resim: ${pickedFile.name}';
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Resim seçilirken bir hata oluştu: $e')),
+      );
+      print("Resim seçilirken bir hata ile karşılaşıldı: $e");
+    }
+
+    // ═════════════ UI ═════════════
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // Dosya seçilip seçilmediğini kontrol eden bir değişken
+    final bool isFileSelected = _selectedFile != null || _selectedImage != null;
 
     if (_isLoadingProfile) {
       return const Scaffold(
@@ -382,13 +452,53 @@ class HomeScreenState extends State<HomeScreen> {
                                   (d) => setState(() => _formData = d),
                             ),
                         const SizedBox(height: 16),
+
+                        // ▼▼▼ DEĞİŞİKLİK BURADA BAŞLIYOR ▼▼▼
+                        Row(
+                          children: [
+                            Expanded(
+                              child: CustomButton(
+                                // Metni duruma göre değiştiriyoruz.
+                                // Dosya seçiliyse dosya adını, değilse varsayılan metni göster.
+                                label: isFileSelected ? _status : 'Dosya yükle',
+                                onPressed: _showSourceSelectionDialog,
+                                // Rengi duruma göre değiştiriyoruz.
+                                // Dosya seçiliyse yeşil, değilse orijinal rengi.
+                                backgroundColor:
+                                    isFileSelected
+                                        ? Colors.green.shade700
+                                        : Colors.teal,
+                                foregroundColor: Colors.white,
+                                isFullWidth: true,
+                                borderRadius: BorderRadius.circular(12),
+                                elevation: 2,
+                              ),
+                            ),
+                            // Sadece dosya seçildiğinde temizleme butonunu göster.
+                            if (isFileSelected)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8.0),
+                                child: IconButton(
+                                  icon: const Icon(
+                                    Icons.close_rounded,
+                                    color: Colors.redAccent,
+                                  ),
+                                  onPressed:
+                                      _clearSelection, // Yeni eklediğimiz fonksiyonu çağır
+                                  tooltip: 'Seçimi Temizle',
+                                ),
+                              ),
+                          ],
+                        ),
+
+                        // ▲▲▲ DEĞİŞİKLİK BURADA BİTİYOR ▲▲▲
+                        const SizedBox(height: 16),
                         CustomButton(
                           key: _startButton,
                           label: 'Şikayeti Başlat',
                           onPressed: _startFollowUp,
                           backgroundColor: theme.primaryColor,
                           foregroundColor: Colors.white,
-                          icon: const Icon(Icons.medical_services),
                           isFullWidth: true,
                           borderRadius: BorderRadius.circular(12),
                           elevation: 2,
@@ -400,5 +510,15 @@ class HomeScreenState extends State<HomeScreen> {
                 ),
               ),
     );
+  }
+
+  // Bu metodu sınıfınızın içine ekleyin
+  void _clearSelection() {
+    setState(() {
+      _selectedFile = null;
+      _selectedImage = null;
+      _selectedType = '';
+      _status = 'Lütfen bir PDF dosyası veya resim seçin';
+    });
   }
 }
