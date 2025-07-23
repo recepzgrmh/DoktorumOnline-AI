@@ -1,6 +1,7 @@
 // lib/screens/pdf_analysis_screen.dart
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:login_page/services/tutorial_service.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:login_page/widgets/custom_button.dart';
@@ -31,7 +32,6 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
   final List<TargetFocus> targets = [];
   final GlobalKey _pdfPicker = GlobalKey();
 
-  // ───────────────────────── Lifecycle ─────────────────────────
   @override
   void dispose() {
     tutorialCoachMark?.finish();
@@ -101,6 +101,70 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
         ),
       );
     }
+  }
+
+  // ═════════════ YENİ EKLENEN FONKSİYON ═════════════
+  /// Kullanıcıya PDF mi yoksa Resim mi seçeceğini soran bir alt menü gösterir.
+  void _showSourceSelectionDialog() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder:
+          (context) => Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 12),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Text(
+                    'Analiz Kaynağını Seçin',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.picture_as_pdf,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  title: const Text('PDF Dosyasından Seç'),
+                  onTap: () {
+                    Navigator.pop(context); // Menüyü kapat
+                    _pickFile(); // PDF seçme fonksiyonunu çalıştır
+                  },
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.image,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  title: const Text('Resimden Analiz Et'),
+                  onTap: () {
+                    Navigator.pop(context); // Menüyü kapat
+                    // "Yakında eklenecek" mesajını göster
+                    _pickImage(context); // Resim seçme fonksiyonunu çalıştır
+                  },
+                ),
+                SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
+              ],
+            ),
+          ),
+    );
   }
 
   // ═════════════ File & Analysis ═════════════
@@ -265,14 +329,14 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        Icons.picture_as_pdf,
+                        Icons.document_scanner_outlined,
                         size: 64,
                         color: theme.primaryColor,
                       ),
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'PDF Dosyası Seçin',
+                      'Dosya Analizi',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -281,15 +345,18 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Analiz etmek istediğiniz PDF dosyasını yükleyin',
+                      'Analiz etmek için bir dosya seçin', // Metni güncelledim
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.grey.shade600),
                     ),
                     const SizedBox(height: 20),
                     CustomButton(
                       key: _pdfPicker,
-                      label: 'PDF Seç',
-                      onPressed: _pickFile,
+                      label: 'Dosya Seç', // Buton metnini güncelledim
+                      // ─── DEĞİŞİKLİK BURADA ───
+                      // Artık doğrudan _pickFile fonksiyonunu çağırmıyoruz.
+                      // Onun yerine seçenek menüsünü gösteren yeni fonksiyonu çağırıyoruz.
+                      onPressed: _showSourceSelectionDialog,
                       backgroundColor: theme.primaryColor,
                       foregroundColor: Colors.white,
                       icon: const Icon(Icons.upload_file),
@@ -391,5 +458,27 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
         ),
       ),
     );
+  }
+}
+
+Future<XFile?> _pickImage(BuildContext context) async {
+  final imagePicker = ImagePicker();
+
+  try {
+    final pickedFile = await imagePicker.pickImage(source: ImageSource.gallery);
+
+    // Eğer kullanıcı bir resim seçtiyse, seçilen dosyayı döndür
+    if (pickedFile != null) {
+      return pickedFile;
+    }
+
+    return null;
+  } catch (e) {
+    // İzinler gibi olası bir hata durumunda kullanıcıyı bilgilendir
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Resim seçilirken bir hata oluştu: $e')),
+    );
+    print("resim seçilirken bir hata ile karşılaşıldı: $e ");
+    return null;
   }
 }
