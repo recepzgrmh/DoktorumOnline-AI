@@ -11,7 +11,6 @@ import 'package:login_page/widgets/complaint_form.dart';
 import 'package:login_page/widgets/custom_button.dart';
 import 'package:login_page/widgets/loading_widget.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
-// *** DÜZELTİLDİ: Merkezi widget import edildi ***
 import 'package:login_page/widgets/coachmark_desc.dart';
 
 class ComplaintScreen extends StatefulWidget {

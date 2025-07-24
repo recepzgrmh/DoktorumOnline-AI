@@ -79,20 +79,18 @@ class HomeScreenState extends State<HomeScreen> {
   bool _hasProfileData = false;
   final _uid = FirebaseAuth.instance.currentUser!.uid;
 
-  // Firestore dinleyicisi için eklendi
   StreamSubscription<DocumentSnapshot>? _profileSubscription;
 
   // ───────────────────────── Lifecycle ─────────────────────────
   @override
   void initState() {
     super.initState();
-    // Eski yöntem yerine stream dinleyicisi başlatılıyor
+
     _listenToProfileUpdates();
   }
 
   @override
   void dispose() {
-    // Kaynak sızıntısını önlemek için stream dinleyicisi iptal ediliyor
     _profileSubscription?.cancel();
     boyController.dispose();
     yasController.dispose();
@@ -110,19 +108,15 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   void onBecameVisible() {
-    // Sadece profil verisi varsa ve ilgili form ekrandaysa işlem yap
     if (_hasProfileData) {
-      // Form alanlarını temizle
       complaintSikayetController.clear();
       complaintSureController.clear();
       complaintIlacController.clear();
 
-      // Form verisini sıfırla ve durumu güncelle
       setState(() {
         _formData = null;
       });
 
-      // State güncellendikten ve widget çizildikten SONRA odaklanma isteği gönder.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _complaintFocusNode.requestFocus();
@@ -130,8 +124,6 @@ class HomeScreenState extends State<HomeScreen> {
       });
     }
   }
-  // Yeni metod: Widget güncellendiğinde çağrılır
-  // lib/screens/home_screen.dart -> HomeScreenState sınıfının içinde
 
   @override
   void didUpdateWidget(HomeScreen oldWidget) {
@@ -216,7 +208,6 @@ class HomeScreenState extends State<HomeScreen> {
 
   // ═════════════ Data Handling ═════════════
 
-  /// YENİ METOD: Firestore'daki profil verisi değişikliklerini anlık olarak dinler.
   void _listenToProfileUpdates() {
     final userDoc = FirebaseFirestore.instance.collection('users').doc(_uid);
 
@@ -289,7 +280,6 @@ class HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ESKİ _loadUserProfile metodu silindi.
   Future<void> _startFollowUp() async {
     // 1. Formun geçerliliğini ve formData'nın dolu olduğunu kontrol et.
     if (!_formKey2.currentState!.validate() || _formData == null) {
@@ -344,7 +334,7 @@ class HomeScreenState extends State<HomeScreen> {
         complaintId: complaintId,
       );
 
-      // 5. ANAHTAR NOKTA: Takip sorularını alırken, dosya analizini de gönder!
+      // 5. Dosya Analizi Soru Cevap Akışıyla birlikte
       final activeUserName = await _profileService.getActiveUserName();
       final parts = await _service.getFollowUpQuestions(
         _formData!.toProfileMap(),
@@ -379,7 +369,6 @@ class HomeScreenState extends State<HomeScreen> {
         );
       }
     } catch (e) {
-      // Beklenmedik bir hata olursa yakala ve kullanıcıya bildir.
       debugPrint('Takip başlatma hatası: $e');
       if (mounted) {
         ScaffoldMessenger.of(
@@ -387,11 +376,10 @@ class HomeScreenState extends State<HomeScreen> {
         ).showSnackBar(SnackBar(content: Text('Bir hata oluştu: $e')));
       }
     } finally {
-      // 7. İşlem başarılı da olsa, hata da olsa en sonda bu blok çalışır.
       if (mounted) {
         setState(() {
-          _loading = false; // Yükleme animasyonunu durdur.
-          _clearSelection(); // Dosya seçimini ve durum mesajını temizle.
+          _loading = false;
+          _clearSelection();
         });
       }
     }
@@ -404,8 +392,8 @@ class HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.transparent,
       builder:
           (context) => SelectionBottomSheet(
-            onSelectPdf: _pickFile, // PDF seçme fonksiyonunu ata
-            onSelectImage: _pickImage, // Resim seçme fonksiyonunu ata
+            onSelectPdf: _pickFile,
+            onSelectImage: _pickImage,
           ),
     );
   }
@@ -422,7 +410,7 @@ class HomeScreenState extends State<HomeScreen> {
 
     setState(() {
       _selectedFile = result.files.first;
-      _selectedImage = null; // Diğer seçimi temizle
+      _selectedImage = null;
       _selectedType = 'pdf';
       _status = 'Seçilen dosya: ${_selectedFile!.name}';
     });
@@ -439,7 +427,7 @@ class HomeScreenState extends State<HomeScreen> {
       if (pickedFile != null) {
         setState(() {
           _selectedImage = pickedFile;
-          _selectedFile = null; // Diğer seçimi temizle
+          _selectedFile = null;
           _selectedType = 'image';
           _status = 'Seçilen resim: ${pickedFile.name}';
         });
@@ -515,17 +503,13 @@ class HomeScreenState extends State<HomeScreen> {
                             ),
                         const SizedBox(height: 16),
 
-                        // ▼▼▼ DEĞİŞİKLİK BURADA BAŞLIYOR ▼▼▼
                         Row(
                           children: [
                             Expanded(
                               child: CustomButton(
-                                // Metni duruma göre değiştiriyoruz.
-                                // Dosya seçiliyse dosya adını, değilse varsayılan metni göster.
                                 label: isFileSelected ? _status : 'Dosya yükle',
                                 onPressed: _showSourceSelectionDialog,
-                                // Rengi duruma göre değiştiriyoruz.
-                                // Dosya seçiliyse yeşil, değilse orijinal rengi.
+
                                 backgroundColor:
                                     isFileSelected
                                         ? Colors.green.shade700
@@ -536,7 +520,7 @@ class HomeScreenState extends State<HomeScreen> {
                                 elevation: 2,
                               ),
                             ),
-                            // Sadece dosya seçildiğinde temizleme butonunu göster.
+
                             if (isFileSelected)
                               Padding(
                                 padding: const EdgeInsets.only(left: 8.0),
@@ -545,15 +529,13 @@ class HomeScreenState extends State<HomeScreen> {
                                     Icons.close_rounded,
                                     color: Colors.redAccent,
                                   ),
-                                  onPressed:
-                                      _clearSelection, // Yeni eklediğimiz fonksiyonu çağır
+                                  onPressed: _clearSelection,
                                   tooltip: 'Seçimi Temizle',
                                 ),
                               ),
                           ],
                         ),
 
-                        // ▲▲▲ DEĞİŞİKLİK BURADA BİTİYOR ▲▲▲
                         const SizedBox(height: 16),
                         CustomButton(
                           key: _startButton,
@@ -574,7 +556,6 @@ class HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Bu metodu sınıfınızın içine ekleyin
   void _clearSelection() {
     setState(() {
       _selectedFile = null;

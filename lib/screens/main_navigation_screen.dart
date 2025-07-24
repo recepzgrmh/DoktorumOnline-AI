@@ -15,6 +15,7 @@ import 'package:upgrader/upgrader.dart';
 
 /// Upgrader widget'ı için özel Türkçe mesajları içeren sınıf.
 /// Bu sınıf dosyanın üst seviyesinde (herhangi bir sınıfın dışında) olmalıdır.
+///
 /// Bu upgrader paketi hala çalışmıyor sebebini tam olarak anlayamadım
 class TurkishUpgraderMessages extends UpgraderMessages {
   @override
@@ -138,14 +139,9 @@ class _MainScreenState extends State<MainScreen> {
 
     setState(() {
       _selectedIndex = index;
-      // setChanges = _selectedIndex == 0 ? true : false; // <-- BU SATIRI SİLİN.
     });
 
-    // YENİ: Eğer seçilen sayfa HomeScreen (index 0) ise,
-    // GlobalKey üzerinden public metodunu çağırarak odaklanmayı tetikle.
     if (index == 0) {
-      // setState'in tamamlanıp widget'ın görünür hale gelmesi için çok kısa bir gecikme ekliyoruz.
-      // Bu, `currentState`'in null olmamasını garantiler.
       Future.delayed(const Duration(milliseconds: 50), () {
         _homeScreenKey.currentState?.onBecameVisible();
       });
@@ -158,7 +154,6 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  /// Belirtilen index'teki sayfanın eğitimini, eğer daha önce görülmediyse gösterir.
   Future<void> _showTutorialForPage(int index) async {
     if (!mounted) return;
 
@@ -189,7 +184,6 @@ class _MainScreenState extends State<MainScreen> {
     try {
       final hasSeen = await TutorialService.hasSeenTutorial(tutorialKey);
       if (!hasSeen && showFunction != null && mounted) {
-        // Sayfa tamamen yüklendikten sonra tutorial'ı göster
         Future.delayed(const Duration(milliseconds: 300), () {
           if (mounted && _selectedIndex == index) {
             showFunction!();
