@@ -25,6 +25,7 @@ class OpenAIService {
     Map<String, String> profileData,
     Map<String, String> complaintData,
     String userName,
+    Map<String, String>? fileAnalysis,
   ) async {
     // —— 1) Prompt'u oluştur ————————————————————————————
     final prompt =
@@ -43,19 +44,29 @@ class OpenAIService {
           ..writeln("- Şikayet: ${complaintData['Şikayet']}")
           ..writeln("- Şikayet Süresi: ${complaintData['Şikayet Süresi']}")
           ..writeln("- Mevcut İlaçlar: ${complaintData['Mevcut İlaçlar']}")
-          ..writeln()
-          ..writeln(
-            "Lütfen kullanıcının sağladığı tüm hasta bilgilerini dikkatle incele ve aşağıdaki adımları takip et:",
-          )
-          ..writeln()
-          ..writeln(
-            "Sunulan verilerde eksik veya belirsiz kalan noktaları belirt ve netleştirmek için kullanıcıya spesifik sorular sor. Bu soruları madde madde sor. Her bir soru birbirinden farklı olmalı.",
-          )
-          ..writeln()
-          ..writeln(
-            // Burada hâlâ talimat veriyoruz; selamlama ve ilk soruyu kod tarafında birleştireceğiz
-            "Her aşamada net, anlaşılır ve empatik bir dil kullan.",
-          );
+          ..writeln();
+    if (fileAnalysis != null && fileAnalysis.isNotEmpty) {
+      prompt.writeln(
+        "Ayrıca kullanıcı tarafından yüklenen dosyanın analizi de aşağıdadır:",
+      );
+      fileAnalysis.forEach((key, value) {
+        prompt.writeln("- $key: $value");
+      });
+      prompt.writeln();
+    }
+    prompt
+      ..writeln(
+        "Lütfen kullanıcının sağladığı tüm hasta bilgilerini dikkatle incele ve aşağıdaki adımları takip et:",
+      )
+      ..writeln()
+      ..writeln(
+        "Sunulan verilerde eksik veya belirsiz kalan noktaları belirt ve netleştirmek için kullanıcıya spesifik sorular sor. Bu soruları madde madde sor. Her bir soru birbirinden farklı olmalı.",
+      )
+      ..writeln()
+      ..writeln(
+        // Burada hâlâ talimat veriyoruz; selamlama ve ilk soruyu kod tarafında birleştireceğiz
+        "Her aşamada net, anlaşılır ve empatik bir dil kullan.",
+      );
 
     // —— 2) ChatGPT'den yanıtı al ————————————————————————————
     final raw = await _postToChatGPT(prompt.toString());
@@ -79,7 +90,9 @@ class OpenAIService {
       final evaluation = await getFinalEvaluation(
         profileData,
         complaintData,
+
         [], // Boş cevap listesi
+        fileAnalysis,
       );
 
       return [greeting + evaluation];
@@ -103,6 +116,7 @@ class OpenAIService {
     Map<String, String> profileData,
     Map<String, String> complaintData,
     List<String> answers,
+    Map<String, String>? fileAnalysis,
   ) async {
     final prompt =
         StringBuffer()
@@ -126,15 +140,25 @@ class OpenAIService {
             answers.asMap().entries.map((e) => "${e.key + 1}. ${e.value}"),
             "\n",
           )
-          ..writeln()
-          ..writeln(
-            "Yukarıdaki tüm bilgileri dikkate alarak kapsamlı bir tıbbi değerlendirme yap ve önerilerde bulun. "
-            "Hastanın şikayetini hafifletecek öneriler ver; gerekirse doktora yönlendir.",
-          )
-          ..writeln(
-            "Yanıtına mutlaka şu cümleyle BAŞLA ve kullanıcı bilgilerini yeniden listeleme: "
-            "\"Verdiğiniz bilgilere dayanarak çıkarımlarım şöyle:\"",
-          );
+          ..writeln();
+    if (fileAnalysis != null && fileAnalysis.isNotEmpty) {
+      prompt.writeln(
+        "Ayrıca kullanıcı tarafından yüklenen dosyanın analizi de aşağıdadır:",
+      );
+      fileAnalysis.forEach((key, value) {
+        prompt.writeln("- $key: $value");
+      });
+      prompt.writeln();
+    }
+    prompt
+      ..writeln(
+        "Yukarıdaki tüm bilgileri (profil, şikayet, soru-cevaplar VE VARSA DOSYA ANALİZİ) birlikte HARMANLAYARAK kapsamlı bir tıbbi değerlendirme yap ve önerilerde bulun. "
+        "Hastanın şikayetini hafifletecek öneriler ver; gerekirse doktora yönlendir.",
+      )
+      ..writeln(
+        "Yanıtına mutlaka şu cümleyle BAŞLA ve kullanıcı bilgilerini yeniden listeleme: "
+        "\"Verdiğiniz bilgilere dayanarak çıkarımlarım şöyle:\"",
+      );
 
     final result = await _postToChatGPT(prompt.toString());
     return result.trim();

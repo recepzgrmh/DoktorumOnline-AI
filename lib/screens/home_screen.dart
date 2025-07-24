@@ -290,13 +290,47 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   // ESKİ _loadUserProfile metodu silindi.
-
   Future<void> _startFollowUp() async {
-    if (!_formKey2.currentState!.validate() || _formData == null) return;
+    // 1. Formun geçerliliğini ve formData'nın dolu olduğunu kontrol et.
+    if (!_formKey2.currentState!.validate() || _formData == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Lütfen tüm zorunlu alanları doldurun.')),
+      );
+      return;
+    }
 
+    // 2. Yükleme animasyonunu başlat.
     setState(() => _loading = true);
 
+    // Analiz sonuçlarını tutacak değişkeni oluştur.
+    Map<String, String>? fileAnalysis;
+
+    // Hata yönetimi için her şeyi try-catch-finally içine al.
     try {
+      // 3. Seçili bir dosya varsa, türüne göre analiz et (PDF veya Resim).
+      if (_selectedFile != null && _selectedFile!.path != null) {
+        setState(
+          () => _status = 'PDF dosyası analiz ediliyor...',
+        ); // Arayüzde durum bildir
+        fileAnalysis = await _service.analyzePdf(_selectedFile!.path!);
+      } else if (_selectedImage != null) {
+        setState(
+          () => _status = 'Resim dosyası analiz ediliyor...',
+        ); // Arayüzde durum bildir
+        fileAnalysis = await _service.analyzeImage(_selectedImage!.path);
+      }
+
+      // Analizden bir hata dönerse, kullanıcıyı bilgilendir ve işlemi durdur.
+      if (fileAnalysis != null && fileAnalysis.containsKey('Hata')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Dosya analizi hatası: ${fileAnalysis['Hata']}'),
+          ),
+        );
+        return; // return, finally bloğunu tetikler ve işlemi sonlandırır.
+      }
+
+      // 4. Firestore'a şikayet kaydını yap (Bu kısım eskisiyle aynı).
       final complaintDoc =
           FirebaseFirestore.instance
               .collection('users')
@@ -310,13 +344,16 @@ class HomeScreenState extends State<HomeScreen> {
         complaintId: complaintId,
       );
 
+      // 5. ANAHTAR NOKTA: Takip sorularını alırken, dosya analizini de gönder!
       final activeUserName = await _profileService.getActiveUserName();
       final parts = await _service.getFollowUpQuestions(
         _formData!.toProfileMap(),
         _formData!.toComplaintMap(),
         activeUserName,
+        fileAnalysis,
       );
 
+      // 6. İlk mesajı kaydet ve sonraki ekrana geç.
       if (parts.isNotEmpty) {
         await _formService.saveMessage(
           complaintId: complaintId,
@@ -335,19 +372,28 @@ class HomeScreenState extends State<HomeScreen> {
                   complaintId: complaintId,
                   inputs: _formData!.toMap(),
                   questions: parts,
+                  fileAnalysis:
+                      fileAnalysis, // Analiz sonucunu bir sonraki ekrana da yolla
                 ),
           ),
         );
       }
     } catch (e) {
-      debugPrint('Başlatma hatası: $e');
+      // Beklenmedik bir hata olursa yakala ve kullanıcıya bildir.
+      debugPrint('Takip başlatma hatası: $e');
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Başlatma hatası: $e')));
+        ).showSnackBar(SnackBar(content: Text('Bir hata oluştu: $e')));
       }
     } finally {
-      if (mounted) setState(() => _loading = false);
+      // 7. İşlem başarılı da olsa, hata da olsa en sonda bu blok çalışır.
+      if (mounted) {
+        setState(() {
+          _loading = false; // Yükleme animasyonunu durdur.
+          _clearSelection(); // Dosya seçimini ve durum mesajını temizle.
+        });
+      }
     }
   }
 

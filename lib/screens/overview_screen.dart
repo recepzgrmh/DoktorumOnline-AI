@@ -18,6 +18,7 @@ class OverviewScreen extends StatefulWidget {
   final String complaintId;
   final Map<String, String> inputs;
   final List<String> questions;
+  final Map<String, String>? fileAnalysis;
 
   const OverviewScreen({
     super.key,
@@ -25,6 +26,7 @@ class OverviewScreen extends StatefulWidget {
     required this.complaintId,
     required this.inputs,
     required this.questions,
+    this.fileAnalysis,
   });
 
   @override
@@ -424,6 +426,8 @@ class _OverviewScreenState extends State<OverviewScreen>
             profileData,
             complaintInfo,
             _answers,
+
+            widget.fileAnalysis,
           );
           await _messagesRef.add({
             'text': report,
