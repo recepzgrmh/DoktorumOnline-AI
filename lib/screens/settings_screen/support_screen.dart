@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:login_page/widgets/custom_button.dart';
 import 'package:login_page/widgets/custom_text_widget.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -134,33 +135,13 @@ class _SupportScreenState extends State<SupportScreen> {
                   const SizedBox(height: 32),
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton.icon(
-                      icon:
-                          _sending
-                              ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                              : const Icon(Icons.send),
-                      label: Text(_sending ? 'Gönderiliyor...' : 'Gönder'),
-                      onPressed: _sending ? null : _sendFeedback,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        textStyle: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 2,
-                      ),
+                    child: CustomButton(
+                      label: _sending ? 'Gönderiliyor...' : 'Gönder',
+                      onPressed: () {
+                        _sending ? null : _sendFeedback();
+                      },
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
                     ),
                   ),
                 ],

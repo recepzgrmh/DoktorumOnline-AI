@@ -1,21 +1,55 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/services/auth_service.dart';
+import 'package:login_page/widgets/custom_button.dart';
 
-class ProfileInfoScreen extends StatelessWidget {
+class ProfileInfoScreen extends StatefulWidget {
   const ProfileInfoScreen({super.key});
 
   @override
+  State<ProfileInfoScreen> createState() => _ProfileInfoScreenState();
+}
+
+class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
+  User? _user;
+  bool _hasPasswordAuth = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _user = FirebaseAuth.instance.currentUser;
+    if (_user != null) {
+      _hasPasswordAuth = _user!.providerData.any(
+        (provider) => provider.providerId == 'password',
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_user == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.blue.shade50),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.blue,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       backgroundColor: Colors.blue.shade50,
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
+              const SizedBox(height: 100),
               CircleAvatar(
                 radius: 48,
                 backgroundColor: Colors.blue.shade100,
@@ -23,13 +57,16 @@ class ProfileInfoScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                FirebaseAuth.instance.currentUser!.displayName!,
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                _user!.displayName ?? 'İsim Belirtilmemiş',
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
-                FirebaseAuth.instance.currentUser!.email!,
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                _user!.email ?? 'E-posta Yok',
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
               ),
               const SizedBox(height: 24),
               Container(
@@ -50,33 +87,48 @@ class ProfileInfoScreen extends StatelessWidget {
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    ProfileInfoRow(
+
+                  children: [
+                    const ProfileInfoRow(
                       label: 'Telefon',
                       value: '+90 555 555 55 55',
                     ),
-                    Divider(),
-                    ProfileInfoRow(label: 'Doğum Tarihi', value: '01.01.1990'),
-                    Divider(),
-                    ProfileInfoRow(label: 'Cinsiyet', value: 'Belirtilmedi'),
+                    const Divider(),
+                    ProfileInfoRow(
+                      label: 'Kayıt Olma Tarihi',
+                      value:
+                          '${_user!.metadata.creationTime?.day}.${_user!.metadata.creationTime?.month}.${_user!.metadata.creationTime?.year}',
+                    ),
+                    const Divider(),
+                    const ProfileInfoRow(
+                      label: 'Cinsiyet',
+                      value: 'Belirtilmedi',
+                    ),
+                    const Divider(),
+
+                    if (_hasPasswordAuth)
+                      const ProfileInfoRow(
+                        label: 'Şifre',
+                        value: 'Şifreni Değiştir',
+                        isButton: true,
+                      )
+                    else
+                      const ProfileInfoRow(
+                        label: 'Şifre',
+                        value: 'Şifre Belirle',
+                        isButton: true,
+                      ),
                   ],
                 ),
               ),
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton.icon(
+                child: CustomButton(
+                  label: 'Bilgileri Düzenle',
                   onPressed: () {},
-                  icon: const Icon(Icons.edit),
-                  label: const Text('Bilgileri Düzenle'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
                 ),
               ),
             ],
@@ -90,7 +142,14 @@ class ProfileInfoScreen extends StatelessWidget {
 class ProfileInfoRow extends StatelessWidget {
   final String label;
   final String value;
-  const ProfileInfoRow({required this.label, required this.value, super.key});
+  final bool isButton;
+
+  const ProfileInfoRow({
+    required this.label,
+    required this.value,
+    super.key,
+    this.isButton = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -103,10 +162,30 @@ class ProfileInfoRow extends StatelessWidget {
             label,
             style: const TextStyle(fontSize: 16, color: Colors.black54),
           ),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
+
+          if (isButton)
+            TextButton(
+              onPressed: () {
+                print('$value tıklandı!');
+              },
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blue,
+                ),
+              ),
+            )
+          else
+            Text(
+              value,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
         ],
       ),
     );

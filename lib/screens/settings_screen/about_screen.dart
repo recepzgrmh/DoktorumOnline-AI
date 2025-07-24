@@ -31,7 +31,15 @@ class _AboutScreenState extends State<AboutScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue.shade50,
-        title: Text('Uygulama Hakkında'),
+        title: Text('Uygulama Hakkında', style: TextStyle(color: Colors.blue)),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.blue,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: Container(
         decoration: BoxDecoration(

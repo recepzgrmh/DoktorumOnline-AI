@@ -5,11 +5,11 @@ import 'package:login_page/screens/settings_screen/about_screen.dart';
 import 'package:login_page/screens/settings_screen/profile_info_screen.dart';
 import 'package:login_page/screens/settings_screen/support_screen.dart';
 import 'package:login_page/screens/settings_screen/notifications_screen.dart';
-import 'package:login_page/screens/settings_screen/security_screen.dart';
+
 import 'package:login_page/screens/settings_screen/language_screen.dart';
-import 'package:login_page/services/auth_service.dart';
+import 'package:login_page/widgets/custom_button.dart';
+
 import 'package:login_page/widgets/custom_page_route.dart';
-import '../../theme/app_theme.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -42,75 +42,77 @@ class _SettingsScreenState extends State<SettingsScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(children: [_buildMenuItems(context)]),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMenuItems(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(20),
-      child: Column(
+      body: Column(
         children: [
-          _buildMenuItem(
-            icon: Icons.person_outline,
-            title: 'Profil Bilgileri',
-            subtitle: 'Kişisel bilgilerinizi görüntüleyin',
-            onTap: () {
-              Navigator.push(
-                context,
-                CustomPageRoute(child: ProfileInfoScreen()),
-              );
-            },
+          Container(
+            margin: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                _buildMenuItem(
+                  icon: Icons.person_outline,
+                  title: 'Profil Bilgileri',
+                  subtitle: 'Kişisel bilgilerinizi görüntüleyin',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      CustomPageRoute(child: ProfileInfoScreen()),
+                    );
+                  },
+                ),
+                _buildMenuItem(
+                  icon: Icons.notifications_outlined,
+                  title: 'Bildirimler',
+                  subtitle: 'Bildirim ayarlarınızı yönetin',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      CustomPageRoute(child: NotificationsScreen()),
+                    );
+                  },
+                ),
+
+                _buildMenuItem(
+                  icon: Icons.language_outlined,
+                  title: 'Dil ve Bölge',
+                  subtitle: 'Dil ve saat dilimi ayarları',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      CustomPageRoute(child: LanguageScreen()),
+                    );
+                  },
+                ),
+                _buildMenuItem(
+                  icon: Icons.help_outline,
+                  title: 'Yardım ve Destek',
+                  subtitle: 'SSS ve iletişim bilgileri',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      CustomPageRoute(child: SupportScreen()),
+                    );
+                  },
+                ),
+                _buildMenuItem(
+                  icon: Icons.info_outline,
+                  title: 'Hakkında',
+                  subtitle: 'Uygulama versiyonu ve lisans',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      CustomPageRoute(child: AboutScreen()),
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
-          _buildMenuItem(
-            icon: Icons.notifications_outlined,
-            title: 'Bildirimler',
-            subtitle: 'Bildirim ayarlarınızı yönetin',
-            onTap: () {
-              Navigator.push(
-                context,
-                CustomPageRoute(child: NotificationsScreen()),
-              );
-            },
+          Spacer(),
+          Padding(
+            padding: EdgeInsets.all(20),
+            child: _buildLogoutButton(context),
           ),
-          _buildMenuItem(
-            icon: Icons.security_outlined,
-            title: 'Güvenlik',
-            subtitle: 'Hesap güvenlik ayarları',
-            onTap: () {
-              Navigator.push(context, CustomPageRoute(child: SecurityScreen()));
-            },
-          ),
-          _buildMenuItem(
-            icon: Icons.language_outlined,
-            title: 'Dil ve Bölge',
-            subtitle: 'Dil ve saat dilimi ayarları',
-            onTap: () {
-              Navigator.push(context, CustomPageRoute(child: LanguageScreen()));
-            },
-          ),
-          _buildMenuItem(
-            icon: Icons.help_outline,
-            title: 'Yardım ve Destek',
-            subtitle: 'SSS ve iletişim bilgileri',
-            onTap: () {
-              Navigator.push(context, CustomPageRoute(child: SupportScreen()));
-            },
-          ),
-          _buildMenuItem(
-            icon: Icons.info_outline,
-            title: 'Hakkında',
-            subtitle: 'Uygulama versiyonu ve lisans',
-            onTap: () {
-              Navigator.push(context, CustomPageRoute(child: AboutScreen()));
-            },
-          ),
-          const SizedBox(height: 20),
-          _buildLogoutButton(context),
+          SizedBox(height: 50),
         ],
       ),
     );
@@ -178,32 +180,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () {
-            _showLogoutDialog(context);
-          },
-          child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.logout, color: Colors.white, size: 30),
-                SizedBox(width: 8),
-                Text(
-                  'Çıkış Yap',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+      child: CustomButton(
+        icon: Icon(Icons.logout, color: Colors.white),
+        label: 'Çıkış Yap',
+        onPressed: () => _showLogoutDialog(context),
+        backgroundColor: Colors.red,
+        foregroundColor: Colors.white,
       ),
     );
   }
