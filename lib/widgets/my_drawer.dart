@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:login_page/screens/opening.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:login_page/screens/settings_screen/settings_screen.dart';
 import 'package:login_page/services/auth_service.dart';
@@ -30,7 +29,7 @@ class MyDrawerState extends State<MyDrawer> {
   final GlobalKey _chatButton = GlobalKey();
   final GlobalKey _uploadButton = GlobalKey();
   final GlobalKey _profilesButton = GlobalKey();
-  final GlobalKey _logoutButton = GlobalKey();
+  final GlobalKey _settingsButton = GlobalKey();
 
   @override
   void initState() {
@@ -110,9 +109,8 @@ class MyDrawerState extends State<MyDrawer> {
       ),
       _buildTarget(
         identify: "Logout Button",
-        keyTarget: _logoutButton,
-        body:
-            'Hesabından çıkış yaparak kişisel verilerini koru. Tekrar giriş yapmak sadece birkaç saniye sürer.',
+        keyTarget: _settingsButton,
+        body: 'Hesap ayarları falan.',
         isLast: true,
       ),
     ];
@@ -145,26 +143,6 @@ class MyDrawerState extends State<MyDrawer> {
     );
   }
 
-  Future<void> signOut() async {
-    try {
-      await FirebaseAuth.instance.signOut();
-      if (mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const Opening()),
-          (route) => false,
-        );
-      }
-    } catch (e) {
-      debugPrint('Çıkış hatası: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Çıkış yaparken bir hata oluştu: $e')),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -172,12 +150,10 @@ class MyDrawerState extends State<MyDrawer> {
         // Arka plan rengini tüm drawer'a uygulamak için
         color: Colors.blue.shade50,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // --- HEADER TEKRAR UserAccountsDrawerHeader OLARAK GÜNCELLENDİ ---
                 UserAccountsDrawerHeader(
                   accountName: Text(
                     currentUser?.displayName ?? 'User',
@@ -193,10 +169,7 @@ class MyDrawerState extends State<MyDrawer> {
                   currentAccountPicture: CircleAvatar(
                     backgroundColor: Colors.white,
                     child: ClipOval(
-                      child: AuthService().getProfileAvatar(
-                        // Bu metodun bir Image widget'ı döndürdüğü varsayılıyor.
-                        radius: 40,
-                      ),
+                      child: AuthService().getProfileAvatar(radius: 40),
                     ),
                   ),
                   decoration: BoxDecoration(
@@ -252,6 +225,7 @@ class MyDrawerState extends State<MyDrawer> {
               ],
             ),
             Padding(
+              key: _settingsButton,
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
               child: ListTile(
                 leading: Icon(
@@ -273,40 +247,6 @@ class MyDrawerState extends State<MyDrawer> {
                     fontSize: 16,
                   ),
                 ),
-              ),
-            ),
-            // Çıkış butonu
-            Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).padding.bottom + 10,
-                left: 15,
-                right: 15,
-              ),
-              child: ListTile(
-                key: _logoutButton,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                leading: Icon(
-                  Icons.logout_rounded,
-                  color: Colors.red.shade700,
-                  size: 26,
-                ),
-                title: Text(
-                  'ÇIKIŞ YAP',
-                  style: TextStyle(
-                    letterSpacing: 2,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red.shade700,
-                    fontSize: 14,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.of(context).pop(); // Drawer'ı kapat
-                  signOut(); // Firebase çıkış işlemi
-                },
-                hoverColor: Colors.red.shade50,
-                splashColor: Colors.red.shade100,
               ),
             ),
           ],

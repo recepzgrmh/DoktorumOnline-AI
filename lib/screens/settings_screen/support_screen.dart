@@ -80,7 +80,7 @@ class _SupportScreenState extends State<SupportScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.blue.shade50,
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
@@ -109,11 +109,23 @@ class _SupportScreenState extends State<SupportScreen> {
                   CustomTextWidget(
                     title: 'Konu',
                     icon: Icons.subject,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Lütfen bir konu belirtin.';
+                      }
+                      return null;
+                    },
                     controller: _subjectController,
                   ),
 
                   CustomTextWidget(
                     title: 'Mesajınız',
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Lütfen mesajınızı yazın.';
+                      }
+                      return null;
+                    },
                     maxLines: 4,
                     icon: Icons.message,
                     controller: _messageController,

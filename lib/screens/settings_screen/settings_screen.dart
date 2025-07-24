@@ -4,6 +4,9 @@ import 'package:login_page/screens/opening.dart';
 import 'package:login_page/screens/settings_screen/about_screen.dart';
 import 'package:login_page/screens/settings_screen/profile_info_screen.dart';
 import 'package:login_page/screens/settings_screen/support_screen.dart';
+import 'package:login_page/screens/settings_screen/notifications_screen.dart';
+import 'package:login_page/screens/settings_screen/security_screen.dart';
+import 'package:login_page/screens/settings_screen/language_screen.dart';
 import 'package:login_page/services/auth_service.dart';
 import 'package:login_page/widgets/custom_page_route.dart';
 import '../../theme/app_theme.dart';
@@ -19,7 +22,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: Colors.blue.shade50,
       appBar: AppBar(
         title: const Text(
           'Ayarlar',
@@ -59,7 +62,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ProfileInfoScreen()),
+                CustomPageRoute(child: ProfileInfoScreen()),
               );
             },
           ),
@@ -68,7 +71,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: 'Bildirimler',
             subtitle: 'Bildirim ayarlarınızı yönetin',
             onTap: () {
-              // Navigate to notifications
+              Navigator.push(
+                context,
+                CustomPageRoute(child: NotificationsScreen()),
+              );
             },
           ),
           _buildMenuItem(
@@ -76,7 +82,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: 'Güvenlik',
             subtitle: 'Hesap güvenlik ayarları',
             onTap: () {
-              // Navigate to security
+              Navigator.push(context, CustomPageRoute(child: SecurityScreen()));
             },
           ),
           _buildMenuItem(
@@ -84,7 +90,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: 'Dil ve Bölge',
             subtitle: 'Dil ve saat dilimi ayarları',
             onTap: () {
-              // Navigate to language settings
+              Navigator.push(context, CustomPageRoute(child: LanguageScreen()));
             },
           ),
           _buildMenuItem(
