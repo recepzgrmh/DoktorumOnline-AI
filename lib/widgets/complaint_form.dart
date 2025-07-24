@@ -165,8 +165,8 @@ class _ComplaintFormState extends State<ComplaintForm> {
         ),
 
         CustomTextWidget(
-          autofocus: true,
           title: 'Şikayetiniz',
+
           icon: Icons.medical_services,
           focusNode: widget.complaintFocusNode,
           controller: widget.sikayetController,

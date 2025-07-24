@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 
-class CustomTextWidget extends StatelessWidget {
+class CustomTextWidget extends StatefulWidget {
   final String title;
   final IconData icon;
   final TextInputType keyboardType;
@@ -13,7 +13,7 @@ class CustomTextWidget extends StatelessWidget {
   final TextStyle? errorStyle;
   final OutlineInputBorder? errorBorder;
   final OutlineInputBorder? focusedErrorBorder;
-  final bool autofocus;
+
   final FocusNode? focusNode;
 
   const CustomTextWidget({
@@ -28,9 +28,16 @@ class CustomTextWidget extends StatelessWidget {
     this.errorStyle,
     this.errorBorder,
     this.focusedErrorBorder,
-    this.autofocus = false,
+
     this.focusNode,
   });
+
+  @override
+  State<CustomTextWidget> createState() => _CustomTextWidgetState();
+}
+
+class _CustomTextWidgetState extends State<CustomTextWidget> {
+  bool readOnly = true;
 
   @override
   Widget build(BuildContext context) {
@@ -40,17 +47,23 @@ class CustomTextWidget extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
       child: TextFormField(
-        focusNode: focusNode,
-        autofocus: autofocus,
-        keyboardType: keyboardType,
-        maxLines: maxLines,
-        controller: controller,
-        validator: validator,
-        onChanged: onChanged,
+        readOnly: readOnly,
+        focusNode: widget.focusNode,
+        onTap: () {
+          setState(() {
+            readOnly = false;
+            print("readOnly değeri değiştirildi: $readOnly");
+          });
+        },
+        keyboardType: widget.keyboardType,
+        maxLines: widget.maxLines,
+        controller: widget.controller,
+        validator: widget.validator,
+        onChanged: widget.onChanged,
         style: const TextStyle(fontSize: 16, color: Colors.black87),
         decoration: InputDecoration(
-          labelText: title,
-          prefixIcon: Icon(icon, color: Colors.teal, size: 22),
+          labelText: widget.title,
+          prefixIcon: Icon(widget.icon, color: Colors.teal, size: 22),
           labelStyle: const TextStyle(
             color: Colors.teal,
             fontSize: 16,
@@ -78,14 +91,14 @@ class CustomTextWidget extends StatelessWidget {
             borderSide: const BorderSide(color: Colors.teal, width: 2),
           ),
           errorStyle:
-              errorStyle ??
+              widget.errorStyle ??
               const TextStyle(
                 color: Colors.redAccent,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
           errorBorder:
-              errorBorder ??
+              widget.errorBorder ??
               OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
                 borderSide: const BorderSide(
@@ -94,7 +107,7 @@ class CustomTextWidget extends StatelessWidget {
                 ),
               ),
           focusedErrorBorder:
-              focusedErrorBorder ??
+              widget.focusedErrorBorder ??
               OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
                 borderSide: const BorderSide(color: Colors.redAccent, width: 2),
