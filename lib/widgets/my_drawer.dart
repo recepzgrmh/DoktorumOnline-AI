@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:login_page/screens/opening.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:login_page/screens/settings_screen/settings_screen.dart';
 import 'package:login_page/services/auth_service.dart';
 import 'package:login_page/services/tutorial_service.dart';
+import 'package:login_page/widgets/custom_page_route.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'coachmark_desc.dart' as coachmark;
 
@@ -205,6 +207,7 @@ class MyDrawerState extends State<MyDrawer> {
                     ),
                   ),
                 ),
+
                 // ----------------------------------------------------------------
                 _buildDrawerItem(
                   key: _homeButton,
@@ -247,6 +250,30 @@ class MyDrawerState extends State<MyDrawer> {
                   },
                 ),
               ],
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+              child: ListTile(
+                leading: Icon(
+                  Icons.settings_outlined,
+                  color: Colors.blue,
+                  size: 26,
+                ),
+                onTap: () {
+                  Navigator.of(
+                    context,
+                  ).push(CustomPageRoute(child: SettingsScreen()));
+                },
+                title: Text(
+                  'Ayarlar',
+                  style: TextStyle(
+                    letterSpacing: 2,
+                    fontWeight: FontWeight.normal,
+                    color: Colors.blue.shade700,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
             ),
             // Çıkış butonu
             Padding(
