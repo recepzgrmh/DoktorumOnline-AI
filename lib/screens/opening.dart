@@ -60,9 +60,9 @@ class Opening extends StatelessWidget {
                 CustomButton(
                   label: "Giriş Yap",
                   onPressed: () {
-                    Navigator.of(
-                      context,
-                    ).push(CustomPageRoute(child: SignIn()));
+                    Navigator.of(context).push(
+                      CustomPageRoute(child: SignIn(), name: 'sign_in_screen'),
+                    );
                   },
                   backgroundColor: Theme.of(context).primaryColor,
                   foregroundColor: Colors.white,
@@ -80,9 +80,9 @@ class Opening extends StatelessWidget {
                 CustomButton(
                   label: "Kayıt Ol",
                   onPressed: () {
-                    Navigator.of(
-                      context,
-                    ).push(CustomPageRoute(child: SignUp()));
+                    Navigator.of(context).push(
+                      CustomPageRoute(child: SignUp(), name: 'sign_up_screen'),
+                    );
                   },
                   backgroundColor: Colors.white,
                   foregroundColor: Theme.of(context).primaryColor,

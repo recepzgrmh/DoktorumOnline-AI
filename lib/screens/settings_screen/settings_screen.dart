@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/screens/opening.dart';
 import 'package:login_page/screens/settings_screen/about_screen.dart';
+import 'package:login_page/screens/settings_screen/dialog_utils.dart';
 import 'package:login_page/screens/settings_screen/profile_info_screen.dart';
 import 'package:login_page/screens/settings_screen/support_screen.dart';
 import 'package:login_page/screens/settings_screen/notifications_screen.dart';
@@ -19,6 +20,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  final _utils = DialogUtils();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,7 +57,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      CustomPageRoute(child: ProfileInfoScreen()),
+                      CustomPageRoute(
+                        child: ProfileInfoScreen(),
+                        name: 'profile_info_screen',
+                      ),
                     );
                   },
                 ),
@@ -66,7 +71,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      CustomPageRoute(child: NotificationsScreen()),
+                      CustomPageRoute(
+                        child: NotificationsScreen(),
+                        name: 'notifications_screen',
+                      ),
                     );
                   },
                 ),
@@ -78,7 +86,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      CustomPageRoute(child: LanguageScreen()),
+                      CustomPageRoute(
+                        child: LanguageScreen(),
+                        name: 'language_screen',
+                      ),
                     );
                   },
                 ),
@@ -89,7 +100,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      CustomPageRoute(child: SupportScreen()),
+                      CustomPageRoute(
+                        child: SupportScreen(),
+                        name: 'support_screen',
+                      ),
                     );
                   },
                 ),
@@ -100,7 +114,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      CustomPageRoute(child: AboutScreen()),
+                      CustomPageRoute(
+                        child: AboutScreen(),
+                        name: 'about_Screen',
+                      ),
                     );
                   },
                 ),
@@ -183,47 +200,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: CustomButton(
         icon: Icon(Icons.logout, color: Colors.white),
         label: 'Çıkış Yap',
-        onPressed: () => _showLogoutDialog(context),
+        onPressed: () {
+          _utils.showConfirmationDialog(
+            context: context,
+            title: 'Çıkış Yap',
+            content: 'Hesabınızdan çıkış yapmak istediğinizden emin misiniz?',
+            icon: Icons.logout,
+            onConfirm: signOut,
+          );
+        },
         backgroundColor: Colors.red,
         foregroundColor: Colors.white,
       ),
-    );
-  }
-
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: const Text(
-            'Çıkış Yap',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
-          ),
-          content: const Text(
-            'Hesabınızdan çıkış yapmak istediğinizden emin misiniz?',
-            style: TextStyle(color: Colors.black),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('İptal', style: TextStyle(color: Colors.grey)),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                signOut();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Çıkış Yap'),
-            ),
-          ],
-        );
-      },
     );
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
+import 'package:login_page/services/firebase_analytics.dart';
 import 'package:login_page/theme/app_theme.dart';
 import 'firebase_options.dart';
 import 'package:login_page/wrapper.dart';
@@ -56,6 +57,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       debugShowCheckedModeBanner: false,
       home: const Wrapper(),
+      navigatorObservers: [AnalyticsService.instance.getAnalyticsObserver()],
     );
   }
 }

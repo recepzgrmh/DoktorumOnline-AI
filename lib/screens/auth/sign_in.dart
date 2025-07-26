@@ -263,7 +263,10 @@ class _SignInState extends State<SignIn> {
                   onPressed:
                       () => Navigator.push(
                         context,
-                        CustomPageRoute(child: ResetPassword()),
+                        CustomPageRoute(
+                          child: ResetPassword(),
+                          name: 'reset_password_screen',
+                        ),
                       ),
                   backgroundColor: Colors.white,
                   foregroundColor: theme.primaryColor,
@@ -286,7 +289,10 @@ class _SignInState extends State<SignIn> {
                   onPressed:
                       () => Navigator.push(
                         context,
-                        CustomPageRoute(child: SignUp()),
+                        CustomPageRoute(
+                          child: SignUp(),
+                          name: 'sign_up_screen',
+                        ),
                       ),
                   backgroundColor: Colors.white,
                   foregroundColor: theme.primaryColor,

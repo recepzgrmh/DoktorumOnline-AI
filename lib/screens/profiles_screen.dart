@@ -534,8 +534,15 @@ class ProfilesScreenState extends State<ProfilesScreen> {
       _loadProfiles(); // Listeyi yenile
     } catch (e) {
       if (!mounted) return;
+      Navigator.pop(modalContext);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Hata: $e'), backgroundColor: Colors.red),
+        // Hatayı kullanıcıya özel bir şekilde düzenledim
+        SnackBar(
+          content: Text(
+            'Hata Lütfen Geçerli Değerler Girerek Tekrar deneyiniz',
+          ),
+          backgroundColor: Colors.red,
+        ),
       );
     } finally {
       // Formun state'ini güncelleyen setState

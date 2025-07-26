@@ -53,7 +53,10 @@ class _SignUpState extends State<SignUp> {
         // ignore: use_build_context_synchronously
         Navigator.pushReplacement(
           context,
-          CustomPageRoute(child: const VerifyAccount()),
+          CustomPageRoute(
+            child: const VerifyAccount(),
+            name: 'verify_account_screen',
+          ),
         );
       }
     } catch (e) {
@@ -272,7 +275,10 @@ class _SignUpState extends State<SignUp> {
                   onPressed:
                       () => Navigator.pushReplacement(
                         context,
-                        CustomPageRoute(child: SignIn()),
+                        CustomPageRoute(
+                          child: SignIn(),
+                          name: 'sign_in_screen',
+                        ),
                       ),
                   backgroundColor: Colors.white,
                   foregroundColor: theme.primaryColor,

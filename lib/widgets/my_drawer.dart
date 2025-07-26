@@ -234,9 +234,12 @@ class MyDrawerState extends State<MyDrawer> {
                   size: 26,
                 ),
                 onTap: () {
-                  Navigator.of(
-                    context,
-                  ).push(CustomPageRoute(child: SettingsScreen()));
+                  Navigator.of(context).push(
+                    CustomPageRoute(
+                      child: SettingsScreen(),
+                      name: 'Settings_screen',
+                    ),
+                  );
                 },
                 title: Text(
                   'Ayarlar',

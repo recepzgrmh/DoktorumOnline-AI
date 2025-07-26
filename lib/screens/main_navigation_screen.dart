@@ -7,6 +7,7 @@ import 'package:login_page/screens/pdf_analysis_screen.dart';
 import 'package:login_page/screens/profiles_screen.dart';
 import 'package:login_page/screens/saved_analyses_screen.dart';
 import 'package:login_page/services/auth_service.dart';
+import 'package:login_page/services/firebase_analytics.dart';
 import 'package:login_page/services/tutorial_service.dart';
 import 'package:login_page/widgets/bottom_navbar.dart';
 import 'package:login_page/widgets/my_drawer.dart';
@@ -46,6 +47,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  // Firebase Analytics için Kod
   // Başlangıçta profiller sayfasını göstermek için index 3'te.
   int _selectedIndex = 3;
 
@@ -74,6 +76,8 @@ class _MainScreenState extends State<MainScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeUserAndTutorials();
     });
+
+    AnalyticsService.instance.setCurrentScreen(screenName: 'home');
   }
 
   /// Uygulama başlangıcında kullanıcı durumunu ve eğitimleri ayarlar.
@@ -140,6 +144,29 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       _selectedIndex = index;
     });
+
+    String screenName;
+    switch (index) {
+      case 0:
+        screenName = 'home_screen';
+        break;
+      case 1:
+        screenName = 'old_chat_screen';
+        break;
+      case 2:
+        screenName = 'pdf_analysis_screen';
+        break;
+      case 3:
+        screenName = 'profile_Screen';
+        break;
+      default:
+        screenName = 'unknown';
+    }
+
+    // Analytics servisini çağır
+    AnalyticsService.instance.setCurrentScreen(screenName: screenName);
+
+    //Her sayfa değişiminde ekran görüntüleme olayını gönder
 
     if (index == 0) {
       Future.delayed(const Duration(milliseconds: 50), () {
@@ -269,6 +296,7 @@ class _MainScreenState extends State<MainScreen> {
                 icon: const Icon(Icons.help_outline, size: 30),
                 onPressed: () async {
                   await TutorialService.resetAllTutorials();
+
                   _showTutorialForPage(_selectedIndex);
                 },
                 tooltip: 'Eğitimleri Sıfırla',
@@ -278,7 +306,9 @@ class _MainScreenState extends State<MainScreen> {
               IconButton(
                 key: _pdfHistoryButtonKey,
                 icon: const Icon(Icons.history, size: 30),
-                onPressed: _onPdfHistoryTapped,
+                onPressed: () {
+                  _onPdfHistoryTapped();
+                },
                 tooltip: 'PDF Analizi Geçmişi',
               ),
 

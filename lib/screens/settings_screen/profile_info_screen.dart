@@ -1,7 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:login_page/screens/settings_screen/dialog_utils.dart';
 import 'package:login_page/services/auth_service.dart';
 import 'package:login_page/widgets/custom_button.dart';
+import 'package:login_page/screens/opening.dart';
+import 'package:login_page/widgets/custom_page_route.dart';
+import 'package:login_page/wrapper.dart';
 
 class ProfileInfoScreen extends StatefulWidget {
   const ProfileInfoScreen({super.key});
@@ -13,6 +17,7 @@ class ProfileInfoScreen extends StatefulWidget {
 class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
   User? _user;
   bool _hasPasswordAuth = false;
+  final _utils = DialogUtils();
 
   @override
   void initState() {
@@ -87,7 +92,6 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-
                   children: [
                     const ProfileInfoRow(
                       label: 'Telefon',
@@ -105,7 +109,6 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                       value: 'Belirtilmedi',
                     ),
                     const Divider(),
-
                     if (_hasPasswordAuth)
                       const ProfileInfoRow(
                         label: 'Şifre',
@@ -131,11 +134,158 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                   foregroundColor: Colors.white,
                 ),
               ),
+              const SizedBox(height: 16),
+              // Hesap Silme Butonu
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.red.withOpacity(0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: CustomButton(
+                  icon: const Icon(Icons.delete_forever, color: Colors.white),
+                  label: 'Hesabımı Sil',
+                  onPressed: () {
+                    _utils.showConfirmationDialog(
+                      context: context,
+                      title: 'Hesabı Sil',
+                      content:
+                          'Bu işlem geri alınamaz. Hesabınızı kalıcı olarak silmek istediğinizden emin misiniz?',
+                      subText:
+                          "• Tüm verileriniz kalıcı olarak silinecek\n• Bu işlem geri alınamaz\n• Uygulamadan çıkış yapılacak",
+
+                      icon: Icons.warning_amber_rounded,
+                      onConfirm:
+                          _deleteUserAccount, // Onaylandığında bu fonksiyonu çağır
+                    );
+                  },
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _deleteUserAccount() async {
+    // Loading dialog göster
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Hesabınız siliniyor...', style: TextStyle(fontSize: 16)),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      // Firebase Authentication'dan kullanıcı hesabını sil
+      await _user!.delete();
+
+      // Loading dialog'u kapat
+      if (mounted) {
+        Navigator.of(context).pop(); // Loading dialog'u kapat
+      }
+
+      // Başarı mesajı göster
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Hesabınız başarıyla silindi'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+
+      // Kısa bir bekleme süresi ekle (SnackBar'ın görünmesi için)
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Opening sayfasına yönlendir ve tüm önceki sayfaları temizle
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const Opening()),
+          (route) => false,
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      // Loading dialog'u kapat
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+
+      String errorMessage;
+      switch (e.code) {
+        case 'requires-recent-login':
+          errorMessage =
+              'Güvenlik nedeniyle tekrar giriş yapmanız gerekiyor. Lütfen çıkış yapıp tekrar giriş yapın.';
+          // Kullanıcıyı çıkış yaptır
+          await FirebaseAuth.instance.signOut();
+          if (mounted) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const Opening()),
+              (route) => false,
+            );
+          }
+          break;
+        case 'user-not-found':
+          errorMessage = 'Kullanıcı bulunamadı.';
+          break;
+        case 'network-request-failed':
+          errorMessage = 'İnternet bağlantınızı kontrol edin.';
+          break;
+        default:
+          errorMessage = 'Hesap silinirken bir hata oluştu. Tekrar deneyin.';
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (e) {
+      // Loading dialog'u kapat
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+
+      debugPrint('Hesap silme hatası: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.',
+            ),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 }
 
@@ -162,7 +312,6 @@ class ProfileInfoRow extends StatelessWidget {
             label,
             style: const TextStyle(fontSize: 16, color: Colors.black54),
           ),
-
           if (isButton)
             TextButton(
               onPressed: () {
