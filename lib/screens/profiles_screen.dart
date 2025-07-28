@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/services/tutorial_service.dart';
 import 'package:login_page/widgets/coachmark_desc.dart';
@@ -71,7 +72,7 @@ class ProfilesScreenState extends State<ProfilesScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Profil yükleme hatası: $e')));
+        ).showSnackBar(SnackBar(content: Text('profile_load_error: $e').tr()));
         setState(() => _isLoading = false);
       }
     }
@@ -105,10 +106,9 @@ class ProfilesScreenState extends State<ProfilesScreen> {
               align: ContentAlign.bottom,
               builder:
                   (context, controller) => CoachmarkDesc(
-                    text:
-                        'Uygulama yönergelerini tekrar görmek için bu butona basabilirsin',
-                    next: 'İleri',
-                    skip: 'Geç',
+                    text: 'tutorial_help_button'.tr(),
+                    next: 'next'.tr(),
+                    skip: 'skip'.tr(),
                     onNext: controller.next,
                     onSkip: controller.skip,
                   ),
@@ -130,10 +130,9 @@ class ProfilesScreenState extends State<ProfilesScreen> {
               align: ContentAlign.bottom,
               builder:
                   (context, controller) => CoachmarkDesc(
-                    text:
-                        'Profil kartına tıklayarak düzenleyebilir veya aktif yapabilirsin',
-                    next: 'İleri',
-                    skip: 'Geç',
+                    text: 'tutorial_profile_card'.tr(),
+                    next: 'next',
+                    skip: 'next',
                     onNext: controller.next,
                     onSkip: controller.skip,
                   ),
@@ -155,9 +154,9 @@ class ProfilesScreenState extends State<ProfilesScreen> {
               align: ContentAlign.top,
               builder:
                   (context, controller) => CoachmarkDesc(
-                    text: 'Buradan yeni profil ekleyebilirsin',
-                    next: 'Bitir',
-                    skip: 'Geç',
+                    text: 'tutorial_add_profile'.tr(),
+                    next: 'finish',
+                    skip: 'skip',
                     onNext: controller.skip,
                     onSkip: controller.skip,
                   ),
@@ -175,7 +174,7 @@ class ProfilesScreenState extends State<ProfilesScreen> {
       backgroundColor: Colors.white,
       body:
           _isLoading
-              ? const LoadingWidget(message: "Profiller yükleniyor...")
+              ? const LoadingWidget(message: "loading_profiles")
               : SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
@@ -183,28 +182,27 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Sağlık Profilleriniz',
+                        'health_profiles_title',
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF2196F3),
                         ),
-                      ),
+                      ).tr(),
                       const SizedBox(height: 8),
                       const Text(
-                        'Sağlık bilgilerinizi yönetin ve AI doktorunuzun size daha iyi hizmet vermesini sağlayın.',
+                        'health_profiles_subtitle',
                         style: TextStyle(
                           fontSize: 16,
                           color: Color(0xFF757575),
                         ),
-                      ),
+                      ).tr(),
                       const SizedBox(height: 32),
                       Expanded(
                         child:
                             _profiles.isEmpty
                                 ? const EmptyStateWidget(
-                                  message:
-                                      'Henüz profil eklenmemiş\nİlk profilinizi ekleyerek başlayın',
+                                  message: 'empty_state_message',
                                   icon: Icons.person_add,
                                 )
                                 : ListView.builder(
@@ -227,7 +225,7 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                       const SizedBox(height: 16),
                       CustomButton(
                         key: _newUser, // Eğitim için key
-                        label: 'Yeni Profil Ekle',
+                        label: 'add_new_profile'.tr(),
                         onPressed: () => _showProfileForm(),
                         icon: const Icon(Icons.add),
                         backgroundColor: const Color(0xFF2196F3),
@@ -280,7 +278,7 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                     Row(
                       children: [
                         Text(
-                          profile['name'] ?? 'Profil',
+                          profile['name'] ?? 'profile'.tr(),
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -298,13 +296,14 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                               color: Colors.green,
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Text(
-                              'Aktif',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                              ),
-                            ),
+                            child:
+                                const Text(
+                                  'active',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ).tr(),
                           ),
                         ],
                       ],
@@ -345,34 +344,37 @@ class ProfilesScreenState extends State<ProfilesScreen> {
               },
               itemBuilder:
                   (context) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'edit',
                       child: Row(
                         children: [
-                          Icon(Icons.edit, size: 20),
-                          SizedBox(width: 8),
-                          Text('Düzenle'),
+                          const Icon(Icons.edit, size: 20),
+                          const SizedBox(width: 8),
+                          const Text('edit').tr(),
                         ],
                       ),
                     ),
                     if (!isActive)
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'activate',
                         child: Row(
                           children: [
-                            Icon(Icons.check_circle, size: 20),
-                            SizedBox(width: 8),
-                            Text('Aktif Yap'),
+                            const Icon(Icons.check_circle, size: 20),
+                            const SizedBox(width: 8),
+                            const Text('make_active').tr(),
                           ],
                         ),
                       ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'delete',
                       child: Row(
                         children: [
                           Icon(Icons.delete, size: 20, color: Colors.red),
                           SizedBox(width: 8),
-                          Text('Sil', style: TextStyle(color: Colors.red)),
+                          Text(
+                            'delete',
+                            style: TextStyle(color: Colors.red),
+                          ).tr(),
                         ],
                       ),
                     ),
@@ -441,7 +443,7 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      _isEditing ? 'Profili Düzenle' : 'Yeni Profil Ekle',
+                      _isEditing ? 'edit_profile'.tr() : 'update_profile'.tr(),
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -474,7 +476,8 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                 CustomButton(
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
-                  label: _isEditing ? 'Profili Güncelle' : 'Profili Kaydet',
+                  label:
+                      _isEditing ? 'update_profile'.tr() : 'save_profile'.tr(),
                   onPressed: () => _saveProfile(context),
                   isLoading: _isFormLoading,
                   isFullWidth: true,
@@ -523,7 +526,9 @@ class ProfilesScreenState extends State<ProfilesScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            _isEditing ? 'Profil güncellendi' : 'Profil kaydedildi',
+            _isEditing
+                ? 'profile_update_success'.tr()
+                : 'profile_saved_success'.tr(),
           ),
           backgroundColor: Colors.green,
         ),
@@ -538,9 +543,7 @@ class ProfilesScreenState extends State<ProfilesScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         // Hatayı kullanıcıya özel bir şekilde düzenledim
         SnackBar(
-          content: Text(
-            'Hata Lütfen Geçerli Değerler Girerek Tekrar deneyiniz',
-          ),
+          content: Text('generic_error_message').tr(),
           backgroundColor: Colors.red,
         ),
       );
@@ -559,8 +562,8 @@ class ProfilesScreenState extends State<ProfilesScreen> {
       await _profileService.setActiveProfile(profileId);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Aktif profil değiştirildi'),
+        SnackBar(
+          content: Text('active_profile_changed').tr(),
           backgroundColor: Colors.green,
         ),
       );
@@ -568,7 +571,10 @@ class ProfilesScreenState extends State<ProfilesScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Hata: $e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('error_prefix: $e').tr(),
+          backgroundColor: Colors.red,
+        ),
       );
       setState(() => _isLoading = false);
     }
@@ -580,14 +586,12 @@ class ProfilesScreenState extends State<ProfilesScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Profili Sil'),
-            content: Text(
-              '$profileName profilini silmek istediğinizden emin misiniz?',
-            ),
+            title: const Text('delete_profile').tr(),
+            content: Text('delete_confirmation'.tr()),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('İptal'),
+                child: Text('cancel').tr(),
               ),
               TextButton(
                 onPressed: () async {
@@ -595,7 +599,7 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                   await _deleteProfile(profileId);
                 },
                 style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: const Text('Sil'),
+                child: const Text('delete').tr(),
               ),
             ],
           ),
@@ -609,8 +613,8 @@ class ProfilesScreenState extends State<ProfilesScreen> {
       await _profileService.deleteProfile(profileId);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profil silindi'),
+        SnackBar(
+          content: Text('profile_deleted_success').tr(),
           backgroundColor: Colors.green,
         ),
       );
@@ -618,7 +622,10 @@ class ProfilesScreenState extends State<ProfilesScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Hata: $e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('error_prefix: $e').tr(),
+          backgroundColor: Colors.red,
+        ),
       );
       setState(() => _isLoading = false);
     }

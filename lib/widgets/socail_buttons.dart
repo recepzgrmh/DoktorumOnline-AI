@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 /// A reusable widget that displays social login buttons (Google, Facebook).
@@ -28,7 +29,7 @@ class SocialAuthButtons extends StatelessWidget {
           onPressed: onGooglePressed,
           iconUrl:
               'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png',
-          label: 'Google ile ' + googleText,
+          label: 'Google$googleText',
         ),
         const SizedBox(height: 12),
         // Facebook Button
@@ -36,7 +37,7 @@ class SocialAuthButtons extends StatelessWidget {
           onPressed: onFacebookPressed,
           iconUrl:
               'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Facebook_logo_%28square%29.png/960px-Facebook_logo_%28square%29.png',
-          label: 'Facebook ile ' + facebookText,
+          label: 'Facebook$facebookText',
         ),
       ],
     );
@@ -79,7 +80,7 @@ class SocialAuthButtons extends StatelessWidget {
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
-              ),
+              ).tr(),
             ],
           ),
         ),

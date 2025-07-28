@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/widgets/text_inputs.dart';
@@ -52,24 +53,29 @@ class _ResetPasswordState extends State<ResetPassword> {
                 // Welcome text
                 SizedBox(
                   width: double.infinity,
-                  child: Text(
-                    textAlign: TextAlign.center,
-                    "Şifreni mi Unuttun?",
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade900,
-                    ),
-                  ),
+                  child:
+                      Text(
+                        textAlign: TextAlign.center,
+                        "forgot_password_title",
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade900,
+                        ),
+                      ).tr(),
                 ),
                 const SizedBox(height: 8),
                 SizedBox(
                   width: double.infinity,
-                  child: Text(
-                    textAlign: TextAlign.center,
-                    "Hesabınızla ilişkili e-posta adresini girin, size şifrenizi sıfırlamanız için bir bağlantı gönderelim.",
-                    style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
-                  ),
+                  child:
+                      Text(
+                        textAlign: TextAlign.center,
+                        "forgot_password_send_mail",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey.shade600,
+                        ),
+                      ).tr(),
                 ),
                 const SizedBox(height: 40),
                 TextInputs(
@@ -79,7 +85,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                 ),
                 const SizedBox(height: 30),
                 CustomButton(
-                  label: "Sıfırlama Linki Gönder",
+                  label: "send_reset_link".tr(),
                   onPressed: resetPassword,
                   backgroundColor: theme.primaryColor,
                   foregroundColor: Colors.white,

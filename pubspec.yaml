@@ -55,6 +55,8 @@ dependencies:
   url_launcher: ^6.3.2
   image_picker: ^1.1.2
   firebase_analytics: ^11.6.0
+  easy_localization: ^3.0.8
+  flutter_svg: ^2.2.0
 
 dev_dependencies:
   flutter_test:
@@ -80,6 +82,10 @@ flutter:
   assets:
     - assets/icon/app_icon.png
     - assets/.env
+    - assets/lang/en.json
+    - assets/lang/tr.json
+    - assets/icon/tr.svg
+    - assets/icon/en.svg
 
   # To add assets to your application, add an assets section, like this:
   # assets:

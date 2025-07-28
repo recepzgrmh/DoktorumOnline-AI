@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/models/medical_form_data.dart';
 import 'package:login_page/services/validation_service.dart';
@@ -77,9 +78,9 @@ class _ComplaintFormState extends State<ComplaintForm> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Mevcut sağlık bilgileriniz kullanılarak şikayetiniz analiz edilecektir. Lütfen sadece şikayetinizi ve süresini belirtiniz.',
+                    'complaint_form.info_text'.tr(),
                     style: TextStyle(fontSize: 13),
                   ),
                 ),
@@ -121,12 +122,13 @@ class _ComplaintFormState extends State<ComplaintForm> {
 
             leading: Icon(Icons.person, color: Colors.teal, size: 20),
             title: Text(
-              'Mevcut Sağlık Bilgileriniz',
+              'complaint_form.existing_health_info'.tr(),
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: Colors.teal,
               ),
             ),
+
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -138,23 +140,38 @@ class _ComplaintFormState extends State<ComplaintForm> {
                   runSpacing: 8,
                   children: [
                     _buildInfoChip(
-                      'Boy: ${widget.userProfileData['Boy'] ?? 'N/A'} cm',
+                      'complaint_form.height'.tr(
+                        args: [widget.userProfileData['Boy'] ?? 'N/A'],
+                      ),
                       Icons.height,
                     ),
+
                     _buildInfoChip(
-                      'Yaş: ${widget.userProfileData['Yaş'] ?? 'N/A'}',
+                      tr(
+                        'complaint_form.age',
+                        args: [widget.userProfileData['Yaş'] ?? 'N/A'],
+                      ),
                       Icons.calendar_today,
                     ),
                     _buildInfoChip(
-                      'Kilo: ${widget.userProfileData['Kilo'] ?? 'N/A'} kg',
+                      tr(
+                        'complaint_form.weight',
+                        args: [widget.userProfileData['Kilo'] ?? 'N/A'],
+                      ),
                       Icons.monitor_weight,
                     ),
                     _buildInfoChip(
-                      'Cinsiyet: ${widget.userProfileData['Cinsiyet'] ?? 'N/A'}',
+                      tr(
+                        'complaint_form.gender',
+                        args: [widget.userProfileData['Cinsiyet'] ?? 'N/A'],
+                      ),
                       Icons.person,
                     ),
                     _buildInfoChip(
-                      'Kan Grubu: ${widget.userProfileData['Kan Grubu'] ?? 'N/A'}',
+                      tr(
+                        'complaint_form.blood_type',
+                        args: [widget.userProfileData['Kan Grubu'] ?? 'N/A'],
+                      ),
                       Icons.bloodtype,
                     ),
                   ],
@@ -165,7 +182,7 @@ class _ComplaintFormState extends State<ComplaintForm> {
         ),
 
         CustomTextWidget(
-          title: 'Şikayetiniz',
+          title: tr('complaint_form.complaint'),
 
           icon: Icons.medical_services,
           focusNode: widget.complaintFocusNode,
@@ -175,14 +192,14 @@ class _ComplaintFormState extends State<ComplaintForm> {
           onChanged: (_) => _notifyFormChanged(),
         ),
         CustomTextWidget(
-          title: 'Şikayet Süresi',
+          title: tr('complaint_form.duration'),
           icon: Icons.timer,
           controller: widget.sureController,
           validator: ValidationService.validateDuration,
           onChanged: (_) => _notifyFormChanged(),
         ),
         CustomTextWidget(
-          title: 'Mevcut İlaçlar (Opsiyonel)',
+          title: tr('complaint_form.medications'),
           icon: Icons.medication,
           controller: widget.ilacController,
           maxLines: 2,

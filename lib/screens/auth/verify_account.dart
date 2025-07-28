@@ -1,12 +1,14 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import 'package:login_page/screens/opening.dart';
 import 'package:login_page/services/auth_service.dart';
 
 import 'package:login_page/widgets/custom_button.dart';
-import 'package:get/get.dart';
 
 import 'dart:async';
+
+import 'package:login_page/widgets/custom_page_route.dart';
 
 class VerifyAccount extends StatefulWidget {
   const VerifyAccount({super.key});
@@ -59,34 +61,34 @@ class _VerifyAccountState extends State<VerifyAccount> {
                   children: [
                     IconButton(
                       icon: Icon(Icons.arrow_back, color: theme.primaryColor),
-                      onPressed: () => Get.offAll(() => const Opening()),
+                      onPressed: () => CustomPageRoute(child: const Opening()),
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      "Hesap Doğrulama",
+                      "verify_account_title",
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: theme.primaryColor,
                       ),
-                    ),
+                    ).tr(),
                   ],
                 ),
                 const SizedBox(height: 40),
                 // Welcome text
                 Text(
-                  "E-posta Doğrulama",
+                  "email_verification",
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                     color: Colors.grey.shade900,
                   ),
-                ),
+                ).tr(),
                 const SizedBox(height: 8),
                 Text(
-                  "Hesabınızı doğrulamak için e-posta adresinize gönderilen linke tıklayın.",
+                  "verification_instruction",
                   style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
-                ),
+                ).tr(),
                 const SizedBox(height: 40),
                 // Email icon
                 Center(
@@ -106,7 +108,7 @@ class _VerifyAccountState extends State<VerifyAccount> {
                 const SizedBox(height: 40),
                 // Continue button
                 CustomButton(
-                  label: "Devam Et",
+                  label: "continue_button",
                   onPressed: () {
                     _authService.checkVerification(context);
                   },
@@ -125,7 +127,7 @@ class _VerifyAccountState extends State<VerifyAccount> {
                 const SizedBox(height: 16),
                 // Resend button
                 CustomButton(
-                  label: "Tekrar Gönder",
+                  label: "resend_button",
                   onPressed: () {
                     _authService.verifyAccount();
                   },

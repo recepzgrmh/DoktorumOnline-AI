@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class CustomButton extends StatelessWidget {
@@ -93,7 +94,7 @@ class CustomButton extends StatelessWidget {
                 Text(
                   label,
                   style: textStyle?.copyWith(fontWeight: FontWeight.w600),
-                ),
+                ).tr(),
               ],
             );
 

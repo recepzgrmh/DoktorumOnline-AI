@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class LoadingWidget extends StatelessWidget {
@@ -23,7 +24,7 @@ class LoadingWidget extends StatelessWidget {
               message!,
               style: Theme.of(context).textTheme.bodyLarge,
               textAlign: TextAlign.center,
-            ),
+            ).tr(),
           ],
         ],
       ),

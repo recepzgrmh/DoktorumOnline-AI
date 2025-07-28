@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:login_page/screens/settings_screen/settings_screen.dart';
@@ -86,31 +87,27 @@ class MyDrawerState extends State<MyDrawer> {
       _buildTarget(
         identify: "Home Button",
         keyTarget: _homeButton,
-        body:
-            'Yeni bir muayeneye başlamak için bu butona dokun. İlgili bilgileri doldur, DoktorumOnline sana ek sorular yöneltsin.',
+        body: 'tutorial_home',
       ),
       _buildTarget(
         identify: "Chat Button",
         keyTarget: _chatButton,
-        body:
-            'Daha önce başlattığın tüm şikâyet ve konuşmaları burada görebilirsin. Herhangi birine dokunarak detayları aç.',
+        body: 'tutorial_chat',
       ),
       _buildTarget(
         identify: "Upload Button",
         keyTarget: _uploadButton,
-        body:
-            'Lab sonucu, kan tahlili veya reçeteni PDF olarak yükle; DoktorumOnline saniyeler içinde özetleyip kritik bulguları vurgular.',
+        body: 'tutorial_upload',
       ),
       _buildTarget(
         identify: "Profiles Button",
         keyTarget: _profilesButton,
-        body:
-            'Farklı kullanıcılar için ayrı profil oluşturabilir, sağlık bilgilerini güncelleyebilirsin.',
+        body: 'tutorial_profiles',
       ),
       _buildTarget(
         identify: "Logout Button",
         keyTarget: _settingsButton,
-        body: 'Hesap ayarları falan.',
+        body: 'tutorial_settings',
         isLast: true,
       ),
     ];
@@ -132,9 +129,9 @@ class MyDrawerState extends State<MyDrawer> {
           align: isLast ? ContentAlign.top : ContentAlign.bottom,
           builder:
               (context, controller) => coachmark.CoachmarkDesc(
-                text: body,
-                skip: 'Geç',
-                next: isLast ? 'Bitir' : 'İleri',
+                text: body.tr(),
+                skip: 'skip'.tr(),
+                next: isLast ? 'finish'.tr() : 'next'.tr(),
                 onSkip: controller.skip,
                 onNext: isLast ? controller.skip : controller.next,
               ),
@@ -185,7 +182,7 @@ class MyDrawerState extends State<MyDrawer> {
                 _buildDrawerItem(
                   key: _homeButton,
                   icon: Icons.analytics_outlined,
-                  title: 'Soru Sor',
+                  title: 'menu_home'.tr(),
                   index: 0,
                   onTap: () {
                     Navigator.of(context).pop();
@@ -195,7 +192,7 @@ class MyDrawerState extends State<MyDrawer> {
                 _buildDrawerItem(
                   key: _chatButton,
                   icon: Icons.history,
-                  title: 'Raporlarım',
+                  title: 'menu_reports'.tr(),
                   index: 1,
                   onTap: () {
                     Navigator.of(context).pop();
@@ -205,7 +202,7 @@ class MyDrawerState extends State<MyDrawer> {
                 _buildDrawerItem(
                   key: _uploadButton,
                   icon: Icons.file_copy_outlined,
-                  title: 'Tahlillerim',
+                  title: 'menu_uploads'.tr(),
                   index: 2,
                   onTap: () {
                     Navigator.of(context).pop();
@@ -215,7 +212,7 @@ class MyDrawerState extends State<MyDrawer> {
                 _buildDrawerItem(
                   key: _profilesButton,
                   icon: Icons.person_outline,
-                  title: 'Profiller',
+                  title: 'menu_profiles'.tr(),
                   index: 3,
                   onTap: () {
                     Navigator.of(context).pop();
@@ -241,15 +238,16 @@ class MyDrawerState extends State<MyDrawer> {
                     ),
                   );
                 },
-                title: Text(
-                  'Ayarlar',
-                  style: TextStyle(
-                    letterSpacing: 2,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.blue.shade700,
-                    fontSize: 16,
-                  ),
-                ),
+                title:
+                    const Text(
+                      'menu_settings',
+                      style: TextStyle(
+                        letterSpacing: 2,
+                        fontWeight: FontWeight.normal,
+                        color: Colors.blue,
+                        fontSize: 16,
+                      ),
+                    ).tr(),
               ),
             ),
           ],

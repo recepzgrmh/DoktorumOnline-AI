@@ -1,4 +1,5 @@
 // lib/widgets/source_selection_bottom_sheet.dart
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class SelectionBottomSheet extends StatelessWidget {
@@ -33,10 +34,10 @@ class SelectionBottomSheet extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(20),
             child: Text(
-              'Analiz Kaynağını Seçin',
+              'selection_title'.tr(),
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
@@ -45,7 +46,7 @@ class SelectionBottomSheet extends StatelessWidget {
               Icons.picture_as_pdf,
               color: Theme.of(context).primaryColor,
             ),
-            title: const Text('PDF Dosyasından Seç'),
+            title: Text('pdf_option'.tr()),
             onTap: () {
               Navigator.pop(context);
               onSelectPdf(); // Dışarıdan gelen fonksiyonu çağır
@@ -53,7 +54,7 @@ class SelectionBottomSheet extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(Icons.image, color: Theme.of(context).primaryColor),
-            title: const Text('Resimden Analiz Et'),
+            title: Text('image_option'.tr()),
             onTap: () {
               Navigator.pop(context);
               onSelectImage(); // Dışarıdan gelen fonksiyonu çağır

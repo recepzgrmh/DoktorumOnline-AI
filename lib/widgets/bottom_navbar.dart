@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class BottomNavbar extends StatelessWidget {
@@ -21,20 +22,23 @@ class BottomNavbar extends StatelessWidget {
       selectedFontSize: 14, // Seçili öğenin yazı tipi boyutu
       unselectedFontSize: 14, // Seçili olmayan öğenin yazı tipi boyutu
 
-      items: const [
+      items: [
         BottomNavigationBarItem(
           icon: Icon(Icons.analytics_outlined),
-          label: 'Soru Sor',
+          label: tr('bottom_navbar.ask_question'),
         ),
-        BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Raporlarım'),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.history),
+          label: tr('bottom_navbar.my_reports'),
+        ),
         BottomNavigationBarItem(
           icon: Icon(Icons.file_copy_outlined),
-          label: 'Tahlillerim',
+          label: tr('bottom_navbar.my_tests'),
         ),
 
         BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),
-          label: 'Profiller',
+          label: tr('bottom_navbar.profiles'),
         ),
       ],
     );

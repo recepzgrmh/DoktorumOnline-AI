@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -105,21 +106,22 @@ class _SignUpState extends State<SignUp> {
                 // Welcome text
                 SizedBox(
                   width: double.infinity,
-                  child: Text(
-                    textAlign: TextAlign.center,
-                    "Ücretsiz kaydol!",
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade900,
-                    ),
-                  ),
+                  child:
+                      Text(
+                        textAlign: TextAlign.center,
+                        "sign_up_title",
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade900,
+                        ),
+                      ).tr(),
                 ),
                 const SizedBox(height: 40),
 
                 SocialAuthButtons(
-                  facebookText: 'Kayıt Ol',
-                  googleText: 'Kayıt Ol',
+                  facebookText: 'sign_up'.tr(),
+                  googleText: 'sign_up'.tr(),
                   onGooglePressed: () async {
                     showDialog(
                       context: context,
@@ -151,27 +153,26 @@ class _SignUpState extends State<SignUp> {
                   },
                   onFacebookPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Facebook ile giriş yakında eklenecek'),
-                      ),
+                      SnackBar(content: Text('facebook_auth_coming_soon').tr()),
                     );
                   },
                 ),
                 const SizedBox(height: 20),
-                // Divider with "veya" text
+
                 Row(
                   children: [
                     const Expanded(child: Divider(color: Colors.white)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        "VEYA",
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
+                      child:
+                          Text(
+                            "or".tr(),
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ).tr(),
                     ),
                     const Expanded(child: Divider(color: Colors.white)),
                   ],
@@ -183,13 +184,13 @@ class _SignUpState extends State<SignUp> {
                 Row(
                   children: [
                     TextInputs(
-                      labelText: 'İsim',
+                      labelText: 'first_name'.tr(),
                       controller: fullName,
                       isFlexible: true,
                     ),
                     const SizedBox(width: 12),
                     TextInputs(
-                      labelText: 'Soyisim',
+                      labelText: 'last_name'.tr(),
                       controller: lastName,
                       isFlexible: true,
                     ),
@@ -197,13 +198,13 @@ class _SignUpState extends State<SignUp> {
                 ),
                 const SizedBox(height: 10),
                 TextInputs(
-                  labelText: 'E-mail',
+                  labelText: 'email'.tr(),
                   controller: email,
                   isEmail: true,
                 ),
                 const SizedBox(height: 10),
                 TextInputs(
-                  labelText: 'Şifre',
+                  labelText: 'password'.tr(),
                   controller: password,
                   isPassword: true,
                 ),
@@ -216,9 +217,9 @@ class _SignUpState extends State<SignUp> {
                       fontWeight: FontWeight.w500,
                     ),
                     children: <TextSpan>[
-                      const TextSpan(text: 'Devam ederek '),
+                      TextSpan(text: 'terms_accept_text_1'.tr()),
                       TextSpan(
-                        text: 'Kullanım Şartları\'nı',
+                        text: 'terms_of_use'.tr(),
                         style: const TextStyle(
                           color: Colors.blue, // Tıklanabilir metin rengi
                           decoration: TextDecoration.underline, // Altı çizili
@@ -231,9 +232,10 @@ class _SignUpState extends State<SignUp> {
                                 );
                               },
                       ),
-                      const TextSpan(text: ' kabul etmiş olursunuz.\n'),
+                      TextSpan(text: 'terms_accept_text_2'.tr()),
                       TextSpan(
-                        text: 'Gizlilik Politikamızı',
+                        text: 'privacy_policy'.tr(),
+
                         style: const TextStyle(
                           color: Colors.blue, // Tıklanabilir metin rengi
                           decoration: TextDecoration.underline, // Altı çizili
@@ -246,7 +248,7 @@ class _SignUpState extends State<SignUp> {
                                 );
                               },
                       ),
-                      const TextSpan(text: ' okuyun.'),
+                      TextSpan(text: 'read_privacy_policy'.tr()),
                     ],
                   ),
                 ),
@@ -254,7 +256,7 @@ class _SignUpState extends State<SignUp> {
 
                 // "Kayıt Ol" butonu
                 CustomButton(
-                  label: "Kayıt Ol",
+                  label: "sign_up",
                   onPressed: signUpUser,
                   backgroundColor: theme.primaryColor,
                   foregroundColor: Colors.white,
@@ -271,7 +273,7 @@ class _SignUpState extends State<SignUp> {
                 const SizedBox(height: 16),
                 // "Giriş Yap" butonu
                 CustomButton(
-                  label: "Zaten Hesabım Var",
+                  label: "already_have_account",
                   onPressed:
                       () => Navigator.pushReplacement(
                         context,

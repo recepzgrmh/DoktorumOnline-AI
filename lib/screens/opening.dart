@@ -1,15 +1,96 @@
+import 'dart:io';
+
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/screens/auth/sign_in.dart';
 import 'package:login_page/screens/auth/sign_up.dart';
 import 'package:login_page/widgets/custom_button.dart';
 import 'package:login_page/widgets/custom_page_route.dart';
+import 'package:flutter_svg/flutter_svg.dart'; // 1. Import the package
 
-class Opening extends StatelessWidget {
+class Opening extends StatefulWidget {
   const Opening({super.key});
 
   @override
+  State<Opening> createState() => _OpeningState();
+}
+
+class _OpeningState extends State<Opening> {
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+        actions: [
+          DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: context.locale.languageCode,
+
+              items: [
+                DropdownMenuItem(
+                  value: 'en',
+                  child: Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(shape: BoxShape.rectangle),
+
+                        child: SvgPicture.asset(
+                          'assets/icon/en.svg',
+                          width: 24,
+                          height: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('English'),
+                    ],
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'tr',
+                  child: Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(shape: BoxShape.rectangle),
+                        child: SvgPicture.asset(
+                          'assets/icon/tr.svg',
+                          width: 24,
+                          height: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('Türkçe'),
+                    ],
+                  ),
+                ),
+              ],
+
+              // 2. AppBar'da sadece seçili olan bayrağı göstermek için
+              selectedItemBuilder: (BuildContext context) {
+                return ['en', 'tr'].map((String value) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Container(
+                      decoration: BoxDecoration(shape: BoxShape.rectangle),
+                      child: SvgPicture.asset(
+                        'assets/icon/$value.svg',
+                        width: 28,
+                        height: 28,
+                      ),
+                    ),
+                  );
+                }).toList();
+              },
+
+              // Dil değiştiğinde çalışacak fonksiyon
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  context.setLocale(Locale(newValue));
+                }
+              },
+            ),
+          ),
+        ],
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -42,23 +123,23 @@ class Opening extends StatelessWidget {
                 ),
                 const SizedBox(height: 32),
                 Text(
-                  'DoktorumOnline AI',
+                  "title",
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).primaryColor,
                   ),
-                ),
+                ).tr(),
                 const SizedBox(height: 16),
                 Text(
-                  'Yapay zeka destekli sağlık asistanınıza hoş geldiniz',
+                  'opening',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
-                ),
+                ).tr(),
                 const SizedBox(height: 48),
                 // Buttons
                 CustomButton(
-                  label: "Giriş Yap",
+                  label: "sign_in",
                   onPressed: () {
                     Navigator.of(context).push(
                       CustomPageRoute(child: SignIn(), name: 'sign_in_screen'),
@@ -78,7 +159,7 @@ class Opening extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 CustomButton(
-                  label: "Kayıt Ol",
+                  label: "sign_up",
                   onPressed: () {
                     Navigator.of(context).push(
                       CustomPageRoute(child: SignUp(), name: 'sign_up_screen'),

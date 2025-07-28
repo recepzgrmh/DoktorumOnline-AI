@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -102,31 +103,36 @@ class _SignInState extends State<SignIn> {
                 // Welcome text
                 SizedBox(
                   width: double.infinity,
-                  child: Text(
-                    textAlign: TextAlign.center,
-                    "Tekrar Hoşgeldin!",
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade900,
-                    ),
-                  ),
+                  child:
+                      Text(
+                        textAlign: TextAlign.center,
+                        "welcome_back",
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade900,
+                        ),
+                      ).tr(),
                 ),
                 const SizedBox(height: 8),
                 SizedBox(
                   width: double.infinity,
-                  child: Text(
-                    textAlign: TextAlign.center,
-                    "Devam etmek için gerekli yerleri doldurun.",
-                    style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
-                  ),
+                  child:
+                      Text(
+                        textAlign: TextAlign.center,
+                        "fill_required_fields",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey.shade600,
+                        ),
+                      ).tr(),
                 ),
                 const SizedBox(height: 40),
 
                 // Social media buttons
                 SocialAuthButtons(
-                  facebookText: 'Giriş Yap',
-                  googleText: 'Giriş Yap',
+                  facebookText: 'sign_in',
+                  googleText: 'sign_in',
                   onGooglePressed: () async {
                     showDialog(
                       context: context,
@@ -158,9 +164,7 @@ class _SignInState extends State<SignIn> {
                   },
                   onFacebookPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Facebook ile giriş yakında eklenecek'),
-                      ),
+                      SnackBar(content: Text('facebook_auth_coming_soon').tr()),
                     );
                   },
                 ),
@@ -171,14 +175,15 @@ class _SignInState extends State<SignIn> {
                     Expanded(child: Divider(color: Colors.white)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        "VEYA",
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
+                      child:
+                          Text(
+                            "or",
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ).tr(),
                     ),
                     Expanded(child: Divider(color: Colors.white)),
                   ],
@@ -205,9 +210,9 @@ class _SignInState extends State<SignIn> {
                       fontWeight: FontWeight.w500,
                     ),
                     children: <TextSpan>[
-                      const TextSpan(text: 'Devam ederek '),
+                      TextSpan(text: 'terms_accept_text_1'.tr()),
                       TextSpan(
-                        text: 'Kullanım Şartları\'nı',
+                        text: 'terms_of_use'.tr(),
                         style: const TextStyle(
                           color: Colors.blue, // Tıklanabilir metin rengi
                           decoration: TextDecoration.underline, // Altı çizili
@@ -220,9 +225,10 @@ class _SignInState extends State<SignIn> {
                                 );
                               },
                       ),
-                      const TextSpan(text: ' kabul etmiş olursunuz.\n'),
+                      TextSpan(text: 'terms_accept_text_2'.tr()),
                       TextSpan(
-                        text: 'Gizlilik Politikamızı',
+                        text: 'privacy_policy'.tr(),
+
                         style: const TextStyle(
                           color: Colors.blue, // Tıklanabilir metin rengi
                           decoration: TextDecoration.underline, // Altı çizili
@@ -235,14 +241,14 @@ class _SignInState extends State<SignIn> {
                                 );
                               },
                       ),
-                      const TextSpan(text: ' okuyun.'),
+                      TextSpan(text: 'read_privacy_policy'.tr()),
                     ],
                   ),
                 ),
                 const SizedBox(height: 30),
                 // Sign in button
                 CustomButton(
-                  label: "Giriş Yap",
+                  label: "sign_in".tr(),
                   onPressed: signInUser,
                   backgroundColor: theme.primaryColor,
                   foregroundColor: Colors.white,
@@ -259,7 +265,7 @@ class _SignInState extends State<SignIn> {
                 const SizedBox(height: 16),
                 // Forgot password button
                 CustomButton(
-                  label: "Şifremi Unuttum",
+                  label: "forgot_password",
                   onPressed:
                       () => Navigator.push(
                         context,
@@ -285,7 +291,7 @@ class _SignInState extends State<SignIn> {
                 const SizedBox(height: 16),
                 // Create account button
                 CustomButton(
-                  label: "Şimdi Hesap Oluştur",
+                  label: "sign_up_now",
                   onPressed:
                       () => Navigator.push(
                         context,

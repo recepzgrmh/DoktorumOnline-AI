@@ -152,7 +152,7 @@ class OpenAIService {
     }
     prompt
       ..writeln(
-        "Yukarıdaki tüm bilgileri (profil, şikayet, soru-cevaplar VE VARSA DOSYA ANALİZİ) birlikte HARMANLAYARAK kapsamlı bir tıbbi değerlendirme yap ve önerilerde bulun. "
+        "Yukarıdaki tüm bilgileri (profil, şikayet, soru-cevaplar VE VARSA DOSYA ANALİZİ) birlikte HARMANLAYARAK kapsamlı bir tıbbi değerlendirme yap ve önerilerde bulun.  "
         "Hastanın şikayetini hafifletecek öneriler ver; gerekirse doktora yönlendir.",
       )
       ..writeln(
@@ -173,7 +173,7 @@ class OpenAIService {
         'Authorization': 'Bearer $_apiKey',
       },
       body: jsonEncode({
-        'model': 'gpt-3.5-turbo',
+        'model': 'gpt-4o',
         'messages': [
           {'role': 'system', 'content': 'Sen bir tıbbi asistansın.'},
           {'role': 'user', 'content': content},

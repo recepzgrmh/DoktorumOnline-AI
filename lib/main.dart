@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:get/get.dart';
+
 import 'package:login_page/services/firebase_analytics.dart';
 import 'package:login_page/theme/app_theme.dart';
 import 'firebase_options.dart';
 import 'package:login_page/wrapper.dart';
-
+import "package:easy_localization/easy_localization.dart";
 import 'package:firebase_auth/firebase_auth.dart';
-
-// GetX için navigator anahtarını tanımla
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
   print("[DEBUG] main başladı");
   try {
     await dotenv.load(fileName: "assets/.env");
@@ -43,7 +41,14 @@ Future<void> main() async {
     print(s);
   }
 
-  runApp(const MyApp());
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [Locale('en'), Locale('tr')],
+      fallbackLocale: const Locale('en'),
+      path: 'assets/lang',
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -51,8 +56,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      navigatorKey: navigatorKey,
+    return MaterialApp(
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+
+      locale: context.locale,
+
       title: 'DoktorumOnline AI',
       theme: AppTheme.lightTheme,
       debugShowCheckedModeBanner: false,

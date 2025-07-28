@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class TextInputs extends StatefulWidget {
@@ -49,7 +50,7 @@ class _TextInputsState extends State<TextInputs> {
           horizontal: 20,
           vertical: 18,
         ),
-        labelText: widget.labelText,
+        labelText: widget.labelText.tr(),
         labelStyle: TextStyle(color: hintColor, fontSize: 16),
         floatingLabelStyle: const TextStyle(
           color: primaryColor,

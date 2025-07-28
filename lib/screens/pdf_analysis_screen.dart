@@ -1,4 +1,5 @@
 // lib/screens/pdf_analysis_screen.dart
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
@@ -27,7 +28,7 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
 
   PlatformFile? _selectedFile;
   XFile? _selectedImage; // Resim için yeni state
-  String _status = 'Lütfen bir PDF dosyası veya resim seçin';
+  String _status = 'initial_status'.tr();
   bool _isLoading = false;
   String _selectedType = ''; // 'pdf' veya 'image'
 
@@ -68,10 +69,9 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
               align: ContentAlign.bottom,
               builder:
                   (context, controller) => CoachmarkDesc(
-                    text:
-                        'Daha önce yaptığınız analizleri buradan görüntüleyebilirsiniz.',
-                    next: 'İleri',
-                    skip: 'Geç',
+                    text: 'tutorial_history'.tr(),
+                    next: 'next'.tr(),
+                    skip: 'skip'.tr(),
                     onNext: controller.next,
                     onSkip: controller.skip,
                   ),
@@ -93,10 +93,9 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
               align: ContentAlign.top,
               builder:
                   (context, controller) => CoachmarkDesc(
-                    text:
-                        'PDF dosyanızı veya resminizi seçmek için bu butona tıklayın. Analiz etmek istediğiniz tıbbi raporu buradan yükleyebilirsiniz.',
-                    next: 'Bitir',
-                    skip: 'Geç',
+                    text: 'tutorial_select_file'.tr(),
+                    next: 'finish'.tr(),
+                    skip: 'skip'.tr(),
                     onNext: controller.skip,
                     onSkip: controller.skip,
                   ),
@@ -134,7 +133,7 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
       _selectedFile = result.files.first;
       _selectedImage = null; // Diğer seçimi temizle
       _selectedType = 'pdf';
-      _status = 'Seçilen dosya: ${_selectedFile!.name}';
+      _status = tr('selected_pdf', args: [_selectedFile!.name]);
     });
   }
 
@@ -151,7 +150,7 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
           _selectedImage = pickedFile;
           _selectedFile = null; // Diğer seçimi temizle
           _selectedType = 'image';
-          _status = 'Seçilen resim: ${pickedFile.name}';
+          _status = tr('selected_image', args: [pickedFile.name]);
         });
       }
     } catch (e) {
@@ -165,13 +164,13 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
   // ═════════════ Analysis Functions ═════════════
   Future<void> _analyzeContent() async {
     if (_selectedFile == null && _selectedImage == null) {
-      setState(() => _status = 'Önce bir PDF veya resim seçmelisiniz.');
+      setState(() => _status = 'must_select'.tr());
       return;
     }
 
     setState(() {
       _isLoading = true;
-      _status = 'Analiz yapılıyor…';
+      _status = 'analyzing'.tr();
     });
 
     try {
@@ -190,7 +189,7 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
       }
 
       setState(() {
-        _status = 'Analiz tamamlandı.';
+        _status = 'analysis_complete'.tr();
       });
 
       await _analysisService.saveAnalysis(fileName: fileName, analysis: result);
@@ -199,7 +198,7 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
         _showAnalysisResult(result, fileName);
       }
     } catch (e) {
-      setState(() => _status = 'Analiz sırasında hata: $e');
+      setState(() => _status = tr('analysis_error', args: [e.toString()]));
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -215,9 +214,7 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
             (_) => Scaffold(
               appBar: CustomAppbar(
                 title:
-                    _selectedType == 'pdf'
-                        ? 'PDF Analiz Sonucu'
-                        : 'Resim Analiz Sonucu',
+                    _selectedType == 'pdf' ? 'pdf_result'.tr() : 'result'.tr(),
               ),
               body: Container(
                 color: Colors.white,
@@ -320,7 +317,7 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
       _selectedFile = null;
       _selectedImage = null;
       _selectedType = '';
-      _status = 'Lütfen bir PDF dosyası veya resim seçin';
+      _status = 'initial_status'.tr();
     });
   }
 
@@ -361,7 +358,7 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Dosya Analizi',
+                      'pdf_title'.tr(),
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -370,14 +367,14 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Analiz etmek için bir dosya veya resim seçin',
+                      'subtitle'.tr(),
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.grey.shade600),
                     ),
                     const SizedBox(height: 20),
                     CustomButton(
                       key: _pdfPicker,
-                      label: 'Dosya Seç',
+                      label: 'select_file'.tr(),
                       onPressed: _showSourceSelectionDialog,
                       backgroundColor: theme.primaryColor,
                       foregroundColor: Colors.white,
@@ -446,7 +443,9 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
             if (hasSelection)
               CustomButton(
                 label:
-                    _isLoading ? 'Analiz Yapılıyor...' : 'Yükle ve Analiz Et',
+                    _isLoading
+                        ? 'analyzing_button'.tr()
+                        : 'upload_and_analyze'.tr(),
                 onPressed: () {
                   if (_isLoading) return;
                   _analyzeContent();

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/screens/home_screen.dart';
@@ -20,19 +21,19 @@ import 'package:upgrader/upgrader.dart';
 /// Bu upgrader paketi hala çalışmıyor sebebini tam olarak anlayamadım
 class TurkishUpgraderMessages extends UpgraderMessages {
   @override
-  String get buttonTitleIgnore => 'Yoksay';
+  String get buttonTitleIgnore => 'upgrader_ignore'.tr();
 
   @override
-  String get buttonTitleLater => 'Daha Sonra';
+  String get buttonTitleLater => 'upgrader_later'.tr();
 
   @override
-  String get buttonTitleUpdate => 'Şimdi Güncelle';
+  String get buttonTitleUpdate => 'upgrader_update'.tr();
 
   @override
-  String get prompt => 'Uygulamanın yeni bir sürümü mevcut!';
+  String get prompt => 'upgrader_prompt'.tr();
 
   @override
-  String get title => 'Uygulama Güncellemesi';
+  String get title => 'upgrader_title'.tr();
 
   @override
   String get body =>
@@ -276,16 +277,17 @@ class _MainScreenState extends State<MainScreen> {
       ),
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
-            _selectedIndex == 0
-                ? 'DoktorumOnline'
-                : _selectedIndex == 1
-                ? 'Geçmiş Sohbetler'
-                : _selectedIndex == 2
-                ? 'PDF Analizi'
-                : 'Profilim',
-            style: const TextStyle(color: Colors.blue),
-          ),
+          title:
+              Text(
+                _selectedIndex == 0
+                    ? 'DoktorumOnline'
+                    : _selectedIndex == 1
+                    ? 'appbar_old_chat'
+                    : _selectedIndex == 2
+                    ? 'appbar_pdf_analysis'
+                    : 'appbar_profile',
+                style: const TextStyle(color: Colors.blue),
+              ).tr(),
           backgroundColor: Colors.white,
           foregroundColor: Colors.blue,
           actions: [
@@ -299,7 +301,7 @@ class _MainScreenState extends State<MainScreen> {
 
                   _showTutorialForPage(_selectedIndex);
                 },
-                tooltip: 'Eğitimleri Sıfırla',
+                tooltip: 'tooltip_reset_tutorial'.tr(),
               ),
             // Sadece PDF Analizi sayfasındayken geçmiş butonunu göster.
             if (_selectedIndex == 2)
@@ -309,7 +311,7 @@ class _MainScreenState extends State<MainScreen> {
                 onPressed: () {
                   _onPdfHistoryTapped();
                 },
-                tooltip: 'PDF Analizi Geçmişi',
+                tooltip: 'tooltip_pdf_history'.tr(),
               ),
 
             // Sadece Anasayfadayken profil simgesi çıksın

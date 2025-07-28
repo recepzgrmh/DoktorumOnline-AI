@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:login_page/screens/main_navigation_screen.dart';
-import 'package:get/get.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -161,16 +160,17 @@ class AuthService {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null && !user.emailVerified) {
       await user.sendEmailVerification();
-      Get.snackbar(
-        "Email Gönderildi",
-        "Lütfen e-posta kutunuzu kontrol edin.",
-        snackPosition: SnackPosition.BOTTOM,
+
+      SnackBar(
+        content: Text(
+          "Email Gönderildi\nLütfen e-posta kutunuzu kontrol edin.",
+        ),
       );
     } else {
-      Get.snackbar(
-        "Hata",
-        "Kullanıcı bulunamadı veya email zaten doğrulanmış.",
-        snackPosition: SnackPosition.BOTTOM,
+      SnackBar(
+        content: Text(
+          "Hata\nKullanıcı bulunamadı veya email zaten doğrulanmış.",
+        ),
       );
     }
   }
