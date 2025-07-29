@@ -1,6 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class NotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
@@ -43,14 +44,31 @@ class NotificationService {
     });
   }
 
-  /// 🔄 Bildirime tıklanınca yapılacaklar
+  /// Bildirime tıklanınca yapılacaklar
   void _setupOnMessageOpenedApp() {
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       debugPrint("📲 Bildirime tıklandı: ${message.notification?.title}");
+
+      // 1. Gelen özel veriyi kontrol et
+      final String? link = message.data['link'];
+
+      // 2. Eğer 'link' adında bir veri varsa, onu açmayı dene
+      if (link != null) {
+        _handleLink(link);
+      }
     });
   }
 
-  /// 📍 Yerel bildirim başlat
+  Future<void> _handleLink(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      debugPrint('Bu link açılamadı: $url');
+    }
+  }
+
+  ///  Yerel bildirim başlat
   Future<void> _initLocalNotifications() async {
     const androidSettings = AndroidInitializationSettings(
       '@mipmap/ic_launcher',
@@ -60,7 +78,7 @@ class NotificationService {
     await _localNotificationsPlugin.initialize(initSettings);
   }
 
-  /// 📤 Yerel bildirim göster
+  ///  Yerel bildirim göster
   Future<void> _showLocalNotification(String? title, String? body) async {
     const androidDetails = AndroidNotificationDetails(
       'default_channel',
