@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/models/medical_form_data.dart';
 import 'package:login_page/services/validation_service.dart';
@@ -81,7 +82,7 @@ class MedicalForm extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Lütfen aşağıdaki bilgileri doldurunuz. Bu bilgiler doktorunuzun size daha iyi yardımcı olmasını sağlayacaktır.',
+                  'medicalForm.infoText'.tr(),
                   style: theme.textTheme.bodyMedium,
                 ),
               ),
@@ -90,7 +91,7 @@ class MedicalForm extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         CustomTextWidget(
-          title: 'Boy (cm)',
+          title: 'medicalForm.heightLabel'.tr(),
           icon: Icons.height,
           controller: boyController,
           keyboardType: TextInputType.number,
@@ -98,7 +99,7 @@ class MedicalForm extends StatelessWidget {
           onChanged: (_) => _notifyFormChanged(),
         ),
         CustomTextWidget(
-          title: 'Yaş',
+          title: 'medicalForm.ageLabel'.tr(),
           icon: Icons.calendar_today,
           controller: yasController,
           keyboardType: TextInputType.number,
@@ -106,7 +107,7 @@ class MedicalForm extends StatelessWidget {
           onChanged: (_) => _notifyFormChanged(),
         ),
         CustomTextWidget(
-          title: 'Kilo (kg)',
+          title: 'medicalForm.weightLabel'.tr(),
           icon: Icons.monitor_weight,
           controller: kiloController,
           keyboardType: TextInputType.number,
@@ -115,12 +116,18 @@ class MedicalForm extends StatelessWidget {
         ),
 
         CustomDropdownWidget<String>(
-          label: 'Cinsiyet',
+          label: 'medicalForm.genderLabel'.tr(),
           icon: Icons.person,
           value: cinsiyet,
-          items: const [
-            DropdownMenuItem(value: 'Erkek', child: Text('Erkek')),
-            DropdownMenuItem(value: 'Kadın', child: Text('Kadın')),
+          items: [
+            DropdownMenuItem(
+              value: 'Erkek',
+              child: Text('medicalForm.genderMale'.tr()),
+            ),
+            DropdownMenuItem(
+              value: 'Kadın',
+              child: Text('medicalForm.genderFemale'.tr()),
+            ),
           ],
           onChanged: (value) {
             onCinsiyetChanged(value);
@@ -130,7 +137,7 @@ class MedicalForm extends StatelessWidget {
         ),
 
         CustomDropdownWidget<String>(
-          label: 'Kan Grubu',
+          label: 'medicalForm.bloodTypeLabel'.tr(),
           icon: Icons.bloodtype,
           value: kanGrubu,
           items: const [
@@ -151,7 +158,7 @@ class MedicalForm extends StatelessWidget {
         ),
 
         CustomTextWidget(
-          title: 'Şikayetiniz',
+          title: 'medicalForm.complaintLabel'.tr(),
           icon: Icons.medical_services,
           controller: sikayetController,
           maxLines: 3,
@@ -159,14 +166,14 @@ class MedicalForm extends StatelessWidget {
           onChanged: (_) => _notifyFormChanged(),
         ),
         CustomTextWidget(
-          title: 'Şikayet Süresi',
+          title: 'medicalForm.durationLabel'.tr(),
           icon: Icons.timer,
           controller: sureController,
           validator: ValidationService.validateDuration,
           onChanged: (_) => _notifyFormChanged(),
         ),
         CustomTextWidget(
-          title: 'Mevcut İlaçlar',
+          title: 'medicalForm.mediactionLabel'.tr(),
           icon: Icons.medication,
           controller: ilacController,
           maxLines: 2,
@@ -174,7 +181,7 @@ class MedicalForm extends StatelessWidget {
           onChanged: (_) => _notifyFormChanged(),
         ),
         CustomTextWidget(
-          title: 'Kronik Rahatsızlık',
+          title: 'medicalForm.chronicDiseaseLabel'.tr(),
           icon: Icons.health_and_safety,
           controller: illnessController,
           maxLines: 2,

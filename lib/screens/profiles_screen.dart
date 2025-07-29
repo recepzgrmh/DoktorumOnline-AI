@@ -201,8 +201,8 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                       Expanded(
                         child:
                             _profiles.isEmpty
-                                ? const EmptyStateWidget(
-                                  message: 'empty_state_message',
+                                ? EmptyStateWidget(
+                                  message: 'empty_state_message'.tr(),
                                   icon: Icons.person_add,
                                 )
                                 : ListView.builder(

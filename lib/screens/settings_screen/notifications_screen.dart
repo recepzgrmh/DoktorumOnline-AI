@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
@@ -7,9 +8,9 @@ class NotificationsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Bildirimler',
-          style: TextStyle(
+        title: Text(
+          'notifications'.tr(),
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.blue,
@@ -25,7 +26,7 @@ class NotificationsScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: const Center(child: Text('Bildirim ayarları burada olacak')),
+      body: Center(child: Text('notifications_settings_placeholder'.tr())),
     );
   }
 }

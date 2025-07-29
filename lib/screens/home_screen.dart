@@ -169,10 +169,10 @@ class HomeScreenState extends State<HomeScreen> {
                   (context, controller) => CoachmarkDesc(
                     text:
                         _hasProfileData
-                            ? 'Şikayetinizi başlatmak için buraya tıklayın'
-                            : 'Tüm bilgileri doldurduktan sonra şikayetinizi başlatın',
-                    next: 'Bitir',
-                    skip: 'Geç',
+                            ? 'tutorial_start_complaint'.tr()
+                            : 'tutorial_start_complaint_noUser'.tr(),
+                    next: 'finish'.tr(),
+                    skip: 'skip'.tr(),
                     onNext: () {
                       controller.skip();
                     },
@@ -342,7 +342,7 @@ class HomeScreenState extends State<HomeScreen> {
       final parts = await _service.getFollowUpQuestions(
         _formData!.toProfileMap(),
         _formData!.toComplaintMap(),
-        activeUserName,
+        activeUserName!,
         fileAnalysis,
       );
 

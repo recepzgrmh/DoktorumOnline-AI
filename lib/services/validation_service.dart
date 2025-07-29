@@ -1,78 +1,80 @@
+import 'package:easy_localization/easy_localization.dart';
+
 class ValidationService {
   static String? validateHeight(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Lütfen boyunuzu giriniz';
+      return 'validation_enter_height'.tr();
     }
     final height = double.tryParse(value);
     if (height == null || height <= 0 || height > 300) {
-      return 'Geçerli bir boy değeri giriniz (1-300 cm)';
+      return 'validation_invalid_height'.tr();
     }
     return null;
   }
 
   static String? validateAge(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Lütfen yaşınızı giriniz';
+      return 'validation_enter_age'.tr();
     }
     final age = int.tryParse(value);
     if (age == null || age <= 0 || age > 120) {
-      return 'Geçerli bir yaş giriniz (1-120)';
+      return 'validation_enter_age'.tr();
     }
     return null;
   }
 
   static String? validateWeight(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Lütfen kilonuzu giriniz';
+      return 'validation_enter_weight'.tr();
     }
     final weight = double.tryParse(value);
     if (weight == null || weight <= 0 || weight > 500) {
-      return 'Geçerli bir kilo değeri giriniz (1-500 kg)';
+      return 'validation_inavlid_weight';
     }
     return null;
   }
 
   static String? validateGender(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Lütfen cinsiyetinizi seçiniz';
+      return 'validation_select_gender'.tr();
     }
     return null;
   }
 
   static String? validateBloodType(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Lütfen kan grubunuzu seçiniz';
+      return 'validation_select_blood_type'.tr();
     }
     return null;
   }
 
   static String? validateComplaint(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Lütfen şikayetinizi giriniz';
+      return 'validation_enter_complaint'.tr();
     }
     if (value.length < 10) {
-      return 'Lütfen şikayetinizi daha detaylı açıklayınız (en az 10 karakter)';
+      return 'validation_complaint_short'.tr();
     }
     return null;
   }
 
   static String? validateDuration(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Lütfen şikayet sürenizi giriniz';
+      return "validation_enter_duration".tr();
     }
     return null;
   }
 
   static String? validateMedication(String? value) {
     if (value != null && value.isNotEmpty && value.length < 3) {
-      return 'Lütfen ilaç bilgisini daha detaylı giriniz';
+      return 'validation_invalid_drug'.tr();
     }
     return null;
   }
 
   static String? validateChronicDisease(String? value) {
     if (value != null && value.isNotEmpty && value.length < 3) {
-      return 'Lütfen kronik rahatsızlık bilgisini daha detaylı giriniz';
+      return 'validation_invalid_cronical'.tr();
     }
     return null;
   }

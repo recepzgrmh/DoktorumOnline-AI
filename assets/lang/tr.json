@@ -26,7 +26,7 @@
   "warning": "Doktorumonline.net web sitesinde yer alan tüm tıbbi bilgiler, yorumlar, duyurular ve tanıtım faaliyetleri yalnızca bilgilendirme amaçlıdır. Hiçbir şekilde kişileri doktorlarından bağımsız olarak teşhis ve tedaviye yönlendirme amacı taşımaz.",
   "first_name": "Ad",
   "last_name": "Soyad",
-  "developer": "geliştirici",
+  "developer": "Geliştirici",
   "important_links": "Önemli Bağlantılar",
   "important_warning":"Önemli Uyarı",
   "contect_info": "İletişim Bilgileri",
@@ -271,5 +271,76 @@
   "pdf_read_error": "PDF içeriği okunamadı veya boş.",
   "image_analysis_error": "Görüntü analizi sırasında bir hata oluştu",
   "ai_api_error": "OpenAI API hatası: {} {}",
-  "pdf_chunk_error": "Bu bölüm işlenirken bir hata oluştu"
+
+  "pdf_chunk_error": "An error occurred while processing this section",
+  "english_language": "İngilizce",
+   "german_language": "Almanca",
+  "turkish_language": "Türkçe",
+  "notifications_settings_placeholder": "Bildirim Ayarları Burada Görünecek"
+
+,
+
+  "app_title": "Medikal Asistan",
+  "ai_system_prompt_medical": "Sen bir tıbbi asistansın. Kullanıcının verdiği bilgilere dayanarak eksik noktaları tespit edip sorular sorar, ardından kapsamlı ve empatik bir tıbbi değerlendirme sunarsın.",
+  "ai_prompt_user_profile_info": "Kullanıcı profil bilgileri:",
+  "ai_prompt_height": "Boy",
+  "ai_prompt_age": "Yaş",
+  "ai_prompt_weight": "Kilo",
+  "ai_prompt_gender": "Cinsiyet",
+  "ai_prompt_blood_type": "Kan Grubu",
+  "ai_prompt_chronic_illness": "Kronik Rahatsızlık",
+  "ai_prompt_complaint_info": "Şikayet bilgileri:",
+  "ai_prompt_complaint": "Şikayet",
+  "ai_prompt_complaint_duration": "Şikayet Süresi",
+  "ai_prompt_current_meds": "Mevcut İlaçlar",
+  "ai_prompt_file_analysis_header": "Ayrıca kullanıcı tarafından yüklenen dosyanın analizi de aşağıdadır:",
+  "ai_prompt_ask_questions_instruction": "Lütfen kullanıcının sağladığı tüm hasta bilgilerini dikkatle incele ve aşağıdaki adımları takip et:\n\nSunulan verilerde eksik veya belirsiz kalan noktaları belirt ve netleştirmek için kullanıcıya spesifik sorular sor. Bu soruları madde madde sor (sorular 1,2,3... şeklinde sayılarla belirtilmeli). Her bir soru birbirinden farklı olmalı. Benim promptuma karşılık olarak bir şey söyleme direkt olarak soruları ver.\n\nHer aşamada net, anlaşılır ve empatik bir dil kullan.",
+  "ai_prompt_final_evaluation_instruction": "Yukarıdaki tüm bilgileri (profil, şikayet, soru-cevaplar VE VARSA DOSYA ANALİZİ) birlikte HARMANLAYARAK kapsamlı bir tıbbi değerlendirme yap ve önerilerde bulun. Hastanın şikayetini hafifletecek öneriler ver; gerekirse doktora yönlendir.",
+  "ai_prompt_final_evaluation_start_sentence": "Yanıtına mutlaka şu cümleyle BAŞLA ve kullanıcı bilgilerini yeniden listeleme: \"Verdiğiniz bilgilere dayanarak çıkarımlarım şöyle:\"",
+  "ai_prompt_file_analysis_system_prompt": "Sen, yalnızca tıbbi belgeleri analiz etmekle görevli bir yapay zeka asistanısın. Görevin iki aşamalıdır:\n\n1. **Değerlendirme:** İlk olarak, sana sunulan metnin veya görselin tıbbi bir belge (örneğin laboratuvar sonucu, doktor raporu, reçete, kan tahlili, patoloji raporu vb.) olup olmadığını kontrol et.\n\n2. **Yanıtlama:**\n   - **Eğer içerik tıbbi ise:** Bir doktor titizliğiyle, aşağıdaki başlıkları kullanarak kapsamlı bir analiz yap. Her başlığı '##' işareti ile başlat ve içeriğini yalın bir dille altına yaz:\n     ## Genel Değerlendirme\n     ## Tespit Edilen Durumlar\n     ## Risk Faktörleri\n     ## Öneriler\n     ## Takip Önerileri\n\n   - **Eğer içerik tıbbi bir belge DEĞİLSE:** Başka hiçbir analiz veya yorum yapmadan, SADECE ve birebir şu cümleyi yanıt olarak ver: 'Üzgünüm, medikal bir belge atmadığınız sürece size yanıt veremem.'",
+
+"ai_prompt_analyze_image_request": "Lütfen bu tıbbi rapor resmini analiz et."
+,"non_medical_document_error": "Üzgünüm, medikal bir belge atmadığınız sürece size yanıt veremem.",
+  "default_user_name": "Kullanıcı"
+
+
+  ,
+
+
+  "validation_enter_height": "Lütfen boyunuzu giriniz",
+  "validation_invalid_height": "Geçerli bir boy değeri giriniz (1-300 cm)",
+  "validation_enter_age": "Lütfen yaşınızı giriniz",
+  "validation_invalid_age": "Geçerli bir yaş giriniz (1-120)",
+  "validation_enter_weight": "Lütfen kilonuzu giriniz",
+  "validation_inavlid_weight": "Geçerli bir kilo değeri giriniz (1-500 kg",
+  "validation_select_gender": "Lütfen cinsiyetinizi seçiniz",
+  "validation_select_blood_type": "Lütfen kan grubunuzu seçiniz",
+  "validation_enter_complaint": "Lütfen şikayetinizi belirtin",
+  "validation_complaint_short": "Lütfen şikayetinizi daha detaylı açıklayınız (en az 10 karakter)",
+  "validation_enter_duration": "Lütfen şikayet süresini belirtin",
+"validation_invalid_drug":"Lütfen İlaç Bilgisini Daha Detaylı Girin (En az 3 karakter)"
+,"validation_invalid_cronical":"Lütfen kronik rahatsızlık bilgisini daha detaylı giriniz",
+
+
+"medicalForm": {
+    "infoText": "Lütfen aşağıdaki bilgileri doldurunuz. Bu bilgiler doktorunuzun size daha iyi yardımcı olmasını sağlayacaktır.",
+    "heightLabel": "Boy (cm)",
+    "ageLabel": "Yaş",
+    "weightLabel": "Kilo (kg)",
+    "genderLabel": "Cinsiyet",
+    "genderMale": "Erkek",
+    "genderFemale": "Kadın",
+    "bloodTypeLabel": "Kan Grubu",
+   
+    "complaintLabel": "Şikayetiniz",
+    "durationLabel": "Şikayet Süresi",
+    "medicationLabel": "Mevcut İlaçlar",
+    "chronicDiseaseLabel": "Kronik Rahatsızlık"
+  },
+  
+  "tutorial_start_complaint":"Şikayetinizi başlatmak için buraya tıklayın",
+  "tutorial_start_complaint_noUser":"Tüm bilgileri doldurduktan sonra şikayetinizi başlatın",
+
+  "update_profile_warning":"Profil bilgilerinizi güncelleyin. Bu bilgiler AI doktorunuzun size daha iyi hizmet vermesini sağlayacaktır.",
+  "profile_name":"Profil Adı"
 }

@@ -228,11 +228,13 @@ class ProfileService {
   }
 
   // Aktif kullanıcının adını getir
-  Future<String> getActiveUserName() async {
+  Future<String?> getActiveUserName() async {
     final activeProfile = await getActiveProfile();
     if (activeProfile != null && activeProfile.isNotEmpty) {
-      return activeProfile['name'] as String? ?? 'Kullanıcı';
+      // Profil adını döndür, null değilse.
+      return activeProfile['name'] as String?;
     }
-    return 'Kullanıcı';
+    // Ad bulunamazsa null döndür.
+    return null;
   }
 }

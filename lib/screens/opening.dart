@@ -41,10 +41,11 @@ class _OpeningState extends State<Opening> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Text('English'),
+                      Text('english_language'.tr()),
                     ],
                   ),
                 ),
+
                 DropdownMenuItem(
                   value: 'tr',
                   child: Row(
@@ -58,7 +59,7 @@ class _OpeningState extends State<Opening> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Text('Türkçe'),
+                      Text('turkish_language'.tr()),
                     ],
                   ),
                 ),

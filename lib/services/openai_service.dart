@@ -30,40 +30,37 @@ class OpenAIService {
     // —— 1) Prompt'u oluştur ———
     final prompt =
         StringBuffer()
-          ..writeln("Kullanıcı profil bilgileri:")
-          ..writeln("- Boy: ${profileData['Boy']}")
-          ..writeln("- Yaş: ${profileData['Yaş']}")
-          ..writeln("- Kilo: ${profileData['Kilo']}")
-          ..writeln("- Cinsiyet: ${profileData['Cinsiyet']}")
-          ..writeln("- Kan Grubu: ${profileData['Kan Grubu']}")
+          ..writeln('ai_prompt_user_profile_info'.tr())
+          ..writeln("- ${'ai_prompt_height'.tr()}: ${profileData['Boy']}")
+          ..writeln("- ${'ai_prompt_age'.tr()}: ${profileData['Yaş']}")
+          ..writeln("- ${'ai_prompt_weight'.tr()}: ${profileData['Kilo']}")
+          ..writeln("- ${'ai_prompt_gender'.tr()}: ${profileData['Cinsiyet']}")
           ..writeln(
-            "- Kronik Rahatsızlık: ${profileData['Kronik Rahatsızlık']}",
+            "- ${'ai_prompt_blood_type'.tr()}: ${profileData['Kan Grubu']}",
+          )
+          ..writeln(
+            "- ${'ai_prompt_chronic_illness'.tr()}: ${profileData['Kronik Rahatsızlık']}",
           )
           ..writeln()
-          ..writeln("Şikayet bilgileri:")
-          ..writeln("- Şikayet: ${complaintData['Şikayet']}")
-          ..writeln("- Şikayet Süresi: ${complaintData['Şikayet Süresi']}")
-          ..writeln("- Mevcut İlaçlar: ${complaintData['Mevcut İlaçlar']}")
+          ..writeln('ai_prompt_complaint_info'.tr())
+          ..writeln(
+            "- ${'ai_prompt_complaint'.tr()}: ${complaintData['Şikayet']}",
+          )
+          ..writeln(
+            "- ${'ai_prompt_complaint_duration'.tr()}: ${complaintData['Şikayet Süresi']}",
+          )
+          ..writeln(
+            "- ${'ai_prompt_current_meds'.tr()}: ${complaintData['Mevcut İlaçlar']}",
+          )
           ..writeln();
     if (fileAnalysis != null && fileAnalysis.isNotEmpty) {
-      prompt.writeln(
-        "Ayrıca kullanıcı tarafından yüklenen dosyanın analizi de aşağıdadır:",
-      );
+      prompt.writeln('ai_prompt_file_analysis_header'.tr());
       fileAnalysis.forEach((key, value) {
         prompt.writeln("- $key: $value");
       });
       prompt.writeln();
     }
-    prompt
-      ..writeln(
-        "Lütfen kullanıcının sağladığı tüm hasta bilgilerini dikkatle incele ve aşağıdaki adımları takip et:",
-      )
-      ..writeln()
-      ..writeln(
-        "Sunulan verilerde eksik veya belirsiz kalan noktaları belirt ve netleştirmek için kullanıcıya spesifik sorular sor. Bu soruları madde madde sor (sorular 1,2,3... şeklinde sayılarla belirtilmeli). Her bir soru birbirinden farklı olmalı. Benim promptuma karşılık olarak bir şey söyleme direkt olarak soruları ver",
-      )
-      ..writeln()
-      ..writeln("Her aşamada net, anlaşılır ve empatik bir dil kullan.");
+    prompt.writeln('ai_prompt_ask_questions_instruction'.tr());
 
     // —— 2) ChatGPT'den yanıtı al ————————————————————————————
     final raw = await _postToChatGPT(prompt.toString());
@@ -115,45 +112,47 @@ class OpenAIService {
   ) async {
     final prompt =
         StringBuffer()
-          ..writeln("Kullanıcı profil bilgileri:")
-          ..writeln("- Boy: ${profileData['Boy']}")
-          ..writeln("- Yaş: ${profileData['Yaş']}")
-          ..writeln("- Kilo: ${profileData['Kilo']}")
-          ..writeln("- Cinsiyet: ${profileData['Cinsiyet']}")
-          ..writeln("- Kan Grubu: ${profileData['Kan Grubu']}")
+          ..writeln('ai_prompt_user_profile_info'.tr())
+          ..writeln("- ${'ai_prompt_height'.tr()}: ${profileData['Boy']}")
+          ..writeln("- ${'ai_prompt_age'.tr()}: ${profileData['Yaş']}")
+          ..writeln("- ${'ai_prompt_weight'.tr()}: ${profileData['Kilo']}")
+          ..writeln("- ${'ai_prompt_gender'.tr()}: ${profileData['Cinsiyet']}")
           ..writeln(
-            "- Kronik Rahatsızlık: ${profileData['Kronik Rahatsızlık']}",
+            "- ${'ai_prompt_blood_type'.tr()}: ${profileData['Kan Grubu']}",
+          )
+          ..writeln(
+            "- ${'ai_prompt_chronic_illness'.tr()}: ${profileData['Kronik Rahatsızlık']}",
           )
           ..writeln()
-          ..writeln("Şikayet bilgileri:")
-          ..writeln("- Şikayet: ${complaintData['Şikayet']}")
-          ..writeln("- Şikayet Süresi: ${complaintData['Şikayet Süresi']}")
-          ..writeln("- Mevcut İlaçlar: ${complaintData['Mevcut İlaçlar']}")
+          ..writeln('ai_prompt_complaint_info'.tr())
+          ..writeln(
+            "- ${'ai_prompt_complaint'.tr()}: ${complaintData['Şikayet']}",
+          )
+          ..writeln(
+            "- ${'ai_prompt_complaint_duration'.tr()}: ${complaintData['Şikayet Süresi']}",
+          )
+          ..writeln(
+            "- ${'ai_prompt_current_meds'.tr()}: ${complaintData['Mevcut İlaçlar']}",
+          )
           ..writeln()
-          ..writeln("Kullanıcının takip sorularına verdiği cevaplar:")
+          ..writeln(
+            "Kullanıcının takip sorularına verdiği cevaplar:",
+          ) // Bu kısım AI'a gittiği için çevrilebilir veya sabit kalabilir
           ..writeAll(
             answers.asMap().entries.map((e) => "${e.key + 1}. ${e.value}"),
             "\n",
           )
           ..writeln();
     if (fileAnalysis != null && fileAnalysis.isNotEmpty) {
-      prompt.writeln(
-        "Ayrıca kullanıcı tarafından yüklenen dosyanın analizi de aşağıdadır:",
-      );
+      prompt.writeln('ai_prompt_file_analysis_header'.tr());
       fileAnalysis.forEach((key, value) {
         prompt.writeln("- $key: $value");
       });
       prompt.writeln();
     }
     prompt
-      ..writeln(
-        "Yukarıdaki tüm bilgileri (profil, şikayet, soru-cevaplar VE VARSA DOSYA ANALİZİ) birlikte HARMANLAYARAK kapsamlı bir tıbbi değerlendirme yap ve önerilerde bulun.  "
-        "Hastanın şikayetini hafifletecek öneriler ver; gerekirse doktora yönlendir.",
-      )
-      ..writeln(
-        "Yanıtına mutlaka şu cümleyle BAŞLA ve kullanıcı bilgilerini yeniden listeleme: "
-        "\"Verdiğiniz bilgilere dayanarak çıkarımlarım şöyle:\"",
-      );
+      ..writeln('ai_prompt_final_evaluation_instruction'.tr())
+      ..writeln('ai_prompt_final_evaluation_start_sentence'.tr());
 
     final result = await _postToChatGPT(prompt.toString());
     return result.trim();
@@ -170,7 +169,7 @@ class OpenAIService {
       body: jsonEncode({
         'model': 'gpt-4o',
         'messages': [
-          {'role': 'system', 'content': 'Sen bir tıbbi asistansın.'},
+          {'role': 'system', 'content': 'ai_system_prompt_medical'.tr()},
           {'role': 'user', 'content': content},
         ],
         'max_tokens': 3000,
@@ -213,8 +212,12 @@ class OpenAIService {
   }
 
   Map<String, String> _parseAnalysisResponse(String reply) {
+    final rejectionMessage = 'non_medical_document_error'.tr();
+    if (reply.trim() == rejectionMessage) {
+      return {'Hata': rejectionMessage};
+    }
+
     final Map<String, String> analysisResults = {};
-    // Yanıtı "##" karakterine göre bölerek başlıkları ve içerikleri ayır
     final sections = reply.split('##');
 
     for (var section in sections) {
@@ -243,23 +246,14 @@ class OpenAIService {
 
     final chunks = chunkText(fullText, 3000);
     Map<String, String> analysisResults = {};
-
+    final systemPrompt = 'ai_prompt_file_analysis_system_prompt'.tr();
     for (var part in chunks) {
       try {
         final res = await client.createChatCompletion(
           request: CreateChatCompletionRequest(
             model: ChatCompletionModel.model(ChatCompletionModels.gpt4o),
             messages: [
-              ChatCompletionMessage.system(
-                content:
-                    "Bir doktor titizliğiyle gelen metni detaylıca incele. Lütfen aşağıdaki başlıklar altında kapsamlı bir analiz yap, Kullanıcının Anlayabileceği Yalın bir dil kullan. Her başlığı '##' işareti ile başlat ve içeriğini altına yaz:\n\n"
-                    "## Genel Değerlendirme\n"
-                    "## Tespit Edilen Durumlar\n"
-                    "## Risk Faktörleri\n"
-                    "## Öneriler\n"
-                    "## Takip Önerileri\n\n"
-                    "Kullanıcının anlayabileceği sade bir dil kullan, ancak gerekli tıbbi terimleri de açıklayarak kullan. Her bölüm için detaylı ve kapsamlı bilgi ver.",
-              ),
+              ChatCompletionMessage.system(content: systemPrompt),
               ChatCompletionMessage.user(
                 content: ChatCompletionUserMessageContent.parts([
                   ChatCompletionMessageContentPart.text(text: part),
@@ -291,6 +285,8 @@ class OpenAIService {
       final bytes = await file.readAsBytes();
       final base64Image = base64Encode(bytes);
 
+      final systemPrompt = 'ai_prompt_file_analysis_system_prompt'.tr();
+      final userPrompt = 'ai_prompt_analyze_image_request'.tr();
       // `openai_dart` client'ını kullanarak API'ye istek gönder
       final res = await client.createChatCompletion(
         request: CreateChatCompletionRequest(
@@ -298,21 +294,12 @@ class OpenAIService {
             ChatCompletionModels.chatgpt4oLatest,
           ),
           messages: [
-            ChatCompletionMessage.system(
-              content:
-                  // PDF analiziyle aynı sistem prompt'u
-                  "Bir doktor titizliğiyle gelen tıbbi raporu (resim formatında) detaylıca incele. Lütfen aşağıdaki başlıklar altında kapsamlı bir analiz yap, Kullanıcının Anlayabileceği Yalın bir dil kullan. Her başlığı '##' işareti ile başlat ve içeriğini altına yaz:\n\n"
-                  "## Genel Değerlendirme\n"
-                  "## Tespit Edilen Durumlar\n"
-                  "## Risk Faktörleri\n"
-                  "## Öneriler\n"
-                  "## Takip Önerileri\n\n"
-                  "Kullanıcının anlayabileceği sade bir dil kullan, ancak gerekli tıbbi terimleri de açıklayarak kullan. Her bölüm için detaylı ve kapsamlı bilgi ver.",
-            ),
+            // Lokalize edilmiş değişkenleri kullan
+            ChatCompletionMessage.system(content: systemPrompt),
             ChatCompletionMessage.user(
               content: ChatCompletionUserMessageContent.parts([
                 ChatCompletionMessageContentPart.text(
-                  text: "Lütfen bu tıbbi rapor resmini analiz et.",
+                  text: userPrompt, // Burası da lokalize edildi
                 ),
                 ChatCompletionMessageContentPart.image(
                   imageUrl: ChatCompletionMessageImageUrl(

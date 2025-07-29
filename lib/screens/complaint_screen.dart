@@ -103,7 +103,7 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
       final parts = await _service.getFollowUpQuestions(
         _formData!.toProfileMap(),
         _formData!.toComplaintMap(),
-        activeUserName,
+        activeUserName!,
         null,
       );
 
