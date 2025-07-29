@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:login_page/screens/main_navigation_screen.dart';
 import 'package:login_page/screens/opening.dart';
 import 'package:login_page/screens/auth/verify_account.dart';
+import 'package:login_page/services/notification_service.dart';
 
 class Wrapper extends StatefulWidget {
   const Wrapper({super.key});
@@ -20,6 +21,7 @@ class _WrapperState extends State<Wrapper> {
   }
 
   Future<void> _checkUserState() async {
+    await NotificationService().initNotification();
     try {
       print('[DEBUG] _checkUserState başladı');
       // Mevcut kullanıcıyı kontrol et

@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:login_page/services/firebase_analytics.dart';
+import 'package:login_page/services/notification_service.dart';
 import 'package:login_page/theme/app_theme.dart';
 import 'firebase_options.dart';
 import 'package:login_page/wrapper.dart';
@@ -11,7 +12,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await EasyLocalization.ensureInitialized();
+
   print("[DEBUG] main başladı");
   try {
     await dotenv.load(fileName: "assets/.env");
@@ -23,6 +26,8 @@ Future<void> main() async {
       );
       print("[DEBUG] Firebase başlatıldı");
 
+      print("[DEBUG] Notification Service başlatıldı");
+
       // Firebase Auth ayarlarını yapılandır
       await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
       print("[DEBUG] Firebase Auth persistence ayarlandı");
@@ -32,6 +37,7 @@ Future<void> main() async {
       if (currentUser != null) {
         // Token'ı yenile
         await currentUser.getIdToken(true);
+
         print("[DEBUG] Kullanıcı token yenilendi");
       }
     }

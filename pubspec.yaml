@@ -57,6 +57,8 @@ dependencies:
   firebase_analytics: ^11.6.0
   easy_localization: ^3.0.8
   flutter_svg: ^2.2.0
+  firebase_messaging: ^15.2.10
+  flutter_local_notifications: ^19.4.0
 
 dev_dependencies:
   flutter_test:
