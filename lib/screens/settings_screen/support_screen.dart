@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -49,8 +50,8 @@ class _SupportScreenState extends State<SupportScreen> {
       _subjectController.clear();
       _messageController.clear();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Geri bildiriminiz iletildi 👍'),
+        SnackBar(
+          content: Text('feedback_success'.tr()),
           backgroundColor: Colors.green,
         ),
       );
@@ -70,7 +71,7 @@ class _SupportScreenState extends State<SupportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Yardım ve Destek'),
+        title: Text('support'.tr()),
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
@@ -91,8 +92,8 @@ class _SupportScreenState extends State<SupportScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
-                    'İstek veya şikâyetini bize ilet',
+                  Text(
+                    'feedback_title'.tr(),
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -101,18 +102,18 @@ class _SupportScreenState extends State<SupportScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Her türlü görüş, öneri ve şikâyetiniz için bize ulaşabilirsiniz.',
+                  Text(
+                    'feedback_description'.tr(),
                     style: TextStyle(fontSize: 15, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
                   CustomTextWidget(
-                    title: 'Konu',
+                    title: 'subject'.tr(),
                     icon: Icons.subject,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Lütfen bir konu belirtin.';
+                        return 'subject_required'.tr();
                       }
                       return null;
                     },
@@ -120,10 +121,10 @@ class _SupportScreenState extends State<SupportScreen> {
                   ),
 
                   CustomTextWidget(
-                    title: 'Mesajınız',
+                    title: 'message'.tr(),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Lütfen mesajınızı yazın.';
+                        return 'message_required'.tr();
                       }
                       return null;
                     },
@@ -136,7 +137,7 @@ class _SupportScreenState extends State<SupportScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: CustomButton(
-                      label: _sending ? 'Gönderiliyor...' : 'Gönder',
+                      label: _sending ? 'sending'.tr() : 'send'.tr(),
                       onPressed: () {
                         _sending ? null : _sendFeedback();
                       },

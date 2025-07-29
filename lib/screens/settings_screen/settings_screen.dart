@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/screens/opening.dart';
@@ -26,8 +27,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       backgroundColor: Colors.blue.shade50,
       appBar: AppBar(
-        title: const Text(
-          'Ayarlar',
+        title: Text(
+          'settings'.tr(),
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -52,8 +53,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 _buildMenuItem(
                   icon: Icons.person_outline,
-                  title: 'Profil Bilgileri',
-                  subtitle: 'Kişisel bilgilerinizi görüntüleyin',
+                  title: 'profile_info'.tr(),
+                  subtitle: 'profile_info_subtitle'.tr(),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -66,8 +67,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 _buildMenuItem(
                   icon: Icons.notifications_outlined,
-                  title: 'Bildirimler',
-                  subtitle: 'Bildirim ayarlarınızı yönetin',
+                  title: 'notifications'.tr(),
+                  subtitle: 'notifications_subtitle'.tr(),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -81,8 +82,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                 _buildMenuItem(
                   icon: Icons.language_outlined,
-                  title: 'Dil ve Bölge',
-                  subtitle: 'Dil ve saat dilimi ayarları',
+                  title: 'language_and_region'.tr(),
+                  subtitle: 'language_and_region_subtitle'.tr(),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -95,8 +96,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 _buildMenuItem(
                   icon: Icons.help_outline,
-                  title: 'Yardım ve Destek',
-                  subtitle: 'SSS ve iletişim bilgileri',
+                  title: 'support'.tr(),
+                  subtitle: 'support_subtitle'.tr(),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -109,8 +110,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 _buildMenuItem(
                   icon: Icons.info_outline,
-                  title: 'Hakkında',
-                  subtitle: 'Uygulama versiyonu ve lisans',
+                  title: 'about'.tr(),
+                  subtitle: 'about_subtitle'.tr(),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -199,12 +200,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       child: CustomButton(
         icon: Icon(Icons.logout, color: Colors.white),
-        label: 'Çıkış Yap',
+        label: 'logout'.tr(),
         onPressed: () {
           _utils.showConfirmationDialog(
             context: context,
-            title: 'Çıkış Yap',
-            content: 'Hesabınızdan çıkış yapmak istediğinizden emin misiniz?',
+            title: 'logout'.tr(),
+            content: 'logout_content'.tr(),
             icon: Icons.logout,
             onConfirm: signOut,
           );
@@ -229,7 +230,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       debugPrint('Çıkış hatası: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Çıkış yaparken bir hata oluştu: $e')),
+          SnackBar(content: Text('logout_error'.tr(args: [e.toString()]))),
         );
       }
     }

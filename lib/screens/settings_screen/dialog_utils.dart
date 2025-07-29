@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class DialogUtils {
@@ -28,8 +29,8 @@ class DialogUtils {
     required String title,
     required String content,
     String? subText,
-    String confirmText = 'Onayla',
-    String cancelText = 'İptal',
+    String? confirmText,
+    String? cancelText,
     required VoidCallback onConfirm,
     IconData? icon,
     Color? iconColor,
@@ -70,7 +71,6 @@ class DialogUtils {
                   fontSize: 16,
                 ),
               ),
-
               if (subText != null) ...[
                 const SizedBox(height: 8),
                 Text(
@@ -84,8 +84,8 @@ class DialogUtils {
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
-                cancelText,
-                style: TextStyle(color: Colors.grey, fontSize: 16),
+                cancelText ?? 'cancel'.tr(),
+                style: const TextStyle(color: Colors.grey, fontSize: 16),
               ),
             ),
             ElevatedButton(
@@ -97,7 +97,7 @@ class DialogUtils {
                 backgroundColor: confirmButtonColor ?? Colors.red,
                 foregroundColor: Colors.white,
               ),
-              child: Text(confirmText),
+              child: Text(confirmText ?? 'accept'.tr()),
             ),
           ],
         );

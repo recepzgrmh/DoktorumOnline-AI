@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
@@ -57,9 +59,9 @@ class _SignInState extends State<SignIn> {
       print(e);
       print(s);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Giriş yapılamadı: $e")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("signin_failed".tr(args: [e.toString()]))),
+        );
       }
     }
   }
@@ -69,9 +71,9 @@ class _SignInState extends State<SignIn> {
     final Uri url = Uri.parse(urlString);
     if (!await launchUrl(url)) {
       // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('$urlString açılamadı')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('url_open_error'.tr(args: [urlString]))),
+      );
     }
   }
 
@@ -131,8 +133,8 @@ class _SignInState extends State<SignIn> {
 
                 // Social media buttons
                 SocialAuthButtons(
-                  facebookText: 'sign_in',
-                  googleText: 'sign_in',
+                  facebookText: 'sign_in_auth'.tr(args: ['Facebook']),
+                  googleText: 'sign_in_auth'.tr(args: ['Google']),
                   onGooglePressed: () async {
                     showDialog(
                       context: context,
@@ -197,7 +199,7 @@ class _SignInState extends State<SignIn> {
                 ),
                 const SizedBox(height: 20),
                 TextInputs(
-                  labelText: 'Şifre',
+                  labelText: 'password_label'.tr(),
                   controller: password,
                   isPassword: true,
                 ),

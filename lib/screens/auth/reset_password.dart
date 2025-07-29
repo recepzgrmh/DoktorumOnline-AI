@@ -17,13 +17,13 @@ class _ResetPasswordState extends State<ResetPassword> {
   Future<void> resetPassword() async {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email.text);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Şifre sıfırlama bağlantısı gönderildi!")),
-      );
-    } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Hata: $e")));
+      ).showSnackBar(SnackBar(content: Text("reset_link_sent".tr())));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("error_message".tr(args: [e.toString()]))),
+      );
     }
   }
 

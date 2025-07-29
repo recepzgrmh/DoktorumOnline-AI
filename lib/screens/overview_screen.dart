@@ -3,6 +3,7 @@
 // Modernize edilmiş UI + hatasız derleme
 //
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
@@ -93,7 +94,7 @@ class _OverviewScreenState extends State<OverviewScreen>
               children: [
                 Icon(Icons.error_outline, color: Colors.white),
                 SizedBox(width: 8),
-                Expanded(child: Text('API anahtarı bulunamadı!')),
+                Expanded(child: Text('api_key_missing'.tr())),
               ],
             ),
             backgroundColor: Colors.red.shade600,
@@ -190,7 +191,7 @@ class _OverviewScreenState extends State<OverviewScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '🎉 Tanı Tamamlandı!',
+                    'progress_completed_title'.tr(),
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -199,7 +200,7 @@ class _OverviewScreenState extends State<OverviewScreen>
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'Artık AI ile detaylı sohbet edebilirsiniz',
+                    'progress_completed_desc'.tr(),
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.9),
                       fontSize: 14,
@@ -263,7 +264,7 @@ class _OverviewScreenState extends State<OverviewScreen>
                   ),
                   SizedBox(width: 12),
                   Text(
-                    'Tanı Süreci',
+                    'diagnosis_process'.tr(),
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -293,7 +294,7 @@ class _OverviewScreenState extends State<OverviewScreen>
                   ],
                 ),
                 child: Text(
-                  '$_remainingQuestions soru kaldı',
+                  'remaining_questions'.tr(args: ['$_remainingQuestions']),
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -354,7 +355,12 @@ class _OverviewScreenState extends State<OverviewScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '$_currentQIndex/${widget.questions.length} soru tamamlandı',
+                'questions_done'.tr(
+                  args: [
+                    _currentQIndex.toString(),
+                    widget.questions.length.toString(),
+                  ],
+                ),
                 style: TextStyle(
                   fontSize: 13,
                   color: Colors.grey.shade600,
@@ -362,7 +368,9 @@ class _OverviewScreenState extends State<OverviewScreen>
                 ),
               ),
               Text(
-                '${(_progressPercentage * 100).toInt()}%',
+                'percent_done'.tr(
+                  args: [((_progressPercentage * 100).toStringAsFixed(0))],
+                ),
                 style: TextStyle(
                   fontSize: 13,
                   color: Colors.blue.shade700,
@@ -471,7 +479,7 @@ class _OverviewScreenState extends State<OverviewScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: CustomErrorWidget(
-              message: 'OpenAI ile iletişim kurulamadı',
+              message: 'openai_error'.tr(),
               onRetry: () => _onSendMessage(userMsg),
             ),
             backgroundColor: Colors.red.shade600,
@@ -490,7 +498,7 @@ class _OverviewScreenState extends State<OverviewScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppbar(title: 'DoktorumOnline AI'),
+      appBar: CustomAppbar(title: 'overview_title'.tr()),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -536,7 +544,7 @@ class _OverviewScreenState extends State<OverviewScreen>
                               ),
                               SizedBox(height: 16),
                               Text(
-                                'Bir hata oluştu',
+                                'error'.tr(),
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -576,7 +584,7 @@ class _OverviewScreenState extends State<OverviewScreen>
                               ),
                               SizedBox(height: 16),
                               Text(
-                                'Mesajlar yükleniyor...',
+                                'loading_messages'.tr(),
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.grey.shade600,
@@ -748,7 +756,7 @@ class _OverviewScreenState extends State<OverviewScreen>
                         scrollToBottomOptions: ScrollToBottomOptions(),
                         inputOptions: InputOptions(
                           inputDecoration: InputDecoration(
-                            hintText: 'Mesajınızı yazın...',
+                            hintText: 'write_message_hint'.tr(),
                             hintStyle: TextStyle(
                               color: Colors.grey.shade400,
                               fontSize: 16,

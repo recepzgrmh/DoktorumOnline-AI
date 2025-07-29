@@ -2,6 +2,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -41,7 +42,7 @@ class HomeScreenState extends State<HomeScreen> {
 
   PlatformFile? _selectedFile;
   XFile? _selectedImage; // Resim için yeni state
-  String _status = 'Lütfen bir PDF dosyası veya resim seçin';
+  String _status = 'select_file_or_image'.tr();
   bool _isLoading = false;
   String _selectedType = ''; // 'pdf' veya 'image'
 
@@ -283,9 +284,9 @@ class HomeScreenState extends State<HomeScreen> {
   Future<void> _startFollowUp() async {
     // 1. Formun geçerliliğini ve formData'nın dolu olduğunu kontrol et.
     if (!_formKey2.currentState!.validate() || _formData == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lütfen tüm zorunlu alanları doldurun.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('fill_all_required_fields'.tr())));
       return;
     }
 
@@ -300,12 +301,12 @@ class HomeScreenState extends State<HomeScreen> {
       // 3. Seçili bir dosya varsa, türüne göre analiz et (PDF veya Resim).
       if (_selectedFile != null && _selectedFile!.path != null) {
         setState(
-          () => _status = 'PDF dosyası analiz ediliyor...',
+          () => _status = 'file_analysis_in_progress'.tr(),
         ); // Arayüzde durum bildir
         fileAnalysis = await _service.analyzePdf(_selectedFile!.path!);
       } else if (_selectedImage != null) {
         setState(
-          () => _status = 'Resim dosyası analiz ediliyor...',
+          () => _status = 'image_analysis_in_progress'.tr(),
         ); // Arayüzde durum bildir
         fileAnalysis = await _service.analyzeImage(_selectedImage!.path);
       }
@@ -314,7 +315,9 @@ class HomeScreenState extends State<HomeScreen> {
       if (fileAnalysis != null && fileAnalysis.containsKey('Hata')) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Dosya analizi hatası: ${fileAnalysis['Hata']}'),
+            content: Text(
+              'file_analysis_error'.tr(args: [fileAnalysis['Hata'].toString()]),
+            ),
           ),
         );
         return; // return, finally bloğunu tetikler ve işlemi sonlandırır.
@@ -371,9 +374,9 @@ class HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       debugPrint('Takip başlatma hatası: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Bir hata oluştu: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('error'.tr(args: [e.toString()]))),
+        );
       }
     } finally {
       if (mounted) {
@@ -412,7 +415,7 @@ class HomeScreenState extends State<HomeScreen> {
       _selectedFile = result.files.first;
       _selectedImage = null;
       _selectedType = 'pdf';
-      _status = 'Seçilen dosya: ${_selectedFile!.name}';
+      _status = 'selected_file'.tr(args: [_selectedFile!.name]);
     });
   }
 
@@ -429,12 +432,14 @@ class HomeScreenState extends State<HomeScreen> {
           _selectedImage = pickedFile;
           _selectedFile = null;
           _selectedType = 'image';
-          _status = 'Seçilen resim: ${pickedFile.name}';
+          _status = 'selected_image'.tr(args: [_selectedImage!.name]);
         });
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Resim seçilirken bir hata oluştu: $e')),
+        SnackBar(
+          content: Text('image_selection_error'.tr(args: [e.toString()])),
+        ),
       );
       print("Resim seçilirken bir hata ile karşılaşıldı: $e");
     }
@@ -451,7 +456,7 @@ class HomeScreenState extends State<HomeScreen> {
     if (_isLoadingProfile) {
       return const Scaffold(
         backgroundColor: Colors.white,
-        body: LoadingWidget(message: 'Profil bilgileri kontrol ediliyor...'),
+        body: LoadingWidget(message: 'loading_profile'),
       );
     }
 
@@ -459,7 +464,7 @@ class HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.white,
       body:
           _loading
-              ? const LoadingWidget(message: 'Şikayetiniz işleniyor...')
+              ? LoadingWidget(message: 'processing_complaint'.tr())
               : SafeArea(
                 child: SingleChildScrollView(
                   controller: _scrollController,
@@ -507,7 +512,10 @@ class HomeScreenState extends State<HomeScreen> {
                           children: [
                             Expanded(
                               child: CustomButton(
-                                label: isFileSelected ? _status : 'Dosya yükle',
+                                label:
+                                    isFileSelected
+                                        ? _status
+                                        : 'upload_file'.tr(),
                                 onPressed: _showSourceSelectionDialog,
 
                                 backgroundColor:
@@ -530,7 +538,7 @@ class HomeScreenState extends State<HomeScreen> {
                                     color: Colors.redAccent,
                                   ),
                                   onPressed: _clearSelection,
-                                  tooltip: 'Seçimi Temizle',
+                                  tooltip: 'clear_selection'.tr(),
                                 ),
                               ),
                           ],
@@ -539,7 +547,7 @@ class HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 16),
                         CustomButton(
                           key: _startButton,
-                          label: 'Şikayeti Başlat',
+                          label: 'start_complaint'.tr(),
                           onPressed: _startFollowUp,
                           backgroundColor: theme.primaryColor,
                           foregroundColor: Colors.white,
@@ -561,7 +569,7 @@ class HomeScreenState extends State<HomeScreen> {
       _selectedFile = null;
       _selectedImage = null;
       _selectedType = '';
-      _status = 'Lütfen bir PDF dosyası veya resim seçin';
+      _status = 'select_file_or_image'.tr();
     });
   }
 }

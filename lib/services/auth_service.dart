@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -53,25 +54,25 @@ class AuthService {
       if (!context.mounted) return null;
 
       // Hata mesajlarını göstermek için mevcut yapı korunmuştur.
-      String message = 'Kimlik doğrulama hatası: ${e.message}';
+      String message = 'auth_error'.tr(args: [e.message.toString()]);
       switch (e.code) {
         case 'account-exists-with-different-credential':
-          message = 'Bu e-posta zaten başka bir oturum yöntemiyle kayıtlı.';
+          message = 'account_exists_with_different_credential'.tr();
           break;
         case 'invalid-credential':
-          message = 'Geçersiz kimlik bilgileri.';
+          message = 'invalid_credential'.tr();
           break;
         case 'operation-not-allowed':
-          message = 'Google Sign-In bu projede etkin değil.';
+          message = 'operation_not_allowed'.tr();
           break;
         case 'user-disabled':
-          message = 'Bu hesap devre dışı bırakılmış.';
+          message = 'user_disabled'.tr();
           break;
         case 'user-not-found':
-          message = 'Kullanıcı bulunamadı.';
+          message = 'user_not_found'.tr();
           break;
         case 'email-already-in-use':
-          message = 'Bu e-posta adresi zaten kullanımda.';
+          message = 'email_already_in_use'.tr();
           break;
       }
       ScaffoldMessenger.of(context).showSnackBar(
@@ -82,7 +83,7 @@ class AuthService {
       if (!context.mounted) return null;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Beklenmeyen bir hata oluştu: $e'),
+          content: Text('error'.tr(args: [e.toString()])),
           backgroundColor: Colors.red,
         ),
       );
@@ -148,7 +149,7 @@ class AuthService {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Doğrulama kontrolü sırasında bir hata oluştu.'),
+          content: Text('verification_error'.tr()),
           backgroundColor: Colors.red,
         ),
       );
@@ -161,17 +162,9 @@ class AuthService {
     if (user != null && !user.emailVerified) {
       await user.sendEmailVerification();
 
-      SnackBar(
-        content: Text(
-          "Email Gönderildi\nLütfen e-posta kutunuzu kontrol edin.",
-        ),
-      );
+      SnackBar(content: Text("email_sent".tr()));
     } else {
-      SnackBar(
-        content: Text(
-          "Hata\nKullanıcı bulunamadı veya email zaten doğrulanmış.",
-        ),
-      );
+      SnackBar(content: Text("email_verification_failed"));
     }
   }
 }

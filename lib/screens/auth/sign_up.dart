@@ -62,9 +62,11 @@ class _SignUpState extends State<SignUp> {
       }
     } catch (e) {
       // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Hesap oluşturulamadı: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("create_account_error".tr(args: [e.toString()])),
+        ),
+      );
     }
   }
 
@@ -73,9 +75,9 @@ class _SignUpState extends State<SignUp> {
     final Uri url = Uri.parse(urlString);
     if (!await launchUrl(url)) {
       // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('$urlString açılamadı')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('url_open_error'.tr(args: [urlString]))),
+      );
     }
   }
 
@@ -120,8 +122,8 @@ class _SignUpState extends State<SignUp> {
                 const SizedBox(height: 40),
 
                 SocialAuthButtons(
-                  facebookText: 'sign_up'.tr(),
-                  googleText: 'sign_up'.tr(),
+                  googleText: 'sign_up_auth'.tr(args: ['Google']),
+                  facebookText: 'sign_up_auth'.tr(args: ['Facebook']),
                   onGooglePressed: () async {
                     showDialog(
                       context: context,

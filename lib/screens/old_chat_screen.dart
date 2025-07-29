@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:login_page/screens/chat_history_detail_screen.dart';
@@ -85,10 +86,9 @@ class OldChatScreenState extends State<OldChatScreen> {
               align: ContentAlign.bottom,
               builder: (context, controller) {
                 return CoachmarkDesc(
-                  text:
-                      'Geçmiş bir görüşmenizi görüntülemek için buraya dokunun.',
-                  next: 'Anladım',
-                  skip: 'Geç',
+                  text: 'old_chats_tutorial_text'.tr(),
+                  next: 'finish'.tr(),
+                  skip: 'skip'.tr(),
                   onNext: controller.skip,
                   onSkip: controller.skip,
                 );
@@ -126,7 +126,7 @@ class OldChatScreenState extends State<OldChatScreen> {
                   Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
                   const SizedBox(height: 16),
                   Text(
-                    "Bir hata oluştu",
+                    "error".tr(),
                     style: TextStyle(color: Colors.red[300], fontSize: 16),
                   ),
                 ],
@@ -145,7 +145,7 @@ class OldChatScreenState extends State<OldChatScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Henüz Mesaj Yok',
+                    'no_messages_yet'.tr(),
                     style: TextStyle(color: Colors.grey[600], fontSize: 16),
                   ),
                 ],
@@ -242,7 +242,7 @@ class OldChatScreenState extends State<OldChatScreen> {
                                     if (snap.connectionState ==
                                         ConnectionState.waiting) {
                                       return Text(
-                                        'Yükleniyor…',
+                                        'loading'.tr(),
                                         style: TextStyle(
                                           color: Colors.grey[500],
                                           fontSize: 13,
@@ -252,7 +252,7 @@ class OldChatScreenState extends State<OldChatScreen> {
                                     if (!snap.hasData ||
                                         snap.data!.docs.isEmpty) {
                                       return Text(
-                                        'Henüz Mesaj Yok',
+                                        'no_messages_yet'.tr(),
                                         style: TextStyle(
                                           color: Colors.grey[500],
                                           fontSize: 13,

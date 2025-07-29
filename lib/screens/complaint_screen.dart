@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/models/medical_form_data.dart';
@@ -224,7 +225,7 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
       return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          title: const Text('Şikayet Bildirimi'),
+          title: Text('complaint_title'.tr()),
           leading: Builder(
             builder:
                 (context) => IconButton(
@@ -236,14 +237,14 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
                 ),
           ),
         ),
-        body: const LoadingWidget(message: "Profil bilgileri yükleniyor..."),
+        body: LoadingWidget(message: "profile_loading".tr()),
       );
     }
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Şikayet Bildirimi'),
+        title: Text('complaint_title'.tr()),
         leading: Builder(
           builder:
               (context) => IconButton(
@@ -264,14 +265,14 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
                 showTutorial();
               }
             },
-            tooltip: 'Eğitimi Tekrar Göster',
+            tooltip: 'show_tutorial_tooltip'.tr(),
           ),
         ],
       ),
 
       body:
           _loading
-              ? const LoadingWidget(message: "Şikayetiniz işleniyor...")
+              ? LoadingWidget(message: "complaint_processing".tr())
               : SafeArea(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -296,7 +297,7 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
                         const SizedBox(height: 16),
                         CustomButton(
                           key: _startButton,
-                          label: 'Şikayeti Başlat',
+                          label: 'start_complaint'.tr(),
                           onPressed: _startFollowUp,
                           backgroundColor: theme.primaryColor,
                           foregroundColor: Colors.white,

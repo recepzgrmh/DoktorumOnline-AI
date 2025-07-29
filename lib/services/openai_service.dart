@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
@@ -83,10 +84,7 @@ class OpenAIService {
     // —— 4) Eğer hiç soru yoksa, doğrudan değerlendirme yap —————————
     if (parts.isEmpty) {
       // Hiç soru yoksa, doğrudan selamlama ve değerlendirme mesajı oluştur
-      final greeting =
-          "Merhaba $userName, ben kişisel sağlık danışmanın DoktorumOnline. "
-          "Verdiğiniz bilgiler yeterli görünüyor. Şikayetinizi değerlendirip size önerilerde bulunacağım.\n\n";
-
+      final greeting = "ai_greeting_no_questions".tr(args: [userName]);
       // Doğrudan değerlendirme yap
       final evaluation = await getFinalEvaluation(
         profileData,
@@ -100,10 +98,7 @@ class OpenAIService {
     }
 
     // —— 5) Selamlama + ilk soruyu tek mesaja dönüştür —————————
-    final greeting =
-        "Merhaba $userName, ben kişisel sağlık danışmanın DoktorumOnline. "
-        "Şikayetine daha sağlıklı yorum yapabilmem için bazı sorular soracağım. "
-        "Bu sorulara cevap verirsen daha iyi sonuç verebilirim.\n\n";
+    final greeting = "ai_intro_greeting".tr(args: [userName]);
 
     parts[0] = greeting + parts[0]; // ilk soruyla selamlamayı birleştir
 

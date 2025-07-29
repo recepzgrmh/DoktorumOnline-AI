@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class LanguageScreen extends StatelessWidget {
@@ -7,8 +8,8 @@ class LanguageScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Dil ve Bölge',
+        title: Text(
+          'language_and_region'.tr(),
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -25,7 +26,7 @@ class LanguageScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: const Center(child: Text('Dil ve bölge ayarları burada olacak')),
+      body: Center(child: Text('language_region_settings_placeholder'.tr())),
     );
   }
 }

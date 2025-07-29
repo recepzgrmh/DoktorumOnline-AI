@@ -29,7 +29,7 @@ class SocialAuthButtons extends StatelessWidget {
           onPressed: onGooglePressed,
           iconUrl:
               'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png',
-          label: 'Google$googleText',
+          label: googleText,
         ),
         const SizedBox(height: 12),
         // Facebook Button
@@ -37,7 +37,7 @@ class SocialAuthButtons extends StatelessWidget {
           onPressed: onFacebookPressed,
           iconUrl:
               'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Facebook_logo_%28square%29.png/960px-Facebook_logo_%28square%29.png',
-          label: 'Facebook$facebookText',
+          label: facebookText,
         ),
       ],
     );

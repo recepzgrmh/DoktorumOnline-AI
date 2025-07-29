@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import 'package:login_page/widgets/custom_appbar.dart';
@@ -18,7 +19,7 @@ class ChatHistoryDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppbar(title: 'DoktorumOnline AI'),
+      appBar: CustomAppbar(title: 'title'.tr()),
 
       body: Container(
         decoration: BoxDecoration(
@@ -40,15 +41,17 @@ class ChatHistoryDetailScreen extends StatelessWidget {
                   .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return Center(child: Text('Bir hata oluştu: ${snapshot.error}'));
+              return Center(
+                child: Text('error'.tr(args: [snapshot.error.toString()])),
+              );
             }
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
             final docs = snapshot.data?.docs ?? [];
             if (docs.isEmpty) {
-              return const EmptyStateWidget(
-                message: 'Henüz mesaj bulunmuyor',
+              return EmptyStateWidget(
+                message: 'chat_empty'.tr(),
                 icon: Icons.chat_bubble_outline,
               );
             }

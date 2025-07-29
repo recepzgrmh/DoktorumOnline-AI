@@ -131,8 +131,8 @@ class ProfilesScreenState extends State<ProfilesScreen> {
               builder:
                   (context, controller) => CoachmarkDesc(
                     text: 'tutorial_profile_card'.tr(),
-                    next: 'next',
-                    skip: 'next',
+                    next: 'next'.tr(),
+                    skip: 'skip'.tr(),
                     onNext: controller.next,
                     onSkip: controller.skip,
                   ),
@@ -155,8 +155,8 @@ class ProfilesScreenState extends State<ProfilesScreen> {
               builder:
                   (context, controller) => CoachmarkDesc(
                     text: 'tutorial_add_profile'.tr(),
-                    next: 'finish',
-                    skip: 'skip',
+                    next: 'finish'.tr(),
+                    skip: 'skip'.tr(),
                     onNext: controller.skip,
                     onSkip: controller.skip,
                   ),

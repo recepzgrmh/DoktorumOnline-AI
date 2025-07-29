@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/screens/settings_screen/dialog_utils.dart';
@@ -62,7 +63,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
               ),
               const SizedBox(height: 20),
               Text(
-                _user!.displayName ?? 'İsim Belirtilmemiş',
+                _user!.displayName ?? 'name_not_provided'.tr(),
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -70,7 +71,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                _user!.email ?? 'E-posta Yok',
+                _user!.email ?? 'email_not_available'.tr(),
                 style: const TextStyle(fontSize: 16, color: Colors.grey),
               ),
               const SizedBox(height: 24),
@@ -93,31 +94,28 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const ProfileInfoRow(
-                      label: 'Telefon',
+                    ProfileInfoRow(
+                      label: 'phone'.tr(),
                       value: '+90 555 555 55 55',
                     ),
                     const Divider(),
                     ProfileInfoRow(
-                      label: 'Kayıt Olma Tarihi',
+                      label: 'registration_date'.tr(),
                       value:
                           '${_user!.metadata.creationTime?.day}.${_user!.metadata.creationTime?.month}.${_user!.metadata.creationTime?.year}',
                     ),
                     const Divider(),
-                    const ProfileInfoRow(
-                      label: 'Cinsiyet',
-                      value: 'Belirtilmedi',
-                    ),
+                    ProfileInfoRow(label: 'gender'.tr(), value: 'Belirtilmedi'),
                     const Divider(),
                     if (_hasPasswordAuth)
-                      const ProfileInfoRow(
-                        label: 'Şifre',
+                      ProfileInfoRow(
+                        label: 'password'.tr(),
                         value: 'Şifreni Değiştir',
                         isButton: true,
                       )
                     else
-                      const ProfileInfoRow(
-                        label: 'Şifre',
+                      ProfileInfoRow(
+                        label: 'password'.tr(),
                         value: 'Şifre Belirle',
                         isButton: true,
                       ),
@@ -128,7 +126,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
               SizedBox(
                 width: double.infinity,
                 child: CustomButton(
-                  label: 'Bilgileri Düzenle',
+                  label: 'edit_info'.tr(),
                   onPressed: () {},
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
@@ -150,15 +148,13 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
                 ),
                 child: CustomButton(
                   icon: const Icon(Icons.delete_forever, color: Colors.white),
-                  label: 'Hesabımı Sil',
+                  label: 'delete_account_title'.tr(),
                   onPressed: () {
                     _utils.showConfirmationDialog(
                       context: context,
-                      title: 'Hesabı Sil',
-                      content:
-                          'Bu işlem geri alınamaz. Hesabınızı kalıcı olarak silmek istediğinizden emin misiniz?',
-                      subText:
-                          "• Tüm verileriniz kalıcı olarak silinecek\n• Bu işlem geri alınamaz\n• Uygulamadan çıkış yapılacak",
+                      title: 'delete_account'.tr(),
+                      content: 'delete_account_content'.tr(),
+                      subText: "delete_account_subtext".tr(),
 
                       icon: Icons.warning_amber_rounded,
                       onConfirm:
@@ -182,7 +178,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return const AlertDialog(
+        return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(16)),
           ),
@@ -191,7 +187,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
             children: [
               CircularProgressIndicator(),
               SizedBox(height: 16),
-              Text('Hesabınız siliniyor...', style: TextStyle(fontSize: 16)),
+              Text('deleting_account'.tr(), style: TextStyle(fontSize: 16)),
             ],
           ),
         );
@@ -210,8 +206,8 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
       // Başarı mesajı göster
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Hesabınız başarıyla silindi'),
+          SnackBar(
+            content: Text('account_deleted_successfully'.tr()),
             backgroundColor: Colors.green,
             duration: Duration(seconds: 2),
           ),
@@ -237,8 +233,7 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
       String errorMessage;
       switch (e.code) {
         case 'requires-recent-login':
-          errorMessage =
-              'Güvenlik nedeniyle tekrar giriş yapmanız gerekiyor. Lütfen çıkış yapıp tekrar giriş yapın.';
+          errorMessage = 'error_requires_recent_login'.tr();
           // Kullanıcıyı çıkış yaptır
           await FirebaseAuth.instance.signOut();
           if (mounted) {
@@ -249,13 +244,13 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
           }
           break;
         case 'user-not-found':
-          errorMessage = 'Kullanıcı bulunamadı.';
+          errorMessage = 'error_user_not_found'.tr();
           break;
         case 'network-request-failed':
-          errorMessage = 'İnternet bağlantınızı kontrol edin.';
+          errorMessage = 'error_netword'.tr();
           break;
         default:
-          errorMessage = 'Hesap silinirken bir hata oluştu. Tekrar deneyin.';
+          errorMessage = 'error_account_delete'.tr();
       }
 
       if (mounted) {
@@ -276,10 +271,8 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
       debugPrint('Hesap silme hatası: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.',
-            ),
+          SnackBar(
+            content: Text('error_unexpected'.tr()),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 3),
           ),

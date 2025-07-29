@@ -155,7 +155,9 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Resim seçilirken bir hata oluştu: $e')),
+        SnackBar(
+          content: Text('image_selection_error'.tr(args: [e.toString()])),
+        ),
       );
       print("Resim seçilirken bir hata ile karşılaşıldı: $e");
     }
@@ -214,7 +216,9 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
             (_) => Scaffold(
               appBar: CustomAppbar(
                 title:
-                    _selectedType == 'pdf' ? 'pdf_result'.tr() : 'result'.tr(),
+                    _selectedType == 'pdf'
+                        ? 'pdf_result'.tr()
+                        : 'image_result'.tr(),
               ),
               body: Container(
                 color: Colors.white,
@@ -421,8 +425,8 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
                             ),
                             Text(
                               _selectedType == 'pdf'
-                                  ? 'PDF Dosyası'
-                                  : 'Resim Dosyası',
+                                  ? 'pdf_file'.tr()
+                                  : 'image_file'.tr(),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey.shade600,

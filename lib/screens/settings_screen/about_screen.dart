@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -15,7 +16,7 @@ class _AboutScreenState extends State<AboutScreen> {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('$urlString açılamadı'),
+          content: Text('url_open_error'.tr(args: [urlString])),
           backgroundColor: Colors.red.shade400,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -31,7 +32,7 @@ class _AboutScreenState extends State<AboutScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue.shade50,
-        title: Text('Uygulama Hakkında', style: TextStyle(color: Colors.blue)),
+        title: Text('about_app'.tr(), style: TextStyle(color: Colors.blue)),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(
@@ -129,9 +130,8 @@ class _AboutScreenState extends State<AboutScreen> {
                         // Açıklama Kartı
                         _buildInfoCard(
                           icon: Icons.description_outlined,
-                          title: 'Uygulama Hakkında',
-                          content:
-                              'DoktorumOnline AI, Flutter ile geliştirilen ve Firebase altyapısı kullanan, kullanıcıların semptomlarını yapay zeka destekli sohbetle analiz ederek kişiye özel sağlık önerileri sunan bir mobil sağlık asistanıdır.',
+                          title: 'about_app'.tr(),
+                          content: 'about_app_info'.tr(),
                         ),
 
                         const SizedBox(height: 16),
@@ -139,7 +139,7 @@ class _AboutScreenState extends State<AboutScreen> {
                         // Geliştirici Kartı
                         _buildInfoCard(
                           icon: Icons.person_outline,
-                          title: 'Geliştirici',
+                          title: 'developer'.tr(),
                           content: 'Recep Özgür MIH',
                         ),
 
@@ -148,7 +148,7 @@ class _AboutScreenState extends State<AboutScreen> {
                         // İletişim Kartı
                         _buildInfoCard(
                           icon: Icons.email_outlined,
-                          title: 'İletişim',
+                          title: 'contect_info'.tr(),
                           content: 'info@mavipiksel.com',
                           isClickable: true,
                           onTap: () => _launchUrl('mailto:info@mavipiksel.com'),
@@ -159,7 +159,7 @@ class _AboutScreenState extends State<AboutScreen> {
                         // Teknolojiler Kartı
                         _buildInfoCard(
                           icon: Icons.code_outlined,
-                          title: 'Kullanılan Teknolojiler',
+                          title: 'used_techs'.tr(),
                           content:
                               'Flutter • Firebase • Provider • URL Launcher',
                         ),
@@ -185,7 +185,7 @@ class _AboutScreenState extends State<AboutScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Row(
+                                Row(
                                   children: [
                                     Icon(
                                       Icons.link,
@@ -194,7 +194,7 @@ class _AboutScreenState extends State<AboutScreen> {
                                     ),
                                     SizedBox(width: 8),
                                     Text(
-                                      'Önemli Bağlantılar',
+                                      'important_links'.tr(),
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
@@ -205,7 +205,7 @@ class _AboutScreenState extends State<AboutScreen> {
                                 ),
                                 const SizedBox(height: 16),
                                 _buildLinkButton(
-                                  'Gizlilik Politikası',
+                                  'privacy_policy'.tr(),
                                   Icons.privacy_tip_outlined,
                                   () => _launchUrl(
                                     'https://www.doktorumonline.net/gizlilik-politikasi',
@@ -213,7 +213,7 @@ class _AboutScreenState extends State<AboutScreen> {
                                 ),
                                 const SizedBox(height: 8),
                                 _buildLinkButton(
-                                  'Kullanıcı Sözleşmesi',
+                                  'user_agreement'.tr(),
                                   Icons.description_outlined,
                                   () => _launchUrl(
                                     'https://www.doktorumonline.net/kullanici-sozlesmesi',
@@ -248,7 +248,7 @@ class _AboutScreenState extends State<AboutScreen> {
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      'Önemli Uyarı',
+                                      'important_warning'.tr(),
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
@@ -259,7 +259,7 @@ class _AboutScreenState extends State<AboutScreen> {
                                 ),
                                 const SizedBox(height: 12),
                                 Text(
-                                  'Doktorumonline.net web sitesinde yer alan her türlü medikal bilgi, yorum, duyuru ve tanıtım faaliyetleri kişileri bilgilendirmeye yöneliktir. Hiçbir şekilde kişinin doktorundan bağımsız teşhis ve tedaviye yönlendirilmesi anlamına gelmemektedir.',
+                                  'warning'.tr(),
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.orange.shade800,

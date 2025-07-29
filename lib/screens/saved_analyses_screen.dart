@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/widgets/custom_appbar.dart';
 import '../models/pdf_analysis.dart';
@@ -20,12 +21,14 @@ class SavedAnalysesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppbar(title: 'Kaydedilmiş Analizler', actions: const []),
+      appBar: CustomAppbar(title: 'saved_analyses'.tr(), actions: const []),
       body: StreamBuilder<List<PdfAnalysis>>(
         stream: _service.getAnalyses(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return Center(child: Text('Bir hata oluştu: ${snapshot.error}'));
+            return Center(
+              child: Text('error'.tr(args: [snapshot.error.toString()])),
+            );
           }
 
           if (!snapshot.hasData) {
@@ -42,7 +45,7 @@ class SavedAnalysesScreen extends StatelessWidget {
                   Icon(Icons.history, size: 64, color: Colors.grey.shade400),
                   const SizedBox(height: 16),
                   Text(
-                    'Henüz kaydedilmiş analiz bulunmuyor',
+                    'no_saved_analysis'.tr(),
                     style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
                   ),
                 ],
@@ -75,7 +78,9 @@ class SavedAnalysesScreen extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   subtitle: Text(
-                    'Tarih: ${analysis.createdAt.toString().split('.')[0]}',
+                    'analysis_date'.tr(
+                      args: [analysis.createdAt.toString().split('.')[0]],
+                    ),
                     style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                   ),
                   trailing: Row(
@@ -84,7 +89,7 @@ class SavedAnalysesScreen extends StatelessWidget {
                       IconButton(
                         icon: const Icon(Icons.visibility),
                         color: Theme.of(context).primaryColor,
-                        tooltip: 'Analizi Gör',
+                        tooltip: 'view_analysis'.tr(),
                         onPressed: () => _showAnalysisDetail(context, analysis),
                       ),
                       IconButton(
@@ -95,21 +100,19 @@ class SavedAnalysesScreen extends StatelessWidget {
                             context: context,
                             builder:
                                 (context) => AlertDialog(
-                                  title: const Text('Analizi Sil'),
-                                  content: const Text(
-                                    'Bu analizi silmek istediğinizden emin misiniz?',
-                                  ),
+                                  title: Text('delete_analysis'.tr()),
+                                  content: Text('delete_analysis_confirm'.tr()),
                                   actions: [
                                     TextButton(
                                       onPressed:
                                           () => Navigator.pop(context, false),
-                                      child: const Text('İptal'),
+                                      child: Text('cancel'.tr()),
                                     ),
                                     TextButton(
                                       onPressed:
                                           () => Navigator.pop(context, true),
-                                      child: const Text(
-                                        'Sil',
+                                      child: Text(
+                                        'delete'.tr(),
                                         style: TextStyle(color: Colors.red),
                                       ),
                                     ),
@@ -141,7 +144,7 @@ class AnalysisDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppbar(title: 'Analiz Detayı', actions: const []),
+      appBar: CustomAppbar(title: 'analysis_detail'.tr(), actions: const []),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
