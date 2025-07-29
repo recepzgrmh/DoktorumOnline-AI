@@ -293,37 +293,68 @@ class HomeScreenState extends State<HomeScreen> {
     // 2. Yükleme animasyonunu başlat.
     setState(() => _loading = true);
 
-    // Analiz sonuçlarını tutacak değişkeni oluştur.
     Map<String, String>? fileAnalysis;
 
-    // Hata yönetimi için her şeyi try-catch-finally içine al.
     try {
-      // 3. Seçili bir dosya varsa, türüne göre analiz et (PDF veya Resim).
+      if (!_hasProfileData) {
+        await _profileService.addProfile(
+          name: 'main_profile'.tr(),
+          age: int.parse(yasController.text),
+          height: int.parse(boyController.text),
+          weight: double.parse(kiloController.text),
+          gender: _cinsiyet!,
+          bloodType: _kanGrubu!,
+
+          chronicIllness: illnessController.text,
+        );
+      }
+      // 3. Dosya analizi (varsa).
       if (_selectedFile != null && _selectedFile!.path != null) {
-        setState(
-          () => _status = 'file_analysis_in_progress'.tr(),
-        ); // Arayüzde durum bildir
+        setState(() => _status = 'file_analysis_in_progress'.tr());
         fileAnalysis = await _service.analyzePdf(_selectedFile!.path!);
       } else if (_selectedImage != null) {
-        setState(
-          () => _status = 'image_analysis_in_progress'.tr(),
-        ); // Arayüzde durum bildir
+        setState(() => _status = 'image_analysis_in_progress'.tr());
         fileAnalysis = await _service.analyzeImage(_selectedImage!.path);
       }
 
-      // Analizden bir hata dönerse, kullanıcıyı bilgilendir ve işlemi durdur.
       if (fileAnalysis != null && fileAnalysis.containsKey('Hata')) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               'file_analysis_error'.tr(args: [fileAnalysis['Hata'].toString()]),
             ),
+            backgroundColor: Colors.redAccent,
           ),
         );
-        return; // return, finally bloğunu tetikler ve işlemi sonlandırır.
+
+        return;
       }
 
-      // 4. Firestore'a şikayet kaydını yap (Bu kısım eskisiyle aynı).
+      // 4. OpenAI servisinden soruları veya hata mesajını al.
+      final activeUserName = await _profileService.getActiveUserName();
+      final parts = await _service.getFollowUpQuestions(
+        _formData!.toProfileMap(),
+        _formData!.toComplaintMap(),
+        activeUserName!,
+        fileAnalysis,
+      );
+
+      // 5. Servisten dönen cevabı kontrol et.
+      // Eğer cevap "geçersiz şikayet" hata mesajı ise SnackBar göster ve işlemi durdur.
+      if (mounted &&
+          parts.length == 1 &&
+          parts.first == 'invalid_complaint_error'.tr()) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(parts.first),
+            backgroundColor: Colors.orange.shade800, // Uyarı rengi
+          ),
+        );
+
+        return;
+      }
+
+      // 6. Şikayet geçerliyse, Firestore'a kaydı yap.
       final complaintDoc =
           FirebaseFirestore.instance
               .collection('users')
@@ -337,16 +368,7 @@ class HomeScreenState extends State<HomeScreen> {
         complaintId: complaintId,
       );
 
-      // 5. Dosya Analizi Soru Cevap Akışıyla birlikte
-      final activeUserName = await _profileService.getActiveUserName();
-      final parts = await _service.getFollowUpQuestions(
-        _formData!.toProfileMap(),
-        _formData!.toComplaintMap(),
-        activeUserName!,
-        fileAnalysis,
-      );
-
-      // 6. İlk mesajı kaydet ve sonraki ekrana geç.
+      // 7. İlk mesajı kaydet.
       if (parts.isNotEmpty) {
         await _formService.saveMessage(
           complaintId: complaintId,
@@ -355,6 +377,7 @@ class HomeScreenState extends State<HomeScreen> {
         );
       }
 
+      // 8. OverviewScreen'e yönlendir.
       if (mounted) {
         Navigator.push(
           context,
@@ -365,8 +388,7 @@ class HomeScreenState extends State<HomeScreen> {
                   complaintId: complaintId,
                   inputs: _formData!.toMap(),
                   questions: parts,
-                  fileAnalysis:
-                      fileAnalysis, // Analiz sonucunu bir sonraki ekrana da yolla
+                  fileAnalysis: fileAnalysis,
                 ),
           ),
         );
@@ -474,10 +496,7 @@ class HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          key: _topAreaKey,
-                          height: 1,
-                        ), // Anchor for scroll
+                        Container(key: _topAreaKey, height: 1),
                         const SizedBox(height: 24),
                         _hasProfileData
                             ? ComplaintForm(

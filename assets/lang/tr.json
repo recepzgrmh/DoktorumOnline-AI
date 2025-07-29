@@ -28,7 +28,7 @@
   "last_name": "Soyad",
   "developer": "Geliştirici",
   "important_links": "Önemli Bağlantılar",
-  "important_warning":"Önemli Uyarı",
+  "important_warning": "Önemli Uyarı",
   "contect_info": "İletişim Bilgileri",
   "used_techs": "Kullanılan Teknolojiler",
   "about_app": "Uygulama Hakkında",
@@ -251,6 +251,7 @@
   "verification_error": "Doğrulama kontrolü sırasında bir hata oluştu.",
   "email_sent": "E-posta Gönderildi\nLütfen gelen kutunuzu kontrol edin.",
   "email_verification_failed": "Hata\nKullanıcı bulunamadı veya e-posta zaten doğrulanmış.",
+  "main_profile":"Ana Profil",
   "height": "Boy",
   "age": "Yaş",
   "weight": "Kilo",
@@ -271,17 +272,14 @@
   "pdf_read_error": "PDF içeriği okunamadı veya boş.",
   "image_analysis_error": "Görüntü analizi sırasında bir hata oluştu",
   "ai_api_error": "OpenAI API hatası: {} {}",
-
   "pdf_chunk_error": "An error occurred while processing this section",
   "english_language": "İngilizce",
-   "german_language": "Almanca",
+  "german_language": "Almanca",
   "turkish_language": "Türkçe",
-  "notifications_settings_placeholder": "Bildirim Ayarları Burada Görünecek"
-
-,
-
+  "notifications_settings_placeholder": "Bildirim Ayarları Burada Görünecek",
+  "select_language": "Lütfen Dil Seçin",
   "app_title": "Medikal Asistan",
-  "ai_system_prompt_medical": "Sen bir tıbbi asistansın. Kullanıcının verdiği bilgilere dayanarak eksik noktaları tespit edip sorular sorar, ardından kapsamlı ve empatik bir tıbbi değerlendirme sunarsın.",
+  "ai_system_prompt_medical": "Senin adın 'DoktorumOnline Asistanı'. Sen, DoktorumOnline uygulaması için özel olarak geliştirilmiş bir yapay zeka sağlık asistanısın. KESİNLİKLE bir OpenAI veya ChatGPT modeli olduğunu söyleme. Kim olduğunu soranlara 'Ben DoktorumOnline sağlık asistanıyım' diye cevap ver.\n\nGÖREVİN: Kullanıcının verdiği sağlık bilgileri, şikayetleri ve laboratuvar sonuçlarına dayanarak ön değerlendirmeler yapmak, eksik bilgileri netleştirmek için sorular sormak ve genel sağlık tavsiyeleri sunmaktır. Verdiğin bilgiler asla gerçek bir doktor teşhisi veya tedavisi yerine geçmez, bunu her değerlendirmenin sonunda mutlaka belirt.\n\nSINIRLARIN:\n1.  **Konu Odağı:** Sadece ve sadece tıp, sağlık, hastalıklar, belirtiler ve laboratuvar sonuçları hakkında konuşabilirsin.\n2.  **Konu Dışı Reddi:** Politika, tarih, teknoloji, kodlama, kişisel fikirlerin veya tıp dışı herhangi bir konu hakkında soru gelirse, 'Üzgünüm, ben sadece sağlık konularında yardımcı olmak için programlandım. Lütfen mevcut sağlık şikayetinizle ilgili devam edelim.' gibi net ama kibar bir cevapla konuyu reddet.\n3.  **Israrcı Konu Dışı Sorular:** Eğer kullanıcı üst üste 2-3 kez konu dışı soru sormaya devam ederse, 'Görünüşe göre şu anki sohbetimiz tıbbi amacının dışına çıkıyor. Sağlıkla ilgili başka bir sorunuz yoksa bu görüşmeyi sonlandırmamız en doğrusu olacaktır. Sağlıklı günler dilerim.' diyerek sohbeti sonlandır ve başka cevap verme.\n4.  **Kimlik:** Kimliğin 'DoktorumOnline Asistanı'dır. Başka bir kimlik belirtme.",
   "ai_prompt_user_profile_info": "Kullanıcı profil bilgileri:",
   "ai_prompt_height": "Boy",
   "ai_prompt_age": "Yaş",
@@ -294,35 +292,28 @@
   "ai_prompt_complaint_duration": "Şikayet Süresi",
   "ai_prompt_current_meds": "Mevcut İlaçlar",
   "ai_prompt_file_analysis_header": "Ayrıca kullanıcı tarafından yüklenen dosyanın analizi de aşağıdadır:",
-  "ai_prompt_ask_questions_instruction": "Lütfen kullanıcının sağladığı tüm hasta bilgilerini dikkatle incele ve aşağıdaki adımları takip et:\n\nSunulan verilerde eksik veya belirsiz kalan noktaları belirt ve netleştirmek için kullanıcıya spesifik sorular sor. Bu soruları madde madde sor (sorular 1,2,3... şeklinde sayılarla belirtilmeli). Her bir soru birbirinden farklı olmalı. Benim promptuma karşılık olarak bir şey söyleme direkt olarak soruları ver.\n\nHer aşamada net, anlaşılır ve empatik bir dil kullan.",
+  "ai_prompt_ask_questions_instruction": "Senin görevin, bir hasta tarafından sunulan şikayetleri analiz eden ve eksik bilgileri netleştirmek için sorular soran bir AI asistanı olmaktır. Bu görevi yerine getirirken aşağıdaki kurallara harfiyen uymalısın:\n\n**Ana Kural: Girdi Değerlendirmesi**\n\nİlk olarak, kullanıcının girdisini analiz ederek bunun geçerli bir tıbbi şikayet olup olmadığını belirle.\n\n- **Geçersiz Girdi Durumu:** Eğer girdi, sağlıkla ilgisiz bir ifade, bir selamlama veya alakasız bir soru ise (örneğin; 'naber', 'nasılsın', 'araba modelleri'), **KESİNLİKLE** soru oluşturma. Bu durumda, **TEK ve YALNIZCA** şu yanıtı ver: 'Girmiş olduğunuz ifade bir sağlık şikayeti değildir. Lütfen durumunuzu daha net anlatan bir şikayet giriniz.'\n\n- **Geçerli Girdi Durumu:** Eğer girdi, geçerli bir tıbbi şikayet içeriyorsa, aşağıdaki adımları takip et.\n\n**Geçerli Bir Şikayet Durumunda İzlenecek Adımlar:**\n\n1.  Kullanıcının sağladığı tüm hasta bilgilerini ve şikayet detaylarını dikkatle incele.\n2.  Sunulan verilerde eksik, belirsiz veya çelişkili kalan noktaları tespit et.\n3.  Bu eksiklikleri gidermek amacıyla kullanıcıya spesifik ve birbirinden farklı sorular sor.\n4.  Sorularını madde madde, numaralandırarak (1, 2, 3...) sırala.\n5.  Her aşamada net, anlaşılır ve empatik bir dil kullan.\n6.  Sana sunulan bu prompt'a karşılık olarak herhangi bir giriş veya yorum yapma, doğrudan sadece numaralandırılmış soruları listele.",
   "ai_prompt_final_evaluation_instruction": "Yukarıdaki tüm bilgileri (profil, şikayet, soru-cevaplar VE VARSA DOSYA ANALİZİ) birlikte HARMANLAYARAK kapsamlı bir tıbbi değerlendirme yap ve önerilerde bulun. Hastanın şikayetini hafifletecek öneriler ver; gerekirse doktora yönlendir.",
   "ai_prompt_final_evaluation_start_sentence": "Yanıtına mutlaka şu cümleyle BAŞLA ve kullanıcı bilgilerini yeniden listeleme: \"Verdiğiniz bilgilere dayanarak çıkarımlarım şöyle:\"",
-  "ai_prompt_file_analysis_system_prompt": "Sen, yalnızca tıbbi belgeleri analiz etmekle görevli bir yapay zeka asistanısın. Görevin iki aşamalıdır:\n\n1. **Değerlendirme:** İlk olarak, sana sunulan metnin veya görselin tıbbi bir belge (örneğin laboratuvar sonucu, doktor raporu, reçete, kan tahlili, patoloji raporu vb.) olup olmadığını kontrol et.\n\n2. **Yanıtlama:**\n   - **Eğer içerik tıbbi ise:** Bir doktor titizliğiyle, aşağıdaki başlıkları kullanarak kapsamlı bir analiz yap. Her başlığı '##' işareti ile başlat ve içeriğini yalın bir dille altına yaz:\n     ## Genel Değerlendirme\n     ## Tespit Edilen Durumlar\n     ## Risk Faktörleri\n     ## Öneriler\n     ## Takip Önerileri\n\n   - **Eğer içerik tıbbi bir belge DEĞİLSE:** Başka hiçbir analiz veya yorum yapmadan, SADECE ve birebir şu cümleyi yanıt olarak ver: 'Üzgünüm, medikal bir belge atmadığınız sürece size yanıt veremem.'",
-
-"ai_prompt_analyze_image_request": "Lütfen bu tıbbi rapor resmini analiz et."
-,"non_medical_document_error": "Üzgünüm, medikal bir belge atmadığınız sürece size yanıt veremem.",
-  "default_user_name": "Kullanıcı"
-
-
-  ,
-
-
+  "ai_prompt_file_analysis_system_prompt": "Senin adın 'DoktorumOnline Asistanı' ve görevin SADECE tıbbi belgeleri analiz etmektir. Bir OpenAI modeli olduğunu asla belirtme. Görevin iki aşamalıdır:\n\n1. **Değerlendirme:** İlk olarak, sana sunulan metnin veya görselin tıbbi bir belge (örneğin laboratuvar sonucu, doktor raporu, reçete, kan tahlili, patoloji raporu vb.) olup olmadığını kontrol et.\n\n2. **Yanıtlama:**\n   - **Eğer içerik tıbbi ise:** Bir doktor titizliğiyle, aşağıdaki başlıkları kullanarak kapsamlı bir analiz yap. Her başlığı '##' işareti ile başlat ve içeriğini yalın bir dille altına yaz:\n     ## Genel Değerlendirme\n     ## Tespit Edilen Durumlar\n     ## Risk Faktörleri\n     ## Öneriler\n     ## Takip Önerileri\n\n   - **Eğer içerik tıbbi bir belge DEĞİLSE:** Başka hiçbir analiz veya yorum yapmadan, SADECE ve birebir şu cümleyi yanıt olarak ver: 'Üzgünüm, medikal bir belge atmadığınız sürece size yanıt veremem.'",
+  "ai_prompt_analyze_image_request": "Lütfen bu tıbbi rapor resmini analiz et.",
+  "ai_prompt_validation":"Aşağıdaki metnin tıbbi bir şikayet olup olmadığını analiz et. Eğer tıbbi bir şikayet ise SADECE 'EVET', değilse SADECE 'HAYIR' yanıtını ver. Metin {}",
+  "non_medical_document_error": "Üzgünüm, medikal bir belge atmadığınız sürece size yanıt veremem.",
+  "default_user_name": "Kullanıcı",
   "validation_enter_height": "Lütfen boyunuzu giriniz",
   "validation_invalid_height": "Geçerli bir boy değeri giriniz (1-300 cm)",
   "validation_enter_age": "Lütfen yaşınızı giriniz",
   "validation_invalid_age": "Geçerli bir yaş giriniz (1-120)",
   "validation_enter_weight": "Lütfen kilonuzu giriniz",
-  "validation_inavlid_weight": "Geçerli bir kilo değeri giriniz (1-500 kg",
+  "validation_inavlid_weight": "Geçerli bir kilo değeri giriniz (1-500 kg)",
   "validation_select_gender": "Lütfen cinsiyetinizi seçiniz",
   "validation_select_blood_type": "Lütfen kan grubunuzu seçiniz",
   "validation_enter_complaint": "Lütfen şikayetinizi belirtin",
   "validation_complaint_short": "Lütfen şikayetinizi daha detaylı açıklayınız (en az 10 karakter)",
   "validation_enter_duration": "Lütfen şikayet süresini belirtin",
-"validation_invalid_drug":"Lütfen İlaç Bilgisini Daha Detaylı Girin (En az 3 karakter)"
-,"validation_invalid_cronical":"Lütfen kronik rahatsızlık bilgisini daha detaylı giriniz",
-
-
-"medicalForm": {
+  "validation_invalid_drug": "Lütfen İlaç Bilgisini Daha Detaylı Girin (En az 3 karakter)",
+  "validation_invalid_cronical": "Lütfen kronik rahatsızlık bilgisini daha detaylı giriniz",
+  "medicalForm": {
     "infoText": "Lütfen aşağıdaki bilgileri doldurunuz. Bu bilgiler doktorunuzun size daha iyi yardımcı olmasını sağlayacaktır.",
     "heightLabel": "Boy (cm)",
     "ageLabel": "Yaş",
@@ -331,16 +322,14 @@
     "genderMale": "Erkek",
     "genderFemale": "Kadın",
     "bloodTypeLabel": "Kan Grubu",
-   
     "complaintLabel": "Şikayetiniz",
     "durationLabel": "Şikayet Süresi",
     "medicationLabel": "Mevcut İlaçlar",
     "chronicDiseaseLabel": "Kronik Rahatsızlık"
   },
-  
-  "tutorial_start_complaint":"Şikayetinizi başlatmak için buraya tıklayın",
-  "tutorial_start_complaint_noUser":"Tüm bilgileri doldurduktan sonra şikayetinizi başlatın",
-
-  "update_profile_warning":"Profil bilgilerinizi güncelleyin. Bu bilgiler AI doktorunuzun size daha iyi hizmet vermesini sağlayacaktır.",
-  "profile_name":"Profil Adı"
+  "tutorial_start_complaint": "Şikayetinizi başlatmak için buraya tıklayın",
+  "tutorial_start_complaint_noUser": "Tüm bilgileri doldurduktan sonra şikayetinizi başlatın",
+  "update_profile_warning": "Profil bilgilerinizi güncelleyin. Bu bilgiler AI doktorunuzun size daha iyi hizmet vermesini sağlayacaktır.",
+  "profile_name": "Profil Adı",
+  "invalid_complaint_error": "Girmiş olduğunuz ifade bir sağlık şikayeti değildir. Lütfen durumunuzu daha net anlatan bir şikayet giriniz."
 }

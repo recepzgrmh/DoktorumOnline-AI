@@ -19,6 +19,41 @@ class OpenAIService {
     client = OpenAIClient(apiKey: _apiKey);
   }
 
+  // şikayet alakalı mı alaksız mı sorgusu
+  Future<bool> _isComplaintMedical(String complaint) async {
+    // Yapay zekadan sadece 'EVET' veya 'HAYIR' yanıtı bekliyoruz.
+    final validationPrompt = "ai_prompt_validation".tr(args: [complaint]);
+
+    final response = await http.post(
+      _endpoint,
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Authorization': 'Bearer $_apiKey',
+      },
+      body: jsonEncode({
+        'model': 'gpt-3.5',
+        'messages': [
+          {'role': 'user', 'content': validationPrompt},
+        ],
+        'max_tokens': 5,
+        'temperature': 0,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      // Hata durumunda, varsayılan olarak tıbbi kabul edip devam et.
+      return true;
+    }
+
+    final utf8Body = utf8.decode(response.bodyBytes);
+    final data = jsonDecode(utf8Body) as Map<String, dynamic>;
+    final content =
+        (data['choices'][0]['message']['content'] as String?)?.trim() ?? '';
+
+    // Yanıt 'EVET' ise true, değilse false döner.
+    return content.toLowerCase() == 'evet';
+  }
+
   /// 1. Adım: Kullanıcı verilerindeki eksik/ belirsiz noktaları
   /// madde madde sorulara dönüştürür.
   Future<List<String>> getFollowUpQuestions(
@@ -27,6 +62,13 @@ class OpenAIService {
     String userName,
     Map<String, String>? fileAnalysis,
   ) async {
+    final String userComplaint = complaintData['Şikayet'] ?? "";
+
+    final bool isMedical = await _isComplaintMedical(userComplaint);
+    if (!isMedical) {
+      // Eğer şikayet tıbbi değilse, JSON'dan aldığımız hata mesajını döndürüp işlemi bitiriyoruz.
+      return ["invalid_complaint_error".tr()];
+    }
     // —— 1) Prompt'u oluştur ———
     final prompt =
         StringBuffer()
@@ -70,6 +112,9 @@ class OpenAIService {
       "______________________ChatGPT'den gelen yanıt : $raw __________________________",
     );
 
+    if (raw.contains("Girmiş olduğunuz ifade bir sağlık şikayeti değildir")) {
+      return [raw];
+    }
     // SIKINTI BURDAYDI ÇÖZDÜM :)))
     final parts =
         raw

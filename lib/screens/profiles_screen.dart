@@ -18,12 +18,10 @@ class ProfilesScreen extends StatefulWidget {
 }
 
 class ProfilesScreenState extends State<ProfilesScreen> {
-  // --- EĞİTİM İÇİN EKLENEN KOD BAŞLANGICI ---
   TutorialCoachMark? tutorialCoachMark;
   final List<TargetFocus> targets = [];
   final GlobalKey _newUser = GlobalKey();
   final GlobalKey _firstProfileCard = GlobalKey();
-  // --- EĞİTİM İÇİN EKLENEN KOD SONU ---
 
   final _profileService = ProfileService();
   final _formKey = GlobalKey<FormState>();
@@ -56,7 +54,7 @@ class ProfilesScreenState extends State<ProfilesScreen> {
     _boyController.dispose();
     _yasController.dispose();
     _kiloController.dispose();
-    tutorialCoachMark?.finish(); // Eğitimi temizle
+    tutorialCoachMark?.finish();
     super.dispose();
   }
 
@@ -78,7 +76,6 @@ class ProfilesScreenState extends State<ProfilesScreen> {
     }
   }
 
-  // --- EĞİTİM İÇİN EKLENEN KOD BAŞLANGICI ---
   void showTutorial() {
     _initTargets();
     if (targets.isEmpty || !mounted) return;
@@ -166,7 +163,6 @@ class ProfilesScreenState extends State<ProfilesScreen> {
       );
     }
   }
-  // --- EĞİTİM İÇİN EKLENEN KOD SONU ---
 
   @override
   Widget build(BuildContext context) {
@@ -213,7 +209,7 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                                       padding: const EdgeInsets.only(
                                         bottom: 16.0,
                                       ),
-                                      // Sadece ilk karta key ata
+
                                       child: _buildProfileCard(
                                         profile,
                                         index == 0 ? _firstProfileCard : null,
@@ -224,7 +220,7 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                       ),
                       const SizedBox(height: 16),
                       CustomButton(
-                        key: _newUser, // Eğitim için key
+                        key: _newUser,
                         label: 'add_new_profile'.tr(),
                         onPressed: () => _showProfileForm(),
                         icon: const Icon(Icons.add),
@@ -386,7 +382,6 @@ class ProfilesScreenState extends State<ProfilesScreen> {
     );
   }
 
-  // Profil ekleme/düzenleme formunu gösteren metot
   void _showProfileForm({Map<String, dynamic>? profile}) {
     _isEditing = profile != null;
     _editingProfileId = profile?['id'];
@@ -495,8 +490,6 @@ class ProfilesScreenState extends State<ProfilesScreen> {
   Future<void> _saveProfile(BuildContext modalContext) async {
     if (!_formKey.currentState!.validate()) return;
 
-    // Formun kendi state'i için setState kullanmak yerine StateSetter'ı kullanmak daha doğru olurdu,
-    // ancak mevcut yapıda bu da çalışır.
     setState(() => _isFormLoading = true);
 
     try {
@@ -541,7 +534,6 @@ class ProfilesScreenState extends State<ProfilesScreen> {
       if (!mounted) return;
       Navigator.pop(modalContext);
       ScaffoldMessenger.of(context).showSnackBar(
-        // Hatayı kullanıcıya özel bir şekilde düzenledim
         SnackBar(
           content: Text('generic_error_message').tr(),
           backgroundColor: Colors.red,
