@@ -9,6 +9,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
+import 'package:login_page/screens/main_navigation_screen.dart';
 import 'package:login_page/screens/navigator_screens/home_screen.dart';
 import 'package:login_page/services/openai_service.dart';
 import 'package:login_page/services/form_service.dart';
@@ -541,7 +542,7 @@ class _OverviewScreenState extends State<OverviewScreen>
 
                       onPressed: () {
                         Navigator.of(context).pushAndRemoveUntil(
-                          CustomPageRoute(child: HomeScreen()),
+                          CustomPageRoute(child: MainScreen()),
                           (Route<dynamic> route) => false,
                         );
                       },
