@@ -38,6 +38,8 @@ class _ComplaintFormState extends State<ComplaintForm> {
       weight: widget.userProfileData['Kilo'] ?? '',
       gender: widget.userProfileData['Cinsiyet'] ?? '',
       bloodType: widget.userProfileData['Kan Grubu'] ?? '',
+      smokeType: widget.userProfileData['Sigara Kullanımı'] ?? '',
+      alcoholType: widget.userProfileData['Alkol Kullanımı'] ?? '',
       complaint: widget.sikayetController.text,
       duration: widget.sureController.text,
       medication: widget.ilacController.text,

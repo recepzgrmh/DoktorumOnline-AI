@@ -33,6 +33,8 @@ class ProfilesScreenState extends State<ProfilesScreen> {
 
   String? _cinsiyet;
   String? _kanGrubu;
+  String? _sigara;
+  String? _alkol;
   bool _isFormLoading = false;
   bool _isEditing = false;
   String? _editingProfileId;
@@ -393,6 +395,8 @@ class ProfilesScreenState extends State<ProfilesScreen> {
       _kiloController.text = profile['weight']?.toString() ?? '';
       _cinsiyet = profile['gender'];
       _kanGrubu = profile['bloodType'];
+      _sigara = profile['smokeType'];
+      _alkol = profile['alcoholType'];
     } else {
       _nameController.clear();
       _boyController.clear();
@@ -400,6 +404,8 @@ class ProfilesScreenState extends State<ProfilesScreen> {
       _kiloController.clear();
       _cinsiyet = null;
       _kanGrubu = null;
+      _sigara = null;
+      _alkol = null;
     }
 
     showModalBottomSheet(
@@ -461,10 +467,16 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                       kiloController: _kiloController,
                       cinsiyet: _cinsiyet,
                       kanGrubu: _kanGrubu,
+                      sigara: _sigara,
+                      alkol: _alkol,
                       onCinsiyetChanged:
                           (value) => setModalState(() => _cinsiyet = value),
                       onKanGrubuChanged:
                           (value) => setModalState(() => _kanGrubu = value),
+                      onSigaraChanged:
+                          (value) => setModalState(() => _sigara = value),
+                      onAlkolChanged:
+                          (value) => setModalState(() => _alkol = value),
                     ),
                   ),
                 ),
@@ -502,6 +514,8 @@ class ProfilesScreenState extends State<ProfilesScreen> {
           weight: double.parse(_kiloController.text),
           gender: _cinsiyet!,
           bloodType: _kanGrubu!,
+          smokeType: _sigara!,
+          alcoholType: _alkol!,
         );
       } else {
         await _profileService.addProfile(
@@ -511,6 +525,8 @@ class ProfilesScreenState extends State<ProfilesScreen> {
           weight: double.parse(_kiloController.text),
           gender: _cinsiyet!,
           bloodType: _kanGrubu!,
+          smokeType: _sigara!,
+          alcoholType: _alkol!,
         );
       }
 

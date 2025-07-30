@@ -4,6 +4,8 @@ class MedicalFormData {
   final String weight;
   final String gender;
   final String bloodType;
+  final String smokeType;
+  final String alcoholType;
   final String complaint;
   final String duration;
   final String medication;
@@ -15,6 +17,8 @@ class MedicalFormData {
     required this.weight,
     required this.gender,
     required this.bloodType,
+    required this.smokeType,
+    required this.alcoholType,
     required this.complaint,
     required this.duration,
     required this.medication,
@@ -29,6 +33,8 @@ class MedicalFormData {
       'Kilo': weight,
       'Cinsiyet': gender,
       'Kan Grubu': bloodType,
+      'Sigara Kullanımı': smokeType,
+      'Alkol Kullanımı': alcoholType,
       'Şikayet': complaint,
       'Şikayet Süresi': duration,
       'Mevcut İlaçlar': medication,
@@ -44,6 +50,8 @@ class MedicalFormData {
       'Kilo': weight,
       'Cinsiyet': gender,
       'Kan Grubu': bloodType,
+      'Sigara Kullanımı': smokeType,
+      'Alkol Kullanımı': alcoholType,
       'Kronik Rahatsızlık': chronicDisease,
     };
   }
@@ -64,6 +72,8 @@ class MedicalFormData {
       weight: map['Kilo'] ?? '',
       gender: map['Cinsiyet'] ?? '',
       bloodType: map['Kan Grubu'] ?? '',
+      smokeType: map['Sigara Kullanımı'] ?? '',
+      alcoholType: map['Alkol Kullanımı'] ?? '',
       complaint: map['Şikayet'] ?? '',
       duration: map['Şikayet Süresi'] ?? '',
       medication: map['Mevcut İlaçlar'] ?? '',
@@ -77,6 +87,8 @@ class MedicalFormData {
     String? weight,
     String? gender,
     String? bloodType,
+    String? smokeType,
+    String? alcoholType,
     String? complaint,
     String? duration,
     String? medication,
@@ -88,6 +100,8 @@ class MedicalFormData {
       weight: weight ?? this.weight,
       gender: gender ?? this.gender,
       bloodType: bloodType ?? this.bloodType,
+      smokeType: smokeType ?? this.smokeType,
+      alcoholType: alcoholType ?? this.alcoholType,
       complaint: complaint ?? this.complaint,
       duration: duration ?? this.duration,
       medication: medication ?? this.medication,

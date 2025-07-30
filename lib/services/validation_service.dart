@@ -48,6 +48,20 @@ class ValidationService {
     return null;
   }
 
+  static String? validateSmokeType(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'validation_select_smoke_type'.tr();
+    }
+    return null;
+  }
+
+  static String? validateAlcoholType(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'validation_select_alcohol_type'.tr();
+    }
+    return null;
+  }
+
   static String? validateComplaint(String? value) {
     if (value == null || value.isEmpty) {
       return 'validation_enter_complaint'.tr();

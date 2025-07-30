@@ -38,6 +38,10 @@ class FormService {
                 'gender': profileData['Cinsiyet'] ?? profileMap['gender'],
                 'bloodType':
                     profileData['Kan Grubu'] ?? profileMap['bloodType'],
+                'smokeType':
+                    profileData['Sigara Kullanımı'] ?? profileMap['smokeType'],
+                'alcoholType':
+                    profileData['Alkol Kullanımı'] ?? profileMap['alcoholType'],
                 'chronicIllness':
                     profileData['Kronik Rahatsızlık'] ??
                     profileMap['chronicIllness'],
@@ -59,6 +63,8 @@ class FormService {
         'kilo': profileData['Kilo'],
         'cinsiyet': profileData['Cinsiyet'],
         'kan_grubu': profileData['Kan Grubu'],
+        'sigara': profileData['Sigara Kullanımı'],
+        'alkol': profileData['Alkol Kullanımı'],
         'kronik_rahatsizlik': profileData['Kronik Rahatsızlık'],
         'lastUpdated': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
@@ -101,6 +107,8 @@ class FormService {
         'Kilo': formData['Kilo'] ?? '',
         'Cinsiyet': formData['Cinsiyet'] ?? '',
         'Kan Grubu': formData['Kan Grubu'] ?? '',
+        'Sigara Kullanımı': formData['Sigara Kullanımı'] ?? '',
+        'Alkol Kullanımı': formData['Alkol Kullanımı'] ?? '',
         'Kronik Rahatsızlık': formData['Kronik Rahatsızlık'] ?? '',
       },
     );
@@ -176,6 +184,8 @@ class FormService {
           'Kilo': activeProfile['weight']?.toString() ?? '',
           'Cinsiyet': activeProfile['gender']?.toString() ?? '',
           'Kan Grubu': activeProfile['bloodType']?.toString() ?? '',
+          'Sigara Kullanımı': activeProfile['smokeType']?.toString() ?? '',
+          'Alkol Kullanımı': activeProfile['alcoholType']?.toString() ?? '',
           'Kronik Rahatsızlık':
               activeProfile['chronicIllness']?.toString() ?? '',
         };
@@ -187,6 +197,8 @@ class FormService {
           'Kilo': data['kilo']?.toString() ?? '',
           'Cinsiyet': data['cinsiyet']?.toString() ?? '',
           'Kan Grubu': data['kan_grubu']?.toString() ?? '',
+          'Sigara Kullanımı': data['sigara']?.toString() ?? '',
+          'Alkol Kullanımı': data['alkol']?.toString() ?? '',
           'Kronik Rahatsızlık': data['kronik_rahatsizlik']?.toString() ?? '',
         };
       }

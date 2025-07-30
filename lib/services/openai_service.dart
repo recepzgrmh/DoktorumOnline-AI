@@ -62,6 +62,7 @@ class OpenAIService {
     String userName,
     Map<String, String>? fileAnalysis,
   ) async {
+    print('GELEN PROFİL DATASI: $profileData');
     final String userComplaint = complaintData['Şikayet'] ?? "";
 
     final bool isMedical = await _isComplaintMedical(userComplaint);
@@ -79,6 +80,12 @@ class OpenAIService {
           ..writeln("- ${'ai_prompt_gender'.tr()}: ${profileData['Cinsiyet']}")
           ..writeln(
             "- ${'ai_prompt_blood_type'.tr()}: ${profileData['Kan Grubu']}",
+          )
+          ..writeln(
+            "- ${'ai_prompt_smoke_type'.tr()}: ${profileData['Sigara Kullanımı']}",
+          )
+          ..writeln(
+            "- ${'ai_prompt_alcohol_type'.tr()}: ${profileData['Alkol Kullanımı']}",
           )
           ..writeln(
             "- ${'ai_prompt_chronic_illness'.tr()}: ${profileData['Kronik Rahatsızlık']}",
@@ -164,6 +171,12 @@ class OpenAIService {
           ..writeln("- ${'ai_prompt_gender'.tr()}: ${profileData['Cinsiyet']}")
           ..writeln(
             "- ${'ai_prompt_blood_type'.tr()}: ${profileData['Kan Grubu']}",
+          )
+          ..writeln(
+            "- ${'ai_prompt_smoke_type'.tr()}: ${profileData['Sigara Kullanımı']}",
+          )
+          ..writeln(
+            "- ${'ai_prompt_alcohol_type'.tr()}: ${profileData['Alkol Kullanımı']}",
           )
           ..writeln(
             "- ${'ai_prompt_chronic_illness'.tr()}: ${profileData['Kronik Rahatsızlık']}",

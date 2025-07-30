@@ -28,6 +28,8 @@ class ProfileService {
     required double weight,
     required String gender,
     required String bloodType,
+    required String smokeType,
+    required String alcoholType,
     String? chronicIllness,
   }) async {
     final uid = _auth.currentUser!.uid;
@@ -41,6 +43,8 @@ class ProfileService {
       'weight': weight,
       'gender': gender,
       'bloodType': bloodType,
+      'smokeType': smokeType,
+      'alcoholType': alcoholType,
       'chronicIllness': chronicIllness ?? '',
       'isActive': false,
     };
@@ -78,6 +82,8 @@ class ProfileService {
     required double weight,
     required String gender,
     required String bloodType,
+    required String smokeType,
+    required String alcoholType,
     String? chronicIllness,
   }) async {
     final uid = _auth.currentUser!.uid;
@@ -102,6 +108,8 @@ class ProfileService {
               'weight': weight,
               'gender': gender,
               'bloodType': bloodType,
+              'smokeType': smokeType,
+              'alcoholType': alcoholType,
               'chronicIllness': chronicIllness ?? '',
             };
           }
@@ -198,6 +206,8 @@ class ProfileService {
       'kilo': profile['weight'].toString(),
       'cinsiyet': profile['gender'],
       'kan_grubu': profile['bloodType'],
+      'sigara': profile['smokeType'],
+      'alkol': profile['alcoholType'],
       'kronik_rahatsizlik': profile['chronicIllness'] ?? '',
       'activeProfileId': profile['id'],
     }, SetOptions(merge: true));

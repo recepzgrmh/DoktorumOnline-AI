@@ -15,8 +15,12 @@ class MedicalForm extends StatelessWidget {
   final TextEditingController illnessController;
   final String? cinsiyet;
   final String? kanGrubu;
+  final String? sigara;
+  final String? alkol;
   final Function(String?) onCinsiyetChanged;
   final Function(String?) onKanGrubuChanged;
+  final Function(String?) onSigaraChanged;
+  final Function(String?) onAlkolChanged;
   final Function(MedicalFormData) onFormChanged;
 
   const MedicalForm({
@@ -30,8 +34,12 @@ class MedicalForm extends StatelessWidget {
     required this.illnessController,
     required this.cinsiyet,
     required this.kanGrubu,
+    required this.sigara,
+    required this.alkol,
     required this.onCinsiyetChanged,
     required this.onKanGrubuChanged,
+    required this.onSigaraChanged,
+    required this.onAlkolChanged,
     required this.onFormChanged,
   });
 
@@ -42,6 +50,8 @@ class MedicalForm extends StatelessWidget {
       weight: kiloController.text,
       gender: cinsiyet ?? '',
       bloodType: kanGrubu ?? '',
+      smokeType: sigara ?? '',
+      alcoholType: alkol ?? '',
       complaint: sikayetController.text,
       duration: sureController.text,
       medication: ilacController.text,
@@ -155,6 +165,53 @@ class MedicalForm extends StatelessWidget {
             _notifyFormChanged();
           },
           validator: ValidationService.validateBloodType,
+        ),
+
+        CustomDropdownWidget<String>(
+          label: 'Sigara Kullanımı',
+          icon: Icons.smoking_rooms_rounded,
+          value: sigara,
+          items: const [
+            DropdownMenuItem(value: 'İçmiyorum', child: Text('İçmiyorum')),
+            DropdownMenuItem(value: 'Bıraktım', child: Text('Bıraktım')),
+            DropdownMenuItem(
+              value: 'Nadiren İçiyorum',
+              child: Text('Nadiren İçiyorum'),
+            ),
+
+            DropdownMenuItem(
+              value: 'Düzenli İçiyorum',
+              child: Text('Düzenli İçiyorum'),
+            ),
+          ],
+          onChanged: (value) {
+            onSigaraChanged(value);
+            _notifyFormChanged();
+          },
+          validator: ValidationService.validateSmokeType,
+        ),
+
+        CustomDropdownWidget<String>(
+          label: 'alcohol_label'.tr(),
+          icon: Icons.local_bar_outlined,
+          value: alkol,
+          items: [
+            DropdownMenuItem(value: 'İçmiyorum', child: Text('none'.tr())),
+            DropdownMenuItem(value: 'Bıraktım', child: Text('quit'.tr())),
+            DropdownMenuItem(
+              value: 'Nadiren İçiyorum',
+              child: Text('occasionally'.tr()),
+            ),
+            DropdownMenuItem(
+              value: 'Düzenli İçiyorum',
+              child: Text('regularly'.tr()),
+            ),
+          ],
+          onChanged: (value) {
+            onAlkolChanged(value);
+            _notifyFormChanged();
+          },
+          validator: ValidationService.validateAlcoholType,
         ),
 
         CustomTextWidget(

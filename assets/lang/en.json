@@ -288,6 +288,8 @@
   "ai_prompt_weight": "Weight",
   "ai_prompt_gender": "Gender",
   "ai_prompt_blood_type": "Blood Type",
+  "ai_prompt_smoke_type": "Smoke Habits",
+  "ai_prompt_alcohol_type": "Alcohol Habits",
   "ai_prompt_chronic_illness": "Chronic Illness",
   "ai_prompt_complaint_info": "Complaint information:",
   "ai_prompt_complaint": "Complaint",
@@ -313,6 +315,8 @@
   "validation_inavlid_weight": "Please enter a valid weight (1-500 kg)",
   "validation_select_gender": "Please select your gender",
   "validation_select_blood_type": "Please select your blood type",
+  "validation_select_smoke_type": "Please select your smoke habits",
+  "validation_select_alcohol_type": "Please select your alcohol habits",
   "validation_enter_complaint": "Please state your complaint",
   "validation_complaint_short": "Please describe your complaint in more detail (at least 10 characters)",
   "validation_enter_duration": "Please state the duration of the complaint",
@@ -338,5 +342,13 @@
   "profile_name": "Profile Name",
   "invalid_complaint_error": "The statement you entered is not a health complaint. Please enter a complaint that more clearly describes your condition.",
   "yes":"yes",
-  "no":"no"
+  "no":"no",
+
+
+   "smoking_label": "Smoking Habits",
+   "alcohol_label":"Alcohol Habits",
+  "none": "I don't smoke",
+  "quit": "I quit",
+  "occasionally": "I smoke occasionally",
+  "regularly": "I smoke regularly"
 }

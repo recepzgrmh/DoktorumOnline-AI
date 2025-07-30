@@ -72,6 +72,8 @@ class HomeScreenState extends State<HomeScreen> {
 
   String? _cinsiyet;
   String? _kanGrubu;
+  String? _sigara;
+  String? _alkol;
   MedicalFormData? _formData;
   Map<String, String> _userProfileData = {};
 
@@ -237,6 +239,8 @@ class HomeScreenState extends State<HomeScreen> {
               'Kilo': activeProfile['weight']?.toString() ?? '',
               'Cinsiyet': activeProfile['gender']?.toString() ?? '',
               'Kan Grubu': activeProfile['bloodType']?.toString() ?? '',
+              'Sigara Kullanımı': activeProfile['smokeType']?.toString() ?? '',
+              'Alkol Kullanımı': activeProfile['alcoholType']?.toString() ?? '',
               'Kronik Rahatsızlık':
                   activeProfile['chronicIllness']?.toString() ?? '',
             };
@@ -248,6 +252,9 @@ class HomeScreenState extends State<HomeScreen> {
               'Kilo': data['kilo']?.toString() ?? '',
               'Cinsiyet': data['cinsiyet']?.toString() ?? '',
               'Kan Grubu': data['kan_grubu']?.toString() ?? '',
+              'Sigara Kullanımı': data['sigara_kullanimi']?.toString() ?? '',
+
+              'Alkol Kullanımı': data['alkol_kullanimi']?.toString() ?? '',
               'Kronik Rahatsızlık':
                   data['kronik_rahatsizlik']?.toString() ?? '',
             };
@@ -258,7 +265,9 @@ class HomeScreenState extends State<HomeScreen> {
               profileData['Yaş']?.isNotEmpty == true &&
               profileData['Kilo']?.isNotEmpty == true &&
               profileData['Cinsiyet']?.isNotEmpty == true &&
-              profileData['Kan Grubu']?.isNotEmpty == true;
+              profileData['Kan Grubu']?.isNotEmpty == true &&
+              profileData['Sigara Kullanımı']?.isNotEmpty == true &&
+              profileData['Alkol Kullanımı']?.isNotEmpty == true;
         }
 
         setState(() {
@@ -304,6 +313,8 @@ class HomeScreenState extends State<HomeScreen> {
           weight: double.parse(kiloController.text),
           gender: _cinsiyet!,
           bloodType: _kanGrubu!,
+          smokeType: _sigara!,
+          alcoholType: _alkol!,
 
           chronicIllness: illnessController.text,
         );
@@ -521,10 +532,15 @@ class HomeScreenState extends State<HomeScreen> {
                               illnessController: illnessController,
                               cinsiyet: _cinsiyet,
                               kanGrubu: _kanGrubu,
+                              sigara: _sigara,
+                              alkol: _alkol,
                               onCinsiyetChanged:
                                   (v) => setState(() => _cinsiyet = v),
                               onKanGrubuChanged:
                                   (v) => setState(() => _kanGrubu = v),
+                              onSigaraChanged:
+                                  (v) => setState(() => _sigara = v),
+                              onAlkolChanged: (v) => setState(() => _alkol = v),
                               onFormChanged:
                                   (d) => setState(() => _formData = d),
                             ),

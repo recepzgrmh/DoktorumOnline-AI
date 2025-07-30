@@ -11,8 +11,12 @@ class ProfileForm extends StatelessWidget {
   final TextEditingController kiloController;
   final String? cinsiyet;
   final String? kanGrubu;
+  final String? sigara;
+  final String? alkol;
   final Function(String?) onCinsiyetChanged;
   final Function(String?) onKanGrubuChanged;
+  final Function(String?) onSigaraChanged;
+  final Function(String?) onAlkolChanged;
 
   const ProfileForm({
     super.key,
@@ -22,8 +26,12 @@ class ProfileForm extends StatelessWidget {
     required this.kiloController,
     required this.cinsiyet,
     required this.kanGrubu,
+    required this.sigara,
+    required this.alkol,
     required this.onCinsiyetChanged,
     required this.onKanGrubuChanged,
+    required this.onSigaraChanged,
+    required this.onAlkolChanged,
   });
 
   @override
@@ -140,6 +148,46 @@ class ProfileForm extends StatelessWidget {
           ],
           onChanged: onKanGrubuChanged,
           validator: ValidationService.validateBloodType,
+        ),
+
+        CustomDropdownWidget<String>(
+          label: 'smoking_label'.tr(),
+          icon: Icons.smoking_rooms_rounded,
+          value: sigara,
+          items: [
+            DropdownMenuItem(value: 'İçmiyorum', child: Text('none'.tr())),
+            DropdownMenuItem(value: 'Bıraktım', child: Text('quit'.tr())),
+            DropdownMenuItem(
+              value: 'Nadiren İçiyorum',
+              child: Text('occasionally'.tr()),
+            ),
+            DropdownMenuItem(
+              value: 'Düzenli İçiyorum',
+              child: Text('regularly'.tr()),
+            ),
+          ],
+          onChanged: onSigaraChanged,
+          validator: ValidationService.validateSmokeType,
+        ),
+
+        CustomDropdownWidget<String>(
+          label: 'alcohol_label'.tr(),
+          icon: Icons.local_bar_outlined,
+          value: alkol,
+          items: [
+            DropdownMenuItem(value: 'İçmiyorum', child: Text('none'.tr())),
+            DropdownMenuItem(value: 'Bıraktım', child: Text('quit'.tr())),
+            DropdownMenuItem(
+              value: 'Nadiren İçiyorum',
+              child: Text('occasionally'.tr()),
+            ),
+            DropdownMenuItem(
+              value: 'Düzenli İçiyorum',
+              child: Text('regularly'.tr()),
+            ),
+          ],
+          onChanged: onAlkolChanged,
+          validator: ValidationService.validateSmokeType,
         ),
       ],
     );

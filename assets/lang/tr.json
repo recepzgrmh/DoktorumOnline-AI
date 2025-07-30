@@ -314,7 +314,11 @@
   "validation_enter_weight": "Lütfen kilonuzu giriniz",
   "validation_inavlid_weight": "Geçerli bir kilo değeri giriniz (1-500 kg)",
   "validation_select_gender": "Lütfen cinsiyetinizi seçiniz",
-  "validation_select_blood_type": "Lütfen kan grubunuzu seçiniz",
+    "validation_select_alcohol_type": "Lütfen Alkol Kullanımınızı Seçiniz",
+  "validation_select_smoke_type": "Lütfen Sigara Kullanımınızı Seçiniz",
+  "validation_select_blood_type": "Lütfen Kan Grubunuzu Seçiniz",
+    "ai_prompt_smoke_type": "Sigara Kullanımı",
+  "ai_prompt_alcohol_type": "Alkol Kullanımı",
   "validation_enter_complaint": "Lütfen şikayetinizi belirtin",
   "validation_complaint_short": "Lütfen şikayetinizi daha detaylı açıklayınız (en az 10 karakter)",
   "validation_enter_duration": "Lütfen şikayet süresini belirtin",
@@ -340,5 +344,13 @@
   "profile_name": "Profil Adı",
   "invalid_complaint_error": "Girmiş olduğunuz ifade bir sağlık şikayeti değildir. Lütfen durumunuzu daha net anlatan bir şikayet giriniz.",
   "yes":"evet",
-  "no":"hayır"
+  "no":"hayır",
+
+
+  "smoking_label": "Sigara Kullanımı",
+  "alcohol_label":"Alkol Kullanımı",
+  "none": "İçmiyorum",
+  "quit": "Bıraktım",
+  "occasionally": "Nadiren İçiyorum",
+  "regularly": "Düzenli İçiyorum"
 }
