@@ -3,11 +3,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:login_page/screens/home_screen.dart';
-import 'package:login_page/screens/old_chat_screen.dart';
-import 'package:login_page/screens/pdf_analysis_screen.dart';
-import 'package:login_page/screens/profiles_screen.dart';
-import 'package:login_page/screens/saved_analyses_screen.dart';
+import 'package:login_page/screens/navigator_screens/home_screen.dart';
+import 'package:login_page/screens/navigator_screens/old_chat_screen.dart';
+import 'package:login_page/screens/navigator_screens/pdf_analysis_screen.dart';
+import 'package:login_page/screens/navigator_screens/profiles_screen.dart';
+import 'package:login_page/screens/navigator_screens/saved_analyses_screen.dart';
 import 'package:login_page/services/auth_service.dart';
 import 'package:login_page/services/firebase_analytics.dart';
 import 'package:login_page/services/tutorial_service.dart';
@@ -240,11 +240,14 @@ class _MainScreenState extends State<MainScreen> {
     return _pages[index]!;
   }
 
+  DateTime? _lastBackPressed;
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false, // Sistemin otomatik geri gitmesini engelle
-      onPopInvoked: (didPop) {
+
+      onPopInvokedWithResult: (bool didPop, dynamic _) {
         if (didPop) return;
 
         // Geçmişte 1'den fazla sayfa varsa bir öncekine dön
@@ -254,8 +257,26 @@ class _MainScreenState extends State<MainScreen> {
             _selectedIndex = _navigationHistory.last;
           });
         } else {
-          // Sadece başlangıç sayfası kaldıysa uygulamadan çık
-          SystemNavigator.pop();
+          final now = DateTime.now();
+
+          if (_lastBackPressed == null ||
+              now.difference(_lastBackPressed!) > Duration(seconds: 2)) {
+            // İlk kez (veya 2 saniyeden sonra) geri tuşuna basıldı
+            _lastBackPressed = now;
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Uygulamadan çıkmak için geri tuşuna bir kez daha basın',
+                ),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          } else {
+            _lastBackPressed = null;
+
+            SystemNavigator.pop();
+          }
         }
       },
       child: Scaffold(

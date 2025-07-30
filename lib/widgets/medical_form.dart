@@ -173,7 +173,7 @@ class MedicalForm extends StatelessWidget {
           onChanged: (_) => _notifyFormChanged(),
         ),
         CustomTextWidget(
-          title: 'medicalForm.mediactionLabel'.tr(),
+          title: 'medicalForm.medicationLabel'.tr(),
           icon: Icons.medication,
           controller: ilacController,
           maxLines: 2,

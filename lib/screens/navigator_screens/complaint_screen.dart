@@ -3,7 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/models/medical_form_data.dart';
-import 'package:login_page/screens/overview_screen.dart';
+import 'package:login_page/screens/navigator_screens/overview_screen.dart';
 import 'package:login_page/services/form_service.dart';
 import 'package:login_page/services/openai_service.dart';
 import 'package:login_page/services/profile_service.dart';

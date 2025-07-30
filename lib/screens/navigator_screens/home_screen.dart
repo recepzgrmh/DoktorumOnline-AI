@@ -8,10 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:login_page/screens/pdf_analysis_screen.dart';
+import 'package:login_page/screens/navigator_screens/pdf_analysis_screen.dart';
 import 'package:login_page/services/tutorial_service.dart';
 import 'package:login_page/models/medical_form_data.dart';
-import 'package:login_page/screens/overview_screen.dart';
+import 'package:login_page/screens/navigator_screens/overview_screen.dart';
 import 'package:login_page/services/form_service.dart';
 import 'package:login_page/services/openai_service.dart';
 import 'package:login_page/services/profile_service.dart';
@@ -338,12 +338,15 @@ class HomeScreenState extends State<HomeScreen> {
         activeUserName!,
         fileAnalysis,
       );
-
+      print("ingilizceden gelen yanıt bu kanka  : $parts");
       // 5. Servisten dönen cevabı kontrol et.
       // Eğer cevap "geçersiz şikayet" hata mesajı ise SnackBar göster ve işlemi durdur.
       if (mounted &&
           parts.length == 1 &&
           parts.first == 'invalid_complaint_error'.tr()) {
+        print(
+          "geçersiz yanıt üretilmiştir invalid_complaint_error ve ai_prompt_ask_questions_instruction aynı şeyi üretmiştir : $parts",
+        );
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(parts.first),

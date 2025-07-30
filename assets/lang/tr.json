@@ -338,5 +338,7 @@
   "tutorial_start_complaint_noUser": "Tüm bilgileri doldurduktan sonra şikayetinizi başlatın",
   "update_profile_warning": "Profil bilgilerinizi güncelleyin. Bu bilgiler AI doktorunuzun size daha iyi hizmet vermesini sağlayacaktır.",
   "profile_name": "Profil Adı",
-  "invalid_complaint_error": "Girmiş olduğunuz ifade bir sağlık şikayeti değildir. Lütfen durumunuzu daha net anlatan bir şikayet giriniz."
+  "invalid_complaint_error": "Girmiş olduğunuz ifade bir sağlık şikayeti değildir. Lütfen durumunuzu daha net anlatan bir şikayet giriniz.",
+  "yes":"evet",
+  "no":"hayır"
 }

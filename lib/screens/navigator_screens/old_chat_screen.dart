@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:login_page/screens/chat_history_detail_screen.dart';
+import 'package:login_page/screens/navigator_screens/chat_history_detail_screen.dart';
 import 'package:login_page/services/tutorial_service.dart';
 import 'package:login_page/widgets/coachmark_desc.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';

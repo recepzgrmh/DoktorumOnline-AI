@@ -9,8 +9,8 @@ import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:login_page/widgets/custom_button.dart';
 import 'package:login_page/widgets/custom_appbar.dart';
 import 'package:login_page/widgets/coachmark_desc.dart';
-import '../services/openai_service.dart';
-import '../services/pdf_analysis_service.dart';
+import '../../services/openai_service.dart';
+import '../../services/pdf_analysis_service.dart';
 import 'dart:io';
 
 class PdfAnalysisScreen extends StatefulWidget {

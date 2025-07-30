@@ -51,7 +51,7 @@ class OpenAIService {
         (data['choices'][0]['message']['content'] as String?)?.trim() ?? '';
 
     // Yanıt 'EVET' ise true, değilse false döner.
-    return content.toLowerCase() == 'evet';
+    return content.toLowerCase() == 'yes'.tr();
   }
 
   /// 1. Adım: Kullanıcı verilerindeki eksik/ belirsiz noktaları
@@ -112,7 +112,7 @@ class OpenAIService {
       "______________________ChatGPT'den gelen yanıt : $raw __________________________",
     );
 
-    if (raw.contains("Girmiş olduğunuz ifade bir sağlık şikayeti değildir")) {
+    if (raw.contains("invalid_complaint_error".tr())) {
       return [raw];
     }
     // SIKINTI BURDAYDI ÇÖZDÜM :)))
