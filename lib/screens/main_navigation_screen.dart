@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:login_page/screens/home_screen.dart';
 import 'package:login_page/screens/old_chat_screen.dart';
 import 'package:login_page/screens/pdf_analysis_screen.dart';
@@ -15,31 +16,6 @@ import 'package:login_page/widgets/my_drawer.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Gerekli paket import edildi
 import 'package:upgrader/upgrader.dart';
 
-/// Upgrader widget'ı için özel Türkçe mesajları içeren sınıf.
-/// Bu sınıf dosyanın üst seviyesinde (herhangi bir sınıfın dışında) olmalıdır.
-///
-/// Bu upgrader paketi hala çalışmıyor sebebini tam olarak anlayamadım
-class TurkishUpgraderMessages extends UpgraderMessages {
-  @override
-  String get buttonTitleIgnore => 'upgrader_ignore'.tr();
-
-  @override
-  String get buttonTitleLater => 'upgrader_later'.tr();
-
-  @override
-  String get buttonTitleUpdate => 'upgrader_update'.tr();
-
-  @override
-  String get prompt => 'upgrader_prompt'.tr();
-
-  @override
-  String get title => 'upgrader_title'.tr();
-
-  @override
-  String get body =>
-      'Uygulamanın {{appName}} {{currentAppStoreVersion}} sürümü hazır! Siz şu an {{currentInstalledVersion}} sürümünü kullanıyorsunuz.';
-}
-
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -51,6 +27,7 @@ class _MainScreenState extends State<MainScreen> {
   // Firebase Analytics için Kod
   // Başlangıçta profiller sayfasını göstermek için index 3'te.
   int _selectedIndex = 3;
+  final List<int> _navigationHistory = [];
 
   // Her sayfanın state'ine erişmek için GlobalKey'ler.
   final GlobalKey<HomeScreenState> _homeScreenKey =
@@ -104,6 +81,9 @@ class _MainScreenState extends State<MainScreen> {
       if (mounted) {
         setState(() {
           _selectedIndex = initialIndex;
+
+          _navigationHistory.clear();
+          _navigationHistory.add(initialIndex);
         });
 
         // Widget tamamen yüklendikten sonra tutorial'ı göster
@@ -144,6 +124,7 @@ class _MainScreenState extends State<MainScreen> {
 
     setState(() {
       _selectedIndex = index;
+      _navigationHistory.add(index);
     });
 
     String screenName;
@@ -261,20 +242,22 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return UpgradeAlert(
-      upgrader: Upgrader(
-        //
-        //debugLogging: true, // Konsolda detaylı bilgi gösterir.
-        // debugDisplayOnce: true,
-        // Türkçe mesajları kullanmak için kendi sınıfımızı çağırıyoruz.
-        messages: TurkishUpgraderMessages(),
-        countryCode: 'TR',
-        languageCode: 'tr',
+    return PopScope(
+      canPop: false, // Sistemin otomatik geri gitmesini engelle
+      onPopInvoked: (didPop) {
+        if (didPop) return;
 
-        // playStoreId veya appStoreId GİRİLMEMELİDİR.
-        // Paket bu kimlikleri uygulamanın kendi dosyalarından
-        // otomatik olarak okur.
-      ),
+        // Geçmişte 1'den fazla sayfa varsa bir öncekine dön
+        if (_navigationHistory.length > 1) {
+          setState(() {
+            _navigationHistory.removeLast();
+            _selectedIndex = _navigationHistory.last;
+          });
+        } else {
+          // Sadece başlangıç sayfası kaldıysa uygulamadan çık
+          SystemNavigator.pop();
+        }
+      },
       child: Scaffold(
         appBar: AppBar(
           title:

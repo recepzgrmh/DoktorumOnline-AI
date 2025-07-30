@@ -9,8 +9,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
+import 'package:login_page/screens/home_screen.dart';
 import 'package:login_page/services/openai_service.dart';
 import 'package:login_page/services/form_service.dart';
+import 'package:login_page/widgets/custom_page_route.dart';
 import 'package:login_page/widgets/error_widget.dart';
 import 'package:login_page/widgets/custom_appbar.dart';
 
@@ -36,6 +38,9 @@ class OverviewScreen extends StatefulWidget {
 
 class _OverviewScreenState extends State<OverviewScreen>
     with TickerProviderStateMixin {
+  int _offTopicCounter = 0; // Konu dışı soru sayacı
+  bool _chatLocked = false; // Sohbetin kilitlenip kilitlenmediğini tutar
+
   late final OpenAI _openAI;
   final OpenAIService _service = OpenAIService();
   final FormService _formService = FormService();
@@ -385,6 +390,7 @@ class _OverviewScreenState extends State<OverviewScreen>
   }
 
   Future<void> _onSendMessage(ChatMessage userMsg) async {
+    if (_chatLocked) return;
     setState(() => _gptState = '...yazıyor');
 
     try {
@@ -447,30 +453,115 @@ class _OverviewScreenState extends State<OverviewScreen>
       } else {
         // Normal ChatGPT modu - soru-cevap akışı tamamlandı veya hiç soru yok
         final historySnapshot = await _messagesRef.orderBy('sentAt').get();
-        final openAIHistory =
-            historySnapshot.docs.map((doc) {
-              final data = doc.data();
-              return {
-                'role':
-                    data['senderId'] == _currentUser.id ? 'user' : 'assistant',
-                'content': data['text'] ?? '',
-              };
-            }).toList();
+
+        // API'ye gönderilecek mesaj listesini sistem talimatıyla başlat
+        final List<Map<String, dynamic>> messagesForApi = [
+          {'role': 'system', 'content': 'ai_system_prompt_medical'.tr()},
+          // Mevcut sohbet geçmişini ekle
+          ...historySnapshot.docs.map((doc) {
+            final data = doc.data();
+            return {
+              'role':
+                  data['senderId'] == _currentUser.id ? 'user' : 'assistant',
+              'content': data['text'] ?? '',
+            };
+          }).toList(),
+        ];
 
         final request = ChatCompleteText(
           model: Gpt4oMiniChatModel(),
-          messages: openAIHistory,
+          messages: messagesForApi,
           maxToken: 1000,
         );
 
         final resp = await _openAI.onChatCompletion(request: request);
         final aiContent = resp?.choices.first.message?.content.trim() ?? '';
         if (aiContent.isNotEmpty) {
+          final String offTopicKeyword = 'ai_off_topic_rejection_keyword'.tr();
+
+          bool isOffTopic = aiContent.contains(offTopicKeyword);
+          if (isOffTopic) {
+            _offTopicCounter++;
+            print("bağlam dışı soru soruldu $_offTopicCounter / 2");
+          }
+
           await _messagesRef.add({
             'text': aiContent,
             'senderId': _gptChatUser.id,
             'sentAt': FieldValue.serverTimestamp(),
           });
+
+          if (_offTopicCounter > 2) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (BuildContext context) {
+                final theme = Theme.of(context);
+
+                return AlertDialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                  ),
+
+                  title: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: theme.primaryColor,
+                        size: 48.0,
+                      ),
+                      SizedBox(height: 16.0),
+                      Text(
+                        'chat_finished'.tr(),
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  content: Text(
+                    'ai_chat_finished'.tr(),
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  actionsAlignment: MainAxisAlignment.center,
+                  actions: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                      ),
+
+                      onPressed: () {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          CustomPageRoute(child: HomeScreen()),
+                          (Route<dynamic> route) => false,
+                        );
+                      },
+                      child: Text(
+                        'turn_back_home_page'.tr(),
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+            debugPrint(
+              "Bağlam dışı soru adedine ulaşıldı. Sohbet kilitleniyor.",
+            );
+
+            setState(() {
+              _chatLocked = true;
+            });
+          }
         }
       }
     } catch (e) {
@@ -491,8 +582,12 @@ class _OverviewScreenState extends State<OverviewScreen>
         );
       }
     }
-
-    setState(() => _gptState = 'Çevrimiçi');
+    if (!_chatLocked) {
+      setState(() => _gptState = 'Çevrimiçi');
+    } else {
+      // Sohbet kilitlendiyse, yazıyor durumunu temizle ve son durumu ayarla
+      setState(() => _gptState = 'Analiz Tamamlandı');
+    }
   }
 
   @override
@@ -755,8 +850,13 @@ class _OverviewScreenState extends State<OverviewScreen>
                         ),
                         scrollToBottomOptions: ScrollToBottomOptions(),
                         inputOptions: InputOptions(
+                          inputDisabled: _chatLocked,
                           inputDecoration: InputDecoration(
-                            hintText: 'write_message_hint'.tr(),
+                            hintText:
+                                _chatLocked
+                                    ? 'analysis_complete'.tr()
+                                    // Kilitliyken gösterilecek yazı
+                                    : 'write_message_hint'.tr(), // Normal yazı
                             hintStyle: TextStyle(
                               color: Colors.grey.shade400,
                               fontSize: 16,
@@ -793,17 +893,26 @@ class _OverviewScreenState extends State<OverviewScreen>
                               margin: const EdgeInsets.only(left: 8),
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [
-                                    Colors.blue.shade400,
-                                    Colors.blue.shade600,
-                                  ],
+                                  colors:
+                                      _chatLocked
+                                          ? [
+                                            Colors.grey.shade400,
+                                            Colors.grey.shade600,
+                                          ]
+                                          : [
+                                            Colors.blue.shade400,
+                                            Colors.blue.shade600,
+                                          ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
                                 borderRadius: BorderRadius.circular(25),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.blue.withOpacity(0.3),
+                                    color:
+                                        _chatLocked
+                                            ? Colors.grey.withOpacity(0.3)
+                                            : Colors.blue.withOpacity(0.3),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
@@ -815,7 +924,7 @@ class _OverviewScreenState extends State<OverviewScreen>
                                   color: Colors.white,
                                   size: 20,
                                 ),
-                                onPressed: onSend,
+                                onPressed: _chatLocked ? null : onSend,
                               ),
                             );
                           },

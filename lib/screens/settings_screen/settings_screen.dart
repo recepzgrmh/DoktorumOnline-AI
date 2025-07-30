@@ -6,7 +6,6 @@ import 'package:login_page/screens/settings_screen/about_screen.dart';
 import 'package:login_page/screens/settings_screen/dialog_utils.dart';
 import 'package:login_page/screens/settings_screen/profile_info_screen.dart';
 import 'package:login_page/screens/settings_screen/support_screen.dart';
-import 'package:login_page/screens/settings_screen/notifications_screen.dart';
 
 import 'package:login_page/screens/settings_screen/language_screen.dart';
 import 'package:login_page/widgets/custom_button.dart';
@@ -61,20 +60,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       CustomPageRoute(
                         child: ProfileInfoScreen(),
                         name: 'profile_info_screen',
-                      ),
-                    );
-                  },
-                ),
-                _buildMenuItem(
-                  icon: Icons.notifications_outlined,
-                  title: 'notifications'.tr(),
-                  subtitle: 'notifications_subtitle'.tr(),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      CustomPageRoute(
-                        child: NotificationsScreen(),
-                        name: 'notifications_screen',
                       ),
                     );
                   },
