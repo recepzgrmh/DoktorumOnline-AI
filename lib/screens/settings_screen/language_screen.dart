@@ -1,30 +1,92 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:login_page/screens/main_navigation_screen.dart';
 import 'package:login_page/widgets/custom_appbar.dart';
+import 'package:login_page/widgets/custom_page_route.dart';
 
 // LanguageOption sınıfı ve _languageOptions listesi aynı kalabilir...
 class LanguageOption {
+  final String localName;
   final String nameKey;
   final Locale locale;
-  final String flag;
 
   LanguageOption({
+    required this.localName,
     required this.nameKey,
     required this.locale,
-    required this.flag,
   });
 }
 
 final List<LanguageOption> _languageOptions = [
   LanguageOption(
-    nameKey: 'turkish_language',
-    locale: const Locale('tr'),
-    flag: '🇹🇷',
+    localName: 'العربية',
+    nameKey: 'arabic_language',
+    locale: const Locale('ar'),
   ),
   LanguageOption(
+    localName: 'Deutsch',
+    nameKey: 'german_language',
+    locale: const Locale('de'),
+  ),
+  LanguageOption(
+    localName: 'Ελληνικά',
+    nameKey: 'greek_language',
+    locale: const Locale('el'),
+  ),
+  LanguageOption(
+    localName: 'English',
     nameKey: 'english_language',
     locale: const Locale('en'),
-    flag: '🇺🇸',
+  ),
+  LanguageOption(
+    localName: 'Español',
+    nameKey: 'spanish_language',
+    locale: const Locale('es'),
+  ),
+  LanguageOption(
+    localName: 'Français',
+    nameKey: 'french_language',
+    locale: const Locale('fr', 'FR'),
+  ),
+  LanguageOption(
+    localName: 'हिंदी',
+    nameKey: 'hindi_language',
+    locale: const Locale('hi'),
+  ),
+  LanguageOption(
+    localName: 'Italiano',
+    nameKey: 'italian_language',
+    locale: const Locale('it'),
+  ),
+  LanguageOption(
+    localName: '日本語',
+    nameKey: 'japanese_language',
+    locale: const Locale('ja'),
+  ),
+  LanguageOption(
+    localName: '한국어',
+    nameKey: 'korean_language',
+    locale: const Locale('ko'),
+  ),
+  LanguageOption(
+    localName: 'Português',
+    nameKey: 'portuguese_language',
+    locale: const Locale('pt', 'PT'),
+  ),
+  LanguageOption(
+    localName: 'русский',
+    nameKey: 'russian_language',
+    locale: const Locale('ru'),
+  ),
+  LanguageOption(
+    localName: 'Türkçe',
+    nameKey: 'turkish_language',
+    locale: const Locale('tr'),
+  ),
+  LanguageOption(
+    localName: '简体中文',
+    nameKey: 'chinese_language',
+    locale: const Locale('zh', 'CN'),
   ),
 ];
 
@@ -37,6 +99,7 @@ class LanguageScreen extends StatefulWidget {
 }
 
 class _LanguageScreenState extends State<LanguageScreen> {
+  bool _loading = false;
   // 2. Dilin değişip değişmediğini takip edecek bir state ekleyin
   bool _languageChanged = false;
 
@@ -56,26 +119,23 @@ class _LanguageScreenState extends State<LanguageScreen> {
         ],
         title: 'language_and_region'.tr(),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 16),
-            Text(
-              'select_language'.tr(),
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 24),
+                Column(
+                  children:
+                      _languageOptions.map((language) {
+                        return _buildLanguageTile(context, language);
+                      }).toList(),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-            Column(
-              children:
-                  _languageOptions.map((language) {
-                    return _buildLanguageTile(context, language);
-                  }).toList(),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -102,6 +162,9 @@ class _LanguageScreenState extends State<LanguageScreen> {
           if (!isSelected) {
             // 4. Dil değiştiğinde state'i güncelleyin
             setState(() {
+              Navigator.of(
+                context,
+              ).pushReplacement(CustomPageRoute(child: MainScreen()));
               _languageChanged = true;
             });
             context.setLocale(language.locale);
@@ -109,17 +172,34 @@ class _LanguageScreenState extends State<LanguageScreen> {
         },
         splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        leading: Text(language.flag, style: const TextStyle(fontSize: 28)),
-        title: Text(
-          language.nameKey.tr(),
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            color:
-                isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.onSurface,
-          ),
+
+        title: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              language.localName,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color:
+                    isSelected
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            Text(
+              language.nameKey.tr(),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color:
+                    isSelected
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+          ],
         ),
         trailing:
             isSelected

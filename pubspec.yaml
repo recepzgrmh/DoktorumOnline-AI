@@ -84,11 +84,23 @@ flutter:
   assets:
     - assets/icon/app_icon.png
     - assets/.env
+
+    - assets/lang/ar.json
+    - assets/lang/de.json
+    - assets/lang/el.json
     - assets/lang/en.json
-
+    - assets/lang/es.json
+    - assets/lang/fr-FR.json
+    - assets/lang/hi.json
+    - assets/lang/it.json
+    - assets/lang/ja.json
+    - assets/lang/ko.json
+    - assets/lang/pt-PT.json
+    - assets/lang/ru.json
     - assets/lang/tr.json
-    - assets/icon/en.svg
+    - assets/lang/zh-CN.json
 
+    - assets/icon/en.svg
     - assets/icon/tr.svg
 
   # To add assets to your application, add an assets section, like this:

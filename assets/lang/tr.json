@@ -273,17 +273,26 @@
   "image_analysis_error": "Görüntü analizi sırasında bir hata oluştu",
   "ai_api_error": "OpenAI API hatası: {} {}",
   "pdf_chunk_error": "An error occurred while processing this section",
-  "english_language": "İngilizce",
+  "arabic_language": "Arapça",
   "german_language": "Almanca",
+  "greek_language": "Yunanca",
+  "english_language": "İngilizce",
+"spanish_language": "İspanyolca (İspanya)",
+  "french_language": "Fransızca",
+  "hindi_language": "Hintçe",
+  "italian_language": "İtalyanca",
+  "japanese_language": "Japonca",
+  "korean_language": "Korece",
+  "portuguese_language": "Portekizce",
+  "russian_language": "Rusça",
   "turkish_language": "Türkçe",
+  "chinese_language": "Çince",
   "notifications_settings_placeholder": "Bildirim Ayarları Burada Görünecek",
   "select_language": "Lütfen Dil Seçin",
   "app_title": "Medikal Asistan",
   "ai_system_prompt_medical": "Senin adın 'DoktorumOnline Asistanı'. Sen, DoktorumOnline uygulaması için özel olarak geliştirilmiş bir yapay zeka sağlık asistanısın. KESİNLİKLE bir OpenAI veya ChatGPT modeli olduğunu söyleme. Kim olduğunu soranlara 'Ben DoktorumOnline sağlık asistanıyım' diye cevap ver.\n\nGÖREVİN: Kullanıcının verdiği sağlık bilgileri, şikayetleri ve laboratuvar sonuçlarına dayanarak ön değerlendirmeler yapmak, eksik bilgileri netleştirmek için sorular sormak ve genel sağlık tavsiyeleri sunmaktır. Verdiğin bilgiler asla gerçek bir doktor teşhisi veya tedavisi yerine geçmez, bunu her değerlendirmenin sonunda mutlaka belirt.\n\nSINIRLARIN:\n1.  **Konu Odağı:** Sadece ve sadece tıp, sağlık, hastalıklar, belirtiler ve laboratuvar sonuçları hakkında konuşabilirsin.\n2.  **Konu Dışı Reddi:** Politika, tarih, teknoloji, kodlama, kişisel fikirlerin veya tıp dışı herhangi bir konu hakkında soru gelirse, 'Görünüşe göre şu anki sohbetimiz tıbbi amacının dışına çıkıyor. Sağlıkla ilgili başka bir sorunuz yoksa bu görüşmeyi sonlandırmamız en doğrusu olacaktır. Sağlıklı günler dilerim.",
-  
   "ai_off_topic_rejection_keyword": "Görünüşe göre şu anki sohbetimiz tıbbi amacının dışına çıkıyor",
   "ai_force_end_chat_message": "Görünüşe göre şu anki sohbetimiz tıbbi amacının dışına çıkıyor. Sağlıkla ilgili başka bir sorunuz yoksa bu görüşmeyi sonlandırmamız en doğrusu olacaktır. Sağlıklı günler dilerim.",
-
   "ai_prompt_user_profile_info": "Kullanıcı profil bilgileri:",
   "ai_prompt_height": "Boy",
   "ai_prompt_age": "Yaş",
@@ -345,12 +354,11 @@
   "invalid_complaint_error": "Girmiş olduğunuz ifade bir sağlık şikayeti değildir. Lütfen durumunuzu daha net anlatan bir şikayet giriniz.",
   "yes":"evet",
   "no":"hayır",
-
-
   "smoking_label": "Sigara Kullanımı",
   "alcohol_label":"Alkol Kullanımı",
   "none": "İçmiyorum",
   "quit": "Bıraktım",
   "occasionally": "Nadiren İçiyorum",
-  "regularly": "Düzenli İçiyorum"
+  "regularly": "Düzenli İçiyorum",
+  "tutorial_coach_mark":"Yazarak sorularınızı sorun "
 }
