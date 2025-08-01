@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:login_page/services/firebase_analytics.dart';
 import 'package:login_page/services/tutorial_service.dart';
 import 'package:login_page/widgets/coachmark_desc.dart';
 import 'package:login_page/widgets/custom_button.dart';
@@ -224,7 +225,13 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                       CustomButton(
                         key: _newUser,
                         label: 'add_new_profile'.tr(),
-                        onPressed: () => _showProfileForm(),
+                        onPressed: () {
+                          AnalyticsService.instance.logButtonClick(
+                            buttonName: 'add_new_profile_button',
+                            screenName: 'profile_screen',
+                          );
+                          _showProfileForm();
+                        },
                         icon: const Icon(Icons.add),
                         backgroundColor: const Color(0xFF2196F3),
                         foregroundColor: Colors.white,

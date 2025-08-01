@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/screens/auth/sign_in.dart';
 import 'package:login_page/screens/auth/sign_up.dart';
+import 'package:login_page/services/firebase_analytics.dart';
 import 'package:login_page/widgets/custom_button.dart';
 import 'package:login_page/widgets/custom_page_route.dart';
 import 'package:flutter_svg/flutter_svg.dart'; // 1. Import the package
@@ -16,6 +17,7 @@ class Opening extends StatefulWidget {
 }
 
 class _OpeningState extends State<Opening> {
+  final _analytics = AnalyticsService.instance;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -142,6 +144,11 @@ class _OpeningState extends State<Opening> {
                 CustomButton(
                   label: "sign_in",
                   onPressed: () {
+                    _analytics.logButtonClick(
+                      buttonName: 'SignIn',
+                      screenName: 'opening_screen',
+                    );
+
                     Navigator.of(context).push(
                       CustomPageRoute(child: SignIn(), name: 'sign_in_screen'),
                     );
@@ -162,6 +169,11 @@ class _OpeningState extends State<Opening> {
                 CustomButton(
                   label: "sign_up",
                   onPressed: () {
+                    _analytics.logButtonClick(
+                      buttonName: 'sign_up_button',
+                      screenName: 'opening_screen',
+                    );
+
                     Navigator.of(context).push(
                       CustomPageRoute(child: SignUp(), name: 'sign_up_screen'),
                     );

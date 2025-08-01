@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:login_page/services/firebase_analytics.dart';
 import 'package:login_page/services/tutorial_service.dart';
 import 'package:login_page/widgets/selection_bottom_sheet.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
@@ -209,6 +210,9 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
   }
 
   void _showAnalysisResult(Map<String, String> result, String fileName) {
+    AnalyticsService.instance.setCurrentScreen(
+      screenName: 'show_analyse_screen',
+    );
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -379,7 +383,13 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
                     CustomButton(
                       key: _pdfPicker,
                       label: 'select_file'.tr(),
-                      onPressed: _showSourceSelectionDialog,
+                      onPressed: () {
+                        AnalyticsService.instance.logButtonClick(
+                          buttonName: 'file_upload_button',
+                          screenName: 'pdf_analysis_screen',
+                        );
+                        _showSourceSelectionDialog();
+                      },
                       backgroundColor: theme.primaryColor,
                       foregroundColor: Colors.white,
                       icon: const Icon(Icons.upload_file),
@@ -452,6 +462,10 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
                         : 'upload_and_analyze'.tr(),
                 onPressed: () {
                   if (_isLoading) return;
+                  AnalyticsService.instance.logButtonClick(
+                    buttonName: 'start_analyse_button',
+                    screenName: 'pdf_analysis_screen',
+                  );
                   _analyzeContent();
                 },
                 backgroundColor: _isLoading ? Colors.grey : theme.primaryColor,

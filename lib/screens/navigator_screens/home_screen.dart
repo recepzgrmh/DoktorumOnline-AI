@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:login_page/screens/navigator_screens/pdf_analysis_screen.dart';
+import 'package:login_page/services/firebase_analytics.dart';
 import 'package:login_page/services/tutorial_service.dart';
 import 'package:login_page/models/medical_form_data.dart';
 import 'package:login_page/screens/navigator_screens/overview_screen.dart';
@@ -393,6 +394,9 @@ class HomeScreenState extends State<HomeScreen> {
 
       // 8. OverviewScreen'e yönlendir.
       if (mounted) {
+        AnalyticsService.instance.setCurrentScreen(
+          screenName: 'overview_screen',
+        );
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -554,7 +558,13 @@ class HomeScreenState extends State<HomeScreen> {
                                     isFileSelected
                                         ? _status
                                         : 'upload_file'.tr(),
-                                onPressed: _showSourceSelectionDialog,
+                                onPressed: () {
+                                  AnalyticsService.instance.logButtonClick(
+                                    buttonName: 'file_upload_button',
+                                    screenName: 'home_screen',
+                                  );
+                                  _showSourceSelectionDialog();
+                                },
 
                                 backgroundColor:
                                     isFileSelected
@@ -586,7 +596,13 @@ class HomeScreenState extends State<HomeScreen> {
                         CustomButton(
                           key: _startButton,
                           label: 'start_complaint'.tr(),
-                          onPressed: _startFollowUp,
+                          onPressed: () {
+                            AnalyticsService.instance.logButtonClick(
+                              buttonName: 'start_complaint_button',
+                              screenName: 'home_screen',
+                            );
+                            _startFollowUp();
+                          },
                           backgroundColor: theme.primaryColor,
                           foregroundColor: Colors.white,
                           isFullWidth: true,

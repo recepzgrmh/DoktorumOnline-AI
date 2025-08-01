@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:login_page/services/firebase_analytics.dart';
 import 'package:login_page/widgets/text_inputs.dart';
 import 'package:login_page/widgets/custom_button.dart';
 
@@ -86,7 +87,13 @@ class _ResetPasswordState extends State<ResetPassword> {
                 const SizedBox(height: 30),
                 CustomButton(
                   label: "send_reset_link".tr(),
-                  onPressed: resetPassword,
+                  onPressed: () {
+                    AnalyticsService.instance.logButtonClick(
+                      buttonName: 'reset_password',
+                      screenName: 'reset_password_screen',
+                    );
+                    resetPassword();
+                  },
                   backgroundColor: theme.primaryColor,
                   foregroundColor: Colors.white,
                   verticalPadding: 16,

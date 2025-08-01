@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page/screens/main_navigation_screen.dart';
+import 'package:login_page/services/firebase_analytics.dart';
 import 'package:login_page/widgets/custom_appbar.dart';
 import 'package:login_page/widgets/custom_page_route.dart';
 
@@ -158,16 +160,24 @@ class _LanguageScreenState extends State<LanguageScreen> {
                 : BorderSide.none,
       ),
       child: ListTile(
-        onTap: () {
+        onTap: () async {
           if (!isSelected) {
-            // 4. Dil değiştiğinde state'i güncelleyin
+            await AnalyticsService.instance.logLanguageSelected(
+              language.locale.languageCode,
+              language.localName,
+            );
+
             setState(() {
-              Navigator.of(
-                context,
-              ).pushReplacement(CustomPageRoute(child: MainScreen()));
               _languageChanged = true;
             });
-            context.setLocale(language.locale);
+
+            // Locale değiştiriliyor
+            await context.setLocale(language.locale);
+
+            // Ana ekrana yönlendiriliyor
+            Navigator.of(
+              context,
+            ).pushReplacement(CustomPageRoute(child: const MainScreen()));
           }
         },
         splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),

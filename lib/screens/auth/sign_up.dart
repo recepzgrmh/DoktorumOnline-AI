@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:login_page/screens/auth/verify_account.dart';
 import 'package:login_page/screens/main_navigation_screen.dart';
 import 'package:login_page/services/auth_service.dart';
+import 'package:login_page/services/firebase_analytics.dart';
 import 'package:login_page/widgets/custom_page_route.dart';
 
 import 'package:login_page/widgets/socail_buttons.dart';
@@ -84,6 +85,7 @@ class _SignUpState extends State<SignUp> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final _analytics = AnalyticsService.instance;
 
     return Scaffold(
       appBar: AppBar(backgroundColor: theme.primaryColor.withOpacity(0.1)),
@@ -125,6 +127,10 @@ class _SignUpState extends State<SignUp> {
                   googleText: 'sign_up_auth'.tr(args: ['Google']),
                   facebookText: 'sign_up_auth'.tr(args: ['Facebook']),
                   onGooglePressed: () async {
+                    _analytics.logButtonClick(
+                      buttonName: 'google_auth_button',
+                      screenName: 'sign_up_screen',
+                    );
                     showDialog(
                       context: context,
                       barrierDismissible: false,
@@ -259,7 +265,13 @@ class _SignUpState extends State<SignUp> {
                 // "Kayıt Ol" butonu
                 CustomButton(
                   label: "sign_up",
-                  onPressed: signUpUser,
+                  onPressed: () {
+                    _analytics.logButtonClick(
+                      buttonName: 'sign_up_button',
+                      screenName: 'sign_up_screen',
+                    );
+                    signUpUser();
+                  },
                   backgroundColor: theme.primaryColor,
                   foregroundColor: Colors.white,
                   verticalPadding: 16,
@@ -276,14 +288,17 @@ class _SignUpState extends State<SignUp> {
                 // "Giriş Yap" butonu
                 CustomButton(
                   label: "already_have_account",
-                  onPressed:
-                      () => Navigator.pushReplacement(
-                        context,
-                        CustomPageRoute(
-                          child: SignIn(),
-                          name: 'sign_in_screen',
-                        ),
-                      ),
+                  onPressed: () {
+                    _analytics.logButtonClick(
+                      buttonName: 'sign_in_button',
+                      screenName: 'sign_up_screen',
+                    );
+
+                    Navigator.pushReplacement(
+                      context,
+                      CustomPageRoute(child: SignIn(), name: 'sign_in_screen'),
+                    );
+                  },
                   backgroundColor: Colors.white,
                   foregroundColor: theme.primaryColor,
                   verticalPadding: 16,

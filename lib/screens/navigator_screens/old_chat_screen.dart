@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:login_page/screens/navigator_screens/chat_history_detail_screen.dart';
+import 'package:login_page/services/firebase_analytics.dart';
 import 'package:login_page/services/tutorial_service.dart';
 import 'package:login_page/widgets/coachmark_desc.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
@@ -178,6 +179,14 @@ class OldChatScreenState extends State<OldChatScreen> {
                   child: InkWell(
                     borderRadius: BorderRadius.circular(16),
                     onTap: () {
+                      AnalyticsService.instance.logButtonClick(
+                        buttonName: 'chat_details_button',
+                        screenName: 'old_chat_screen',
+                      );
+
+                      AnalyticsService.instance.setCurrentScreen(
+                        screenName: 'old_chat_details_screen',
+                      );
                       Navigator.push(
                         context,
                         MaterialPageRoute(

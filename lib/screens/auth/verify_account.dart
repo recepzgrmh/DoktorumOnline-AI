@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:login_page/screens/opening.dart';
 import 'package:login_page/services/auth_service.dart';
+import 'package:login_page/services/firebase_analytics.dart';
 
 import 'package:login_page/widgets/custom_button.dart';
 
@@ -41,6 +42,30 @@ class _VerifyAccountState extends State<VerifyAccount> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            AnalyticsService.instance.logButtonClick(
+              buttonName: 'back_button',
+              screenName: 'verify_account_screen',
+            );
+
+            AnalyticsService.instance.setCurrentScreen(
+              screenName: 'opening_screen',
+            );
+            Navigator.of(
+              context,
+            ).pushReplacement(CustomPageRoute(child: Opening()));
+          },
+          icon: Icon(Icons.arrow_back_outlined),
+        ),
+        centerTitle: false,
+        title: Text(
+          'verify_account_title'.tr(),
+          style: TextStyle(color: theme.primaryColor),
+        ),
+        backgroundColor: theme.primaryColor.withOpacity(0.1),
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -56,25 +81,6 @@ class _VerifyAccountState extends State<VerifyAccount> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Back button and title
-                Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.arrow_back, color: theme.primaryColor),
-                      onPressed: () => CustomPageRoute(child: const Opening()),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      "verify_account_title",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: theme.primaryColor,
-                      ),
-                    ).tr(),
-                  ],
-                ),
-                const SizedBox(height: 40),
                 // Welcome text
                 Text(
                   "email_verification",

@@ -23,7 +23,8 @@ class MyDrawer extends StatefulWidget {
 }
 
 class MyDrawerState extends State<MyDrawer> {
-  final currentUser = FirebaseAuth.instance.currentUser;
+  late final User? currentUser;
+
   TutorialCoachMark? tutorialCoachMark;
   List<TargetFocus> targets = [];
   final GlobalKey _homeButton = GlobalKey();
@@ -35,6 +36,7 @@ class MyDrawerState extends State<MyDrawer> {
   @override
   void initState() {
     super.initState();
+    currentUser = FirebaseAuth.instance.currentUser;
     // Widget ağacı çizildikten sonra eğitimin kontrol edilip gösterilmesini sağlar.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkAndShowTutorial();

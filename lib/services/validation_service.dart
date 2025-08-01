@@ -76,6 +76,7 @@ class ValidationService {
     if (value == null || value.isEmpty) {
       return "validation_enter_duration".tr();
     }
+
     return null;
   }
 

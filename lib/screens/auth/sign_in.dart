@@ -9,6 +9,7 @@ import 'package:login_page/screens/auth/reset_password.dart';
 import 'package:login_page/screens/auth/sign_up.dart';
 import 'package:login_page/screens/main_navigation_screen.dart';
 import 'package:login_page/services/auth_service.dart';
+import 'package:login_page/services/firebase_analytics.dart';
 import 'package:login_page/widgets/custom_page_route.dart';
 import 'package:login_page/widgets/socail_buttons.dart';
 import 'package:login_page/widgets/text_inputs.dart';
@@ -81,6 +82,7 @@ class _SignInState extends State<SignIn> {
   Widget build(BuildContext context) {
     print('[DEBUG] SignIn build başladı');
     final theme = Theme.of(context);
+    final _analytics = AnalyticsService.instance;
 
     return Scaffold(
       appBar: AppBar(backgroundColor: theme.primaryColor.withOpacity(0.1)),
@@ -101,7 +103,7 @@ class _SignInState extends State<SignIn> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Back button and title
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
                 // Welcome text
                 SizedBox(
                   width: double.infinity,
@@ -136,6 +138,10 @@ class _SignInState extends State<SignIn> {
                   facebookText: 'sign_in_auth'.tr(args: ['Facebook']),
                   googleText: 'sign_in_auth'.tr(args: ['Google']),
                   onGooglePressed: () async {
+                    _analytics.logButtonClick(
+                      buttonName: 'google_auth_button',
+                      screenName: 'sign_in_screen',
+                    );
                     showDialog(
                       context: context,
                       barrierDismissible: false,
@@ -251,7 +257,13 @@ class _SignInState extends State<SignIn> {
                 // Sign in button
                 CustomButton(
                   label: "sign_in".tr(),
-                  onPressed: signInUser,
+                  onPressed: () {
+                    _analytics.logButtonClick(
+                      buttonName: 'sign_in_button',
+                      screenName: 'sign_in_screen',
+                    );
+                    signInUser();
+                  },
                   backgroundColor: theme.primaryColor,
                   foregroundColor: Colors.white,
                   verticalPadding: 16,
@@ -268,14 +280,23 @@ class _SignInState extends State<SignIn> {
                 // Forgot password button
                 CustomButton(
                   label: "forgot_password",
-                  onPressed:
-                      () => Navigator.push(
-                        context,
-                        CustomPageRoute(
-                          child: ResetPassword(),
-                          name: 'reset_password_screen',
-                        ),
+                  onPressed: () {
+                    _analytics.setCurrentScreen(
+                      screenName: 'reset_password_screen',
+                    );
+                    _analytics.logButtonClick(
+                      buttonName: 'forgot_password_button',
+                      screenName: 'sign_in_screen',
+                    );
+
+                    Navigator.push(
+                      context,
+                      CustomPageRoute(
+                        child: ResetPassword(),
+                        name: 'reset_password_screen',
                       ),
+                    );
+                  },
                   backgroundColor: Colors.white,
                   foregroundColor: theme.primaryColor,
                   verticalPadding: 16,
@@ -294,14 +315,18 @@ class _SignInState extends State<SignIn> {
                 // Create account button
                 CustomButton(
                   label: "sign_up_now",
-                  onPressed:
-                      () => Navigator.push(
-                        context,
-                        CustomPageRoute(
-                          child: SignUp(),
-                          name: 'sign_up_screen',
-                        ),
-                      ),
+                  onPressed: () {
+                    _analytics.setCurrentScreen(screenName: 'sign_up_screen');
+                    _analytics.logButtonClick(
+                      buttonName: 'sign_up_button',
+                      screenName: 'sign_in_screen',
+                    );
+
+                    Navigator.push(
+                      context,
+                      CustomPageRoute(child: SignUp(), name: 'sign_up_screen'),
+                    );
+                  },
                   backgroundColor: Colors.white,
                   foregroundColor: theme.primaryColor,
                   verticalPadding: 16,

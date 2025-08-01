@@ -301,6 +301,10 @@ class _MainScreenState extends State<MainScreen> {
                 key: _helpButtonKey,
                 icon: const Icon(Icons.help_outline, size: 30),
                 onPressed: () async {
+                  AnalyticsService.instance.logButtonClick(
+                    buttonName: 'help_button',
+                    screenName: 'profile_screen',
+                  );
                   await TutorialService.resetAllTutorials();
 
                   _showTutorialForPage(_selectedIndex);
@@ -335,6 +339,14 @@ class _MainScreenState extends State<MainScreen> {
           onMenuItemTap: _onItemTapped,
           selectedIndex: _selectedIndex,
         ),
+        onDrawerChanged: (isOpened) {
+          if (isOpened) {
+            AnalyticsService.instance.logButtonClick(
+              buttonName: 'drawer_button',
+              screenName: 'main_screen',
+            );
+          }
+        },
         bottomNavigationBar: Theme(
           data: Theme.of(context).copyWith(
             splashColor: Colors.transparent,

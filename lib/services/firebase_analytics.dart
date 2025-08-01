@@ -1,23 +1,16 @@
-// lib/services/analytics_service.dart
-
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 
 class AnalyticsService {
-  // 1. Private constructor oluştur. Bu, dışarıdan new AnalyticsService() ile örnek oluşturulmasını engeller.
   AnalyticsService._internal();
 
-  // 2. Sınıfın tek bir örneğini (instance) oluştur.
   static final AnalyticsService instance = AnalyticsService._internal();
 
-  // 3. FirebaseAnalytics örneğini al.
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
 
-  // NavigatorObserver'ı almak için bir metod
   FirebaseAnalyticsObserver getAnalyticsObserver() =>
       FirebaseAnalyticsObserver(analytics: _analytics);
 
-  // Metodların geri kalanı aynı kalır...
   Future<void> logLogin({required String loginMethod}) async {
     await _analytics.logLogin(loginMethod: loginMethod);
     print('✅ Analytics: logLogin gönderildi (method: $loginMethod)');
@@ -34,5 +27,43 @@ class AnalyticsService {
       screenClassOverride: screenName,
     );
     print('✅ Analytics: setCurrentScreen ayarlandı (screen: $screenName)');
+  }
+
+  /// 🔴 Kullanıcının çıkış yaptığını logla
+  Future<void> logSignOut({required String screenName}) async {
+    await _analytics.logEvent(
+      name: 'sign_out',
+      parameters: {'screen': screenName},
+    );
+    print('✅ Analytics: logSignOut gönderildi (screen: $screenName)');
+  }
+
+  Future<void> logButtonClick({
+    required String buttonName,
+    required String screenName,
+  }) async {
+    await _analytics.logEvent(
+      name: 'button_click',
+      parameters: {'button_name': buttonName, 'screen': screenName},
+    );
+    print(
+      '✅ Analytics: logButtonClick gönderildi (button: $buttonName, screen: $screenName)',
+    );
+  }
+
+  Future<void> logLanguageSelected(
+    String languageCode,
+    String languageName,
+  ) async {
+    await _analytics.logEvent(
+      name: 'language_selected',
+      parameters: {
+        'language_code': languageCode,
+        'language_name': languageName,
+      },
+    );
+    print(
+      '✅ Analytics: language_selected gönderildi ($languageCode - $languageName)',
+    );
   }
 }

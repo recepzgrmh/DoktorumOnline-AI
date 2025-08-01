@@ -8,6 +8,7 @@ import 'package:login_page/screens/settings_screen/profile_info_screen.dart';
 import 'package:login_page/screens/settings_screen/support_screen.dart';
 
 import 'package:login_page/screens/settings_screen/language_screen.dart';
+import 'package:login_page/services/firebase_analytics.dart';
 import 'package:login_page/widgets/custom_button.dart';
 
 import 'package:login_page/widgets/custom_page_route.dart';
@@ -204,6 +205,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> signOut() async {
     try {
       await FirebaseAuth.instance.signOut();
+      await AnalyticsService.instance.logSignOut(screenName: 'SettingsScreen');
+
       if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,
