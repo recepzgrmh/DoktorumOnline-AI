@@ -40,7 +40,7 @@ class _SupportScreenState extends State<SupportScreen> {
       await FirebaseFirestore.instance.collection('feedback').add({
         'subject': _subjectController.text.trim(),
         'message': _messageController.text.trim(),
-        'userId': user?.uid,
+        'userId': user?.email,
         'createdAt': FieldValue.serverTimestamp(),
         'platform': Platform.isAndroid ? 'android' : 'ios',
         'appVersion': pkgInfo.version,

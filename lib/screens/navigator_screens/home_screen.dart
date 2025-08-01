@@ -4,6 +4,7 @@
 import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -323,10 +324,18 @@ class HomeScreenState extends State<HomeScreen> {
       // 3. Dosya analizi (varsa).
       if (_selectedFile != null && _selectedFile!.path != null) {
         setState(() => _status = 'file_analysis_in_progress'.tr());
-        fileAnalysis = await _service.analyzePdf(_selectedFile!.path!);
+        fileAnalysis = await _service.analyzePdf(
+          _selectedFile!.path!,
+          userId: FirebaseAuth.instance.currentUser!.uid,
+          userEmail: FirebaseAuth.instance.currentUser!.email,
+        );
       } else if (_selectedImage != null) {
         setState(() => _status = 'image_analysis_in_progress'.tr());
-        fileAnalysis = await _service.analyzeImage(_selectedImage!.path);
+        fileAnalysis = await _service.analyzeImage(
+          _selectedImage!.path,
+          userId: FirebaseAuth.instance.currentUser!.uid,
+          userEmail: FirebaseAuth.instance.currentUser!.email,
+        );
       }
 
       if (fileAnalysis != null && fileAnalysis.containsKey('Hata')) {
@@ -349,6 +358,7 @@ class HomeScreenState extends State<HomeScreen> {
         _formData!.toComplaintMap(),
         activeUserName!,
         fileAnalysis,
+        userId: _uid,
       );
       print("ingilizceden gelen yanıt bu kanka  : $parts");
       // 5. Servisten dönen cevabı kontrol et.

@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:login_page/services/token_service.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:openai_dart/openai_dart.dart';
 
@@ -12,7 +13,7 @@ class OpenAIService {
   final String _apiKey = dotenv.env['OPENAI_API_KEY']!;
   // (Eski Yöntem)
   final Uri _endpoint = Uri.parse('https://api.openai.com/v1/chat/completions');
-
+  final TokenService _tokenService = TokenService();
   // YÖNTEM 2: OpenAI Dart Client ile
   late final OpenAIClient client;
   OpenAIService() {
@@ -20,7 +21,11 @@ class OpenAIService {
   }
 
   // şikayet alakalı mı alaksız mı sorgusu
-  Future<bool> _isComplaintMedical(String complaint) async {
+  Future<bool> _isComplaintMedical(
+    String complaint, {
+    String? userId,
+    String? userEmail,
+  }) async {
     // Yapay zekadan sadece 'EVET' veya 'HAYIR' yanıtı bekliyoruz.
     final validationPrompt = "ai_prompt_validation".tr(args: [complaint]);
 
@@ -50,6 +55,18 @@ class OpenAIService {
     final content =
         (data['choices'][0]['message']['content'] as String?)?.trim() ?? '';
 
+    if (data['usage'] != null) {
+      final usage = data['usage'];
+      _tokenService.logTokenUsage(
+        userEmail: userEmail,
+        functionName: '_isComplaintMedical',
+        model: data['model'],
+        promptTokens: usage['prompt_tokens'],
+        completionTokens: usage['completion_tokens'],
+        totalTokens: usage['total_tokens'],
+        userId: userId,
+      );
+    }
     // Yanıt 'EVET' ise true, değilse false döner.
     return content.toLowerCase() == 'yes'.tr();
   }
@@ -60,12 +77,18 @@ class OpenAIService {
     Map<String, String> profileData,
     Map<String, String> complaintData,
     String userName,
-    Map<String, String>? fileAnalysis,
-  ) async {
+    Map<String, String>? fileAnalysis, {
+    String? userId,
+    String? userEmail,
+  }) async {
     print('GELEN PROFİL DATASI: $profileData');
     final String userComplaint = complaintData['Şikayet'] ?? "";
 
-    final bool isMedical = await _isComplaintMedical(userComplaint);
+    final bool isMedical = await _isComplaintMedical(
+      userComplaint,
+      userId: userId,
+      userEmail: userEmail,
+    );
     if (!isMedical) {
       // Eğer şikayet tıbbi değilse, JSON'dan aldığımız hata mesajını döndürüp işlemi bitiriyoruz.
       return ["invalid_complaint_error".tr()];
@@ -112,7 +135,12 @@ class OpenAIService {
     prompt.writeln('ai_prompt_ask_questions_instruction'.tr());
 
     // —— 2) ChatGPT'den yanıtı al ————————————————————————————
-    final raw = await _postToChatGPT(prompt.toString());
+    final raw = await _postToChatGPT(
+      prompt.toString(),
+      functionName: 'getFollowUpQuestions',
+      userId: userId,
+      userEmail: userEmail,
+    );
 
     /// —————————————————— CHATGPT YANITI ——————————————————
     print(
@@ -138,7 +166,8 @@ class OpenAIService {
       final evaluation = await getFinalEvaluation(
         profileData,
         complaintData,
-
+        userId: userId,
+        userEmail: userEmail,
         [], // Boş cevap listesi
         fileAnalysis,
       );
@@ -160,8 +189,10 @@ class OpenAIService {
     Map<String, String> profileData,
     Map<String, String> complaintData,
     List<String> answers,
-    Map<String, String>? fileAnalysis,
-  ) async {
+    Map<String, String>? fileAnalysis, {
+    String? userId,
+    String? userEmail,
+  }) async {
     final prompt =
         StringBuffer()
           ..writeln('ai_prompt_user_profile_info'.tr())
@@ -212,12 +243,22 @@ class OpenAIService {
       ..writeln('ai_prompt_final_evaluation_instruction'.tr())
       ..writeln('ai_prompt_final_evaluation_start_sentence'.tr());
 
-    final result = await _postToChatGPT(prompt.toString());
+    final result = await _postToChatGPT(
+      prompt.toString(),
+      functionName: 'getFinalEvaluation',
+      userId: userId,
+      userEmail: userEmail,
+    );
     return result.trim();
   }
 
   /// Ortak: Bir prompt'u ChatGPT'ye gönderir ve cevabını döner.
-  Future<String> _postToChatGPT(String content) async {
+  Future<String> _postToChatGPT(
+    String content, {
+    required String functionName,
+    String? userId,
+    String? userEmail,
+  }) async {
     final response = await http.post(
       _endpoint,
       headers: {
@@ -244,6 +285,67 @@ class OpenAIService {
     final utf8Body = utf8.decode(response.bodyBytes);
     // 2) JSON parse
     final data = jsonDecode(utf8Body) as Map<String, dynamic>;
+
+    if (data['usage'] != null) {
+      final usage = data['usage'];
+      _tokenService.logTokenUsage(
+        userEmail: userEmail,
+        functionName: functionName,
+        model: data['model'],
+        promptTokens: usage['prompt_tokens'],
+        completionTokens: usage['completion_tokens'],
+        totalTokens: usage['total_tokens'],
+        userId: userId,
+      );
+    }
+    return (data['choices'][0]['message']['content'] as String?)?.trim() ?? '';
+  }
+
+  Future<String> getChatResponse(
+    List<Map<String, dynamic>> messages, {
+    String? userId,
+    String? userEmail,
+  }) async {
+    // Bu fonksiyon _postToChatGPT'ye çok benziyor, onu kullanabiliriz.
+    // Gelen mesajları tek bir 'content' bloğuna dönüştürmek yerine
+    // direkt 'messages' listesi olarak göndereceğiz.
+
+    final response = await http.post(
+      _endpoint,
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Authorization': 'Bearer $_apiKey',
+      },
+      body: jsonEncode({
+        'model': 'gpt-4o-mini', // veya gpt-4o, hangisini istersen
+        'messages': messages, // Direkt mesaj listesini gönder
+        'max_tokens': 1000,
+        'temperature': 0.7, // Serbest sohbette biraz daha yaratıcı olabilir
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        'OpenAI API hatası: ${response.statusCode} ${response.body}',
+      );
+    }
+
+    final utf8Body = utf8.decode(response.bodyBytes);
+    final data = jsonDecode(utf8Body) as Map<String, dynamic>;
+
+    if (data['usage'] != null) {
+      final usage = data['usage'];
+      _tokenService.logTokenUsage(
+        userEmail: userEmail,
+        functionName: 'getChatResponse',
+        model: data['model'],
+        promptTokens: usage['prompt_tokens'],
+        completionTokens: usage['completion_tokens'],
+        totalTokens: usage['total_tokens'],
+        userId: userId,
+      );
+    }
+
     return (data['choices'][0]['message']['content'] as String?)?.trim() ?? '';
   }
 
@@ -294,7 +396,11 @@ class OpenAIService {
     return analysisResults;
   }
 
-  Future<Map<String, String>> analyzePdf(String filePath) async {
+  Future<Map<String, String>> analyzePdf(
+    String filePath, {
+    String? userId,
+    String? userEmail,
+  }) async {
     final file = File(filePath);
     final fullText = await extractTextFromPdf(file);
 
@@ -323,6 +429,19 @@ class OpenAIService {
           ),
         );
 
+        final usage = res.usage;
+        if (usage != null) {
+          _tokenService.logTokenUsage(
+            functionName: 'analyzePdf',
+            model: res.model,
+            promptTokens: usage.promptTokens,
+            completionTokens: usage.completionTokens ?? 0,
+            totalTokens: usage.totalTokens,
+            userId: userId,
+            userEmail: userEmail,
+          );
+        }
+
         final reply = res.choices.first.message.content?.trim() ?? '';
 
         final parsedPart = _parseAnalysisResponse(reply);
@@ -337,7 +456,11 @@ class OpenAIService {
     return analysisResults;
   }
 
-  Future<Map<String, String>> analyzeImage(String imagePath) async {
+  Future<Map<String, String>> analyzeImage(
+    String imagePath, {
+    String? userId,
+    String? userEmail,
+  }) async {
     try {
       final file = File(imagePath);
       final bytes = await file.readAsBytes();
@@ -372,6 +495,18 @@ class OpenAIService {
         ),
       );
 
+      final usage = res.usage;
+      if (usage != null) {
+        _tokenService.logTokenUsage(
+          userEmail: userEmail,
+          functionName: 'analyzeImage',
+          model: res.model,
+          promptTokens: usage.promptTokens,
+          completionTokens: usage.completionTokens ?? 0,
+          totalTokens: usage.totalTokens,
+          userId: userId,
+        );
+      }
       final reply = res.choices.first.message.content?.trim() ?? '';
 
       return _parseAnalysisResponse(reply);

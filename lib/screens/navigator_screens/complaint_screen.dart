@@ -105,6 +105,7 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
         _formData!.toComplaintMap(),
         activeUserName!,
         null,
+        userId: _uid,
       );
 
       if (parts.isNotEmpty) {

@@ -4,6 +4,7 @@
 //
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
@@ -441,7 +442,7 @@ class _OverviewScreenState extends State<OverviewScreen>
             profileData,
             complaintInfo,
             _answers,
-
+            userId: FirebaseAuth.instance.currentUser!.uid,
             widget.fileAnalysis,
           );
           await _messagesRef.add({
@@ -452,13 +453,9 @@ class _OverviewScreenState extends State<OverviewScreen>
           setState(() => _flowComplete = true);
         }
       } else {
-        // Normal ChatGPT modu - soru-cevap akışı tamamlandı veya hiç soru yok
         final historySnapshot = await _messagesRef.orderBy('sentAt').get();
-
-        // API'ye gönderilecek mesaj listesini sistem talimatıyla başlat
         final List<Map<String, dynamic>> messagesForApi = [
           {'role': 'system', 'content': 'ai_system_prompt_medical'.tr()},
-          // Mevcut sohbet geçmişini ekle
           ...historySnapshot.docs.map((doc) {
             final data = doc.data();
             return {
@@ -467,16 +464,15 @@ class _OverviewScreenState extends State<OverviewScreen>
               'content': data['text'] ?? '',
             };
           }).toList(),
+          // Yeni mesajı da eklemeyi unutma, yoksa kendini tekrar eder
+          {'role': 'user', 'content': userMsg.text},
         ];
 
-        final request = ChatCompleteText(
-          model: Gpt4oMiniChatModel(),
-          messages: messagesForApi,
-          maxToken: 1000,
+        final aiContent = await _service.getChatResponse(
+          messagesForApi,
+          userId: FirebaseAuth.instance.currentUser?.uid,
+          userEmail: FirebaseAuth.instance.currentUser?.uid,
         );
-
-        final resp = await _openAI.onChatCompletion(request: request);
-        final aiContent = resp?.choices.first.message?.content.trim() ?? '';
         if (aiContent.isNotEmpty) {
           final String offTopicKeyword = 'ai_off_topic_rejection_keyword'.tr();
 

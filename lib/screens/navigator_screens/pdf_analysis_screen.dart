@@ -1,5 +1,6 @@
 // lib/screens/pdf_analysis_screen.dart
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
@@ -181,11 +182,19 @@ class PdfAnalysisScreenState extends State<PdfAnalysisScreen> {
       String fileName;
 
       if (_selectedType == 'pdf' && _selectedFile != null) {
-        result = await _service.analyzePdf(_selectedFile!.path!);
+        result = await _service.analyzePdf(
+          _selectedFile!.path!,
+          userId: FirebaseAuth.instance.currentUser!.uid,
+          userEmail: FirebaseAuth.instance.currentUser!.email,
+        );
         fileName = _selectedFile!.name;
       } else if (_selectedType == 'image' && _selectedImage != null) {
         // Resim analizi için yeni metod
-        result = await _service.analyzeImage(_selectedImage!.path);
+        result = await _service.analyzeImage(
+          _selectedImage!.path,
+          userId: FirebaseAuth.instance.currentUser!.uid,
+          userEmail: FirebaseAuth.instance.currentUser!.email,
+        );
         fileName = _selectedImage!.name;
       } else {
         throw Exception('Geçersiz dosya türü');
